@@ -6,7 +6,9 @@ const cors = require('cors');
 require("dotenv").config({ path: "./config.env" });
 
 const app = express()
-const port = 5500
+const PORT = process.env.PORT;
+const HOST = process.env.HOST;
+
 
 const Db = process.env.MONGO_URI
 const client = new MongoClient(Db)
@@ -149,10 +151,10 @@ app.post('/reject', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`)
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
 });
 
-app.listen(port, '192.168.1.132', () => {
-    console.log(`Server is running from: 192.168.1.132 on port: ${port}`)
+app.listen(PORT, HOST, () => {
+    console.log(`Server is running from: ${HOST} on port: ${PORT}`)
 });
