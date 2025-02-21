@@ -9,65 +9,91 @@ import FeatureSection from '../Components/FeatureSection';
 const { width: screenWidth } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
-    const [events,setEvents] = useState([]); 
-    const [featuredEvents, setFeaturedEvents] = useState([]);
-    const [error, setError] = useState(null);
-    const [selectedLocation, setSelectedLocation] = useState(''); 
+  const [events,setEvents] = useState([]); 
+  const [featuredEvents, setFeaturedEvents] = useState([]);
+  const [error, setError] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(''); 
+  const currentDate = new Date();
 
-    const formatDate = new Intl.DateTimeFormat("en-us", {
-        weekday: "short",
-        month: "short",
-        day: "2-digit"
-    });
+  const formatDate = new Intl.DateTimeFormat("en-us", {
+    weekday: "short",
+    month: "short",
+    day: "2-digit"
+  });
 
-    const getImgUri = (img => {
-        return img && img.trim() ? img : 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8='
+  const getImgUri = (img => {
+    return img && img.trim() ? img : 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8='
+  })
+
+  const groupByType = (events) => {
+    return events.reduce((groups, event) => {
+      const { type } = event;
+      if(!groups[type]) {
+        groups[type] = [];
+      }
+      groups[type].push(event);
+      return groups;
+    }, {});
+  };
+
+  const upcomingEvents = events
+    .filter(event => {
+      const eventDate = new Date(event.date);
+
+      if(eventDate > currentDate) {
+        return true;
+      }
+      if(eventDate.toDateString() === currentDate.toDateString()) {
+        return event.time > currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      return false;
     })
+    .sort((a,b) => {
+      const dateA = new Date (a.date);
+      const dateB = new Date (b.date);
 
-    const groupByType = (events) => {
-        return events.reduce((groups, event) => {
-            const { type } = event;
-            if(!groups[type]) {
-                groups[type] = [];
-            }
-            groups[type].push(event);
-            return groups;
-        }, {});
-    };
+      if(dateA.getTime() !== dateB.getTime()) {
+        return dateA - dateB;
+      } else {
+        return b.time.localeCompare(a.time);
+      }
+  });
 
-    const groupedEvents = groupByType(events);
+  const groupedEvents = groupByType(events);
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const cityName = selectedLocation.split(',')[0].toLowerCase();
-                const response = await fetch(`http://192.168.1.132:5500/event-data/${cityName}`);
-                if(!response.ok) {
-                    throw new Error('Failed to fetch events');
-                }
-                const data = await response.json();
-                setEvents(data);
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const cityName = selectedLocation.split(',')[0].toLowerCase();
+        const response = await fetch(`http://192.168.1.132:5500/event-data/${cityName}`);
+        if(!response.ok) {
+          throw new Error('Failed to fetch events');
+        }
+        const data = await response.json();
+        setEvents(data);
 
-                const featured = data.filter(event => event.feature === true);
-                setFeaturedEvents(featured);
+        const featured = data.filter(event => event.feature === true);
+        setFeaturedEvents(featured);
                 
-                setError(null);
-            } catch (error) {
-                console.error('Error fetching events:', error);
-                setError('Unable to fetch events. Please try again later.');
-            }
-        };
-
-        fetchEvents();
-    }, [selectedLocation]);
-
-    const eventTypeColors = {
-        music: '#FFDDC1', // Light Peach
-        fitness: '#C1FFD7', // Light Green
-        conference: '#D1C4E9',   // Lavender
-        art: '#FFCDD2',    // Light Pink
-        other: '#E0E0E0', // Light Gray (for unclassified types)
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setError('Unable to fetch events. Please try again later.');
+      }
     };
+
+    fetchEvents();
+  }, [selectedLocation]);
+
+  const eventTypeColors = {
+    music: '#FFDDC1', // Light Peach
+    fitness: '#C1FFD7', // Light Green
+    conference: '#D1C4E9',   // Lavender
+    art: '#FFCDD2',    // Light Pink
+    social: '#FFFFFF', // white
+    other: '#E0E0E0', // Light Gray (for unclassified types)
+  };
     
     return(
         <View style={styles.screen}>
@@ -99,6 +125,7 @@ const HomeScreen = ({ navigation }) => {
                                 keyExtractor={(item) => item[0]}
                                 renderItem={({ item }) => {
                                     const [type, events] = item;
+
                                     return (
                                         <View style={styles.cardConatiners}>
                                             <Text style={styles.groupTitle}>{type}</Text>
