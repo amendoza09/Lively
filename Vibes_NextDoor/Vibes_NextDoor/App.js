@@ -13,6 +13,7 @@ import AccountScreen from './Screens/Account';
 import PrivacyScreen from './Screens/Privacy';
 import HelpScreen from './Screens/Help';
 import FeedbackScreen from './Screens/Feedback';
+import SubmitEventScreen from './Screens/SubmitEvents';
 
 const HomeStack = createStackNavigator();
 const SettingStack = createStackNavigator();
@@ -68,6 +69,24 @@ function SettingStackScreen() {
       <SettingStack.Screen name="Back" 
         options={{ headerShown: false }} 
         component={SettingScreen} 
+      />
+
+      <SettingStack.Screen
+        name="Submit an Event"
+        component={SubmitEventScreen}
+        option={({ navigation }) => ({
+          headerShown: true,
+          Title: 'Submit an Event',
+          headerLeft: () => (
+            <Pressable 
+              onPress={() => navigation.goBack()} 
+              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
+            >
+              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
+            </Pressable>
+          ),
+        })}
       />
 
       <SettingStack.Screen
@@ -182,8 +201,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    position: 'absolute',
-    borderRadius: 35, 
+    position: 'absolute', 
     backgroundColor: 'black', // Tab bar background color
     shadowColor: '#000', // Shadow for floating effect (iOS)
     shadowOffset: { width: 0, height: 5 },

@@ -8,6 +8,9 @@ import FeatureSection from '../Components/FeatureSection';
 
 const { width: screenWidth } = Dimensions.get('window');
 
+const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
+const PORT = process.env.PORT;
+
 const HomeScreen = ({ navigation }) => {
   const [events,setEvents] = useState([]); 
   const [featuredEvents, setFeaturedEvents] = useState([]);
@@ -63,10 +66,11 @@ const HomeScreen = ({ navigation }) => {
   const groupedEvents = groupByType(events);
 
   useEffect(() => {
+    
     const fetchEvents = async () => {
       try {
         const cityName = selectedLocation.split(',')[0].toLowerCase();
-        const response = await fetch(`http://192.168.1.132:5500/event-data/${cityName}`);
+        const response = await fetch(`${API_BASE_URL}/event-data/${cityName}`);
         if(!response.ok) {
           throw new Error('Failed to fetch events');
         }
@@ -78,7 +82,7 @@ const HomeScreen = ({ navigation }) => {
                 
         setError(null);
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error('Error fetching events at home page:', error);
         setError('Unable to fetch events. Please try again later.');
       }
     };
@@ -95,81 +99,79 @@ const HomeScreen = ({ navigation }) => {
     other: '#E0E0E0', // Light Gray (for unclassified types)
   };
     
-    return(
-        <View style={styles.screen}>
-            <AppHeader 
-                selectedLocation={selectedLocation} 
-                setSelectedLocation={setSelectedLocation} />
-            <ScrollView contentContainerStyle={styles.container} >
-                {error && <Text style={styles.errorText}>{error}</Text>}
-                    {events.length === 0 && !error ? (
-                        <Text style={styles.emptyText}></Text>
-                        ): ( 
-                        <View>
-                            <Text style={styles.titleFeature}>Featured</Text>
-                            <FeatureSection data={featuredEvents} />
-                        </View>
-                        )}
-                <View style={styles.HomeContainer}>
-                    {error && <Text style={styles.errorText}>{error}</Text>}
-                    {events.length === 0 && !error ? (
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>Nothing in {selectedLocation} yet...</Text>
-                        </View>
-                        ): (
-                        <View>
-                            <Text style={styles.title}>Everything else</Text>
-            
-                            <FlatList
-                                data={Object.entries(groupedEvents)}
-                                keyExtractor={(item) => item[0]}
-                                renderItem={({ item }) => {
-                                    const [type, events] = item;
-
-                                    return (
-                                        <View style={styles.cardConatiners}>
-                                            <Text style={styles.groupTitle}>{type}</Text>
-                                            <FlatList
-                                                data={events}
-                                                horizontal
-                                                showsHorizontalScrollIndicator={false}
-                                                keyExtractor={(event) => event._id.toString()}
-                                                renderItem={({ item: event }) => {
-                                                    const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
-                                                    return(
-                                                        <View style={[styles.eventCard, { backgroundColor }]}>
-                                                            <View style={styles.imageCard}>
-                                                                <Image 
-                                                                    source={{ uri: getImgUri(event.img) }} 
-                                                                    style={styles.image} 
-                                                                    resizeMode="cover" 
-                                                                />
-                                                            </View>
-                                                            <View> 
-                                                                <View style={styles.info}> 
-                                                                    <Text style={styles.infoText}>{event.time} </Text>
-                                                                    <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
-                                                                    <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
-                                                                </View>
-                                                                <View style={styles.description}>
-                                                                    <Text style={styles.eventTitle}>{event.title}</Text>
-                                                                    <Text>{event.location}</Text>
-                                                                </View>
-                                                            </View>
-                                                        </View>
-                                                    )
-                                                }}
-                                            />
-                                        </View>
-                                    )
-                                }}
-                            />  
-                        </View> 
-                    )}
+  return(
+    <View style={styles.screen}>
+      <AppHeader 
+        selectedLocation={selectedLocation} 
+        setSelectedLocation={setSelectedLocation} />
+      <ScrollView contentContainerStyle={styles.container} >
+        {error && <Text style={styles.errorText}>{error}</Text>}
+        {events.length === 0 && !error ? (
+          <Text style={styles.emptyText}></Text>
+        ): ( 
+          <View>
+              <Text style={styles.titleFeature}>Featured</Text>
+              <FeatureSection data={featuredEvents} />
+          </View>
+        )}
+            <View style={styles.HomeContainer}>
+              {error && <Text style={styles.errorText}>{error}</Text>}
+              {events.length === 0 && !error ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyText}>Nothing in {selectedLocation} yet...</Text>
                 </View>
-            </ScrollView>
-        </View>
-    );
+              ): (
+                <View>
+                  <Text style={styles.title}>Everything else</Text>
+                  <FlatList
+                    data={Object.entries(groupedEvents)}
+                    keyExtractor={(item) => item[0]}
+                    renderItem={({ item }) => {
+                    const [type, events] = item;
+
+                    return (
+                      <View style={styles.cardConatiners}>
+                        <Text style={styles.groupTitle}>{type}</Text>
+                        <FlatList
+                          data={events}
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          keyExtractor={(event) => event._id.toString()}
+                          renderItem={({ item: event }) => {
+                            const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
+                            return(
+                              <View style={[styles.eventCard, { backgroundColor }]}>
+                                <View style={styles.imageCard}>
+                                  <Image 
+                                    source={{ uri: getImgUri(event.img) }} 
+                                    style={styles.image} 
+                                    resizeMode="cover" 
+                                  />
+                                </View>
+                                <View> 
+                                  <View style={styles.info}> 
+                                    <Text style={styles.infoText}>{event.time} </Text>
+                                    <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
+                                    <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
+                                  </View>
+                                  <View style={styles.description}>
+                                    <Text style={styles.eventTitle}>{event.title}</Text>
+                                    <Text>{event.location}</Text>
+                                  </View>
+                                </View>
+                              </View>
+                            )
+                          }}
+                        />
+                      </View>
+                    )}}
+                  />  
+                </View> 
+              )}
+            </View>
+        </ScrollView>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -181,7 +183,7 @@ const styles = StyleSheet.create({
     },
     HomeContainer: {
       height: '100%',
-      paddingBottom: 180,
+      paddingBottom: 190,
     },
     emptyContainer: {
         width: screenWidth,

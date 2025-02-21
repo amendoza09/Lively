@@ -4,6 +4,10 @@ import { TouchableOpacity, View,
     TextInput, FlatList 
 } from 'react-native';
 
+// search feature will come soon
+
+const API_BASE_URL = process.env.REACT_API_URL || 'https://localhost:5500';
+
 const SearchScreen = ({ route, navigation }) => {
     const { setSelectedLocation } = route.params;
     const [searchQuery, setSearchQuery] = useState('');
@@ -36,7 +40,7 @@ const SearchScreen = ({ route, navigation }) => {
         const fetchCities = async () => {
             try { 
                 setLoading(true);
-                const response = await fetch('http://localhost:5500/event-data/City');
+                const response = await fetch(`${API_BASE_URL}/event-data/City`);
                 if(!response.ok) {
                     throw new Error('failed to fetch cities');
                 }
@@ -46,7 +50,7 @@ const SearchScreen = ({ route, navigation }) => {
                 setAllCities(formattedCity);
                 setError(null);
             } catch (err) {
-                console.error('Error fetching cities:', err);
+                console.error('Error fetching cities at search page:', err);
                 setError('Unable to fetch Cities. Please try again lateer.');
             } finally {
                 setLoading(false);
@@ -112,8 +116,8 @@ const styles = StyleSheet.create({
     title: { 
         fontSize: 24, 
         fontWeight: 'bold',
-         marginBottom: 20 
-        },
+        marginBottom: 20 
+    },
     searchInput: { 
         borderWidth: 1, 
         borderColor: '#ddd', 

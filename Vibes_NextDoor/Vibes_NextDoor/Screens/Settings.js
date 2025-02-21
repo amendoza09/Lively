@@ -6,10 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SettingScreen = ({ navigation }) => {
     const settingOptions = [
-        { id: '1', name: 'Creator Account', action: () => navigation.navigate('Creator Account') },
-        { id: '2', name: 'Privacy', action: () => navigation.navigate('Privacy') },
-        { id: '3', name: 'Help', action: () => navigation.navigate('Help') },
-        { id: '4', name: 'Feedback & Support', action: () => navigation.navigate('Feedback & Support')},
+        { id: '1', name: 'Submit an Event', action:() => navigation.navigate('Submit an Event') },
+        { id: '2', name: 'Creator Account', action: () => navigation.navigate('Creator Account') },
+        { id: '3', name: 'Privacy', action: () => navigation.navigate('Privacy') },
+        { id: '4', name: 'Help', action: () => navigation.navigate('Help') },
+        { id: '5', name: 'Feedback & Support', action: () => navigation.navigate('Feedback & Support')},
     ];
 
     const renderOption = ({ item }) => (
@@ -33,6 +34,7 @@ const SettingScreen = ({ navigation }) => {
                     style={styles.options}
                     keyExtractor={(item) => item.id}
                     renderItem={renderOption}
+                    scrollEnabled={false}
                     ItemSeperatorComponent={() => <View style={styles.separator} />}
 
                 />
@@ -42,14 +44,11 @@ const SettingScreen = ({ navigation }) => {
 
 const styles =StyleSheet.create({
     safeArea: {
-        marginBottom: 10,
         alignItems: 'center',
         backgroundColor: 'white',
-        paddingBottom: -15,
+        paddingBottom: -10,
         borderWidth: 1,
         borderColor: '#ddd',
-        borderBottomLeftRadius: 35,
-        borderBottomRightRadius: 35,
     },
     settingsHeader: {
         textAlign: 'center',

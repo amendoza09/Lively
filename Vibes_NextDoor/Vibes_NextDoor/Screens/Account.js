@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
+const API_BASE_URL = process.env.REACT_API_URL;
 
 const AccountScreen = ({ email }) => {
     const [accountStatus, setAccountStatus] = useState("Loading");
@@ -9,7 +10,7 @@ const AccountScreen = ({ email }) => {
     useEffect(() => {
         const fetchAccountStatus = async () =>{
             try {
-                const response = await fetch(`http://192.168.1.132:5500/Creator_Account/${email}`);
+                const response = await fetch(`${API_BASE_URL}/Creator_Account/${email}`);
                 const data = await response.json();
             } catch(error) {
                 consol.error("Error fetching account status:", error);
@@ -21,7 +22,7 @@ const AccountScreen = ({ email }) => {
 
     return (
         <View style={styles.emptyContainer} >
-        
+            <Text>Creator Accounts are coming soon...</Text>
         </View>
     )
 }

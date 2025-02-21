@@ -126,9 +126,11 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
                                         </TouchableOpacity>
                                     )}
                                 />
+                                {/* search feature will come soon
                                 <Pressable style={styles.searchBar} onPress={handleSearchPress}>
                                     <Text style={styles.cityItem}>Search...</Text>
                                 </Pressable>
+                                */}
                             </View>
                         </Animated.View>
                     )}
@@ -151,11 +153,12 @@ const styles = StyleSheet.create({
     safeArea: {
         zIndex: 10,
         alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: 'white',
         width: screenWidth,
-        paddingBottom: -15,
+        paddingBottom: -10,
         borderColor: '#ddd',
-        borderRadius: 35,
+        borderWidth: 1,
     },
     headerRow: {
         flexDirection: 'row',
@@ -178,7 +181,7 @@ const styles = StyleSheet.create({
         zIndex: 0,
         width: screenWidth,
         backgroundColor: 'white',
-        height: 210,
+        height: 170,
         paddingTop: 15,
         alignItems: 'center',
         borderBottomLeftRadius: 35,
