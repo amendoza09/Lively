@@ -8,6 +8,7 @@ const screenWidth = Dimensions.get("window").width;
 const FeatureSection = ({ data }) => {
     const flatListRef = useRef();
     const [activeIndex, setActiveIndex] = useState(0);
+    const currentDate = new Date();
 
     const getItemLayout = (data, index) => ({
         length: screenWidth,
@@ -26,8 +27,30 @@ const FeatureSection = ({ data }) => {
         setActiveIndex(index);
     };
 
+    const upcomingEvents = data.filter(event => {
+      const eventDate = new Date(event.date);
+  
+      if(eventDate > currentDate) {
+        return true;
+      }
+      if(eventDate.toDateString() === currentDate.toDateString()) {
+        return event.time > currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+  
+      return false;
+    }).sort((a,b) => {
+      const dateA = new Date (a.date);
+      const dateB = new Date (b.date);
+  
+      if(dateA.getTime() !== dateB.getTime()) {
+        return dateA - dateB;
+      } else {
+        return a.time.localeCompare(b.time);
+      }
+    });
+
     const renderDots = () => {
-        return data.map((dot, index) => {
+        return upcomingEvents.map((dot, index) => {
             if(activeIndex === index) {
                 return(
                     <View style={styles.activeDot}></View>
@@ -52,7 +75,7 @@ const FeatureSection = ({ data }) => {
                 ref={flatListRef}
                 showsHorizontalScrollIndicator={false}
                 getItemLayout={getItemLayout}
-                data={data}
+                data={upcomingEvents}
                 renderItem={({ item }) => (
                     <View style={styles.eventCard}>
                         <Image 

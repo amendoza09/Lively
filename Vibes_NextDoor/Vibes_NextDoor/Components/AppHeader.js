@@ -99,7 +99,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
                             style={styles.citySelectButton}
                             onPress={modalVisible ? closeMenu : openMenu}
                         >
-                            <Text style={styles.title}>{selectedLocation || 'Select a City'}</Text>
+                            <Text style={styles.cityTitle}>{selectedLocation || 'Select a City'}</Text>
                             <ArrowIcon 
                                 name={modalVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"}
                                 size={24} 
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: 'white',
         width: screenWidth,
-        paddingBottom: -10,
+        paddingBottom: -15,
         borderColor: '#ddd',
         borderWidth: 1,
     },
@@ -166,6 +166,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlignVertical: 'center',
+    },
+    cityTitle: {
+        color: '#2196f3',
         fontSize: 24,
         fontWeight: 'bold',
         textAlignVertical: 'center',
@@ -181,11 +187,9 @@ const styles = StyleSheet.create({
         zIndex: 0,
         width: screenWidth,
         backgroundColor: 'white',
-        height: 170,
+        height: 167,
         paddingTop: 15,
         alignItems: 'center',
-        borderBottomLeftRadius: 35,
-        borderBottomRightRadius: 35,
     },
     modalTitle: {
         fontSize: 20,

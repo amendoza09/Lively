@@ -39,31 +39,29 @@ const HomeScreen = ({ navigation }) => {
     }, {});
   };
 
-  const upcomingEvents = events
-    .filter(event => {
-      const eventDate = new Date(event.date);
+  const upcomingEvents = events.filter(event => {
+    const eventDate = new Date(event.date);
 
-      if(eventDate > currentDate) {
-        return true;
-      }
-      if(eventDate.toDateString() === currentDate.toDateString()) {
-        return event.time > currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      }
+    if(eventDate > currentDate) {
+      return true;
+    }
+    if(eventDate.toDateString() === currentDate.toDateString()) {
+      return event.time > currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
 
-      return false;
-    })
-    .sort((a,b) => {
-      const dateA = new Date (a.date);
-      const dateB = new Date (b.date);
+    return false;
+  }).sort((a,b) => {
+    const dateA = new Date (a.date);
+    const dateB = new Date (b.date);
 
-      if(dateA.getTime() !== dateB.getTime()) {
-        return dateA - dateB;
-      } else {
-        return b.time.localeCompare(a.time);
-      }
+    if(dateA.getTime() !== dateB.getTime()) {
+      return dateA - dateB;
+    } else {
+      return a.time.localeCompare(b.time);
+    }
   });
 
-  const groupedEvents = groupByType(events);
+  const groupedEvents = groupByType(upcomingEvents);
 
   useEffect(() => {
     
@@ -198,7 +196,8 @@ const styles = StyleSheet.create({
     },
     titleFeature: {
         PaddingLeft: 5,
-        marginTop: 5,
+        margin: 5,
+        marginBottom: 5,
         fontSize: 24,
         fontWeight: 'bold',
     },
