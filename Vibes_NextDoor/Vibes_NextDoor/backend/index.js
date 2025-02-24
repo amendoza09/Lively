@@ -10,12 +10,13 @@ const PORT = process.env.PORT;
 const HOST = process.env.HOST;
 
 
-const Db = process.env.MONGO_URI
+const Db = process.env.MONGO_URI;
 const client = new MongoClient(Db)
 
 // models
 const PendingAccount = require('./schemas/pendingAccount');
 const ApprovedAccount = require('./schemas/approvedAccount');
+const Event = require('./schemas/eventSchema');
 
 app.use(express.json())
 app.use(cors());
@@ -65,6 +66,31 @@ app.get("/event-data/:City", async (req, res) => {
         await client.close()
     }
 })
+
+// create an event
+app.post('/event-data/:City', async (req, res) => {
+
+    const { city } = req.params;
+    const { title, location, address, date, time, type, imgUrl, featured } = req.body;
+
+    try {
+        await client.connect();
+
+        const newEvent = new Event({
+            title, location, address, city, date, time, type, imgUrl, featured 
+        });
+        
+        await newEvent.save();
+
+        res.status(201).json({ message: 'Event created successfully', event: newEvent });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Server error', e });
+    } finally {
+        await client.close()
+    }
+})
+
 
 // register new account
 app.post('/event-data/pending-accounts', async (req, res) => {
@@ -150,6 +176,7 @@ app.post('/reject', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)

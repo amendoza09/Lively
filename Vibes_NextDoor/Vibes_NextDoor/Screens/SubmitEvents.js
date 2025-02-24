@@ -4,24 +4,26 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import RNPickerSelect from 'react-native-picker-select';
 
-const eventTypes = [
-  'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Other'
-];
+const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
 
+const SubmitEventScreen = ({ route }) => {
+  const { onSubmit, selectedCity, setSelectedCity } = route.params;
+  const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState(''); 
+  const [address, setAddress] = useState(''); 
+  const [date, setDate] = useState(new Date());
+  const [time, setTime] = useState(new Date());
+  const [eventType, setEventType] = useState('');
+  const [image, setImage] = useState(null);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showDatePicker, setDatePicker] = useState(false);
+  const [showEventPicker, setShowEventPicker] = useState(false);
 
-
-const SubmitEventScreen = ({ onSubmit }) => {
-    const [title, setTitle] = useState('');
-    const [location, setLocation] = useState('');
-    const [date, setDate] = useState(new Date());
-    const [time, setTime] = useState(new Date());
-    const [eventType, setEventType] = useState('');
-    const [image, setImage] = useState(null);
-    const [showTimePicker, setShowTimePicker] = useState(false);
-    const [showDatePicker, setDatePicker] = useState(false);
-    const [showEventPicker, setShowEventPicker] = useState(false);
+  const eventTypes = [
+    'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Other'
+  ];
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -36,26 +38,47 @@ const SubmitEventScreen = ({ onSubmit }) => {
     }
   }
 
-  const handleSubmit = () => {
-    if (!title || !location || !eventType) {
-      alert('Please fill in all fields.');
-      return;
+  const handleSubmit = async () => {
+    try {
+      const cityName = selectedLocation.split(',')[0].toLowerCase();
+
+      if (!title || !location || !eventType) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const newEvent = {
+        title,
+        location,
+        city: selectedLocation,
+        address,
+        date: date.toISOString().split('T')[0],
+        time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: eventType,
+        imgUrl: image,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/event-data/${cityName}`, {
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify(newEvent),
+      });
+
+      if (response.ok) {
+        console.log("Event saved!");
+      } else {
+        console.error("Failed to save event");
+      }
+      onSubmit(newEvent);
+      
+    } catch (error) {
+        console.error('Error submitting event:', error);
+        setError('Unable to submit event. Please try again later.');
     }
-
-    const newEvent = {
-      title,
-      location,
-      date: date.toISOString().split('T')[0],
-      time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      type: eventType,
-      img: image,
-    };
-
-    onSubmit(newEvent);
-  }
+  };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
       <Text style={styles.label}>Event Title</Text>
       <TextInput 
         style={styles.input}
@@ -72,8 +95,15 @@ const SubmitEventScreen = ({ onSubmit }) => {
         onChangeText={setLocation}
       />
 
+      <Text style={styles.label}>Address</Text>
+      <TextInput 
+        style={styles.input}
+        placeholder="Enter Address (optional)"
+        value={address}
+        onChangeText={setAddress}
+      />
       <Text style={styles.label}>Date</Text>
-      <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.inputPicker}>
+      <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
         <DateTimePicker
           value={date}
           mode="date"
@@ -86,7 +116,7 @@ const SubmitEventScreen = ({ onSubmit }) => {
       </TouchableOpacity>
 
       <Text style={styles.label}>Time</Text>
-      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.inputPicker}>
+      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
         <DateTimePicker 
             value={time}
             mode="time"
@@ -97,23 +127,38 @@ const SubmitEventScreen = ({ onSubmit }) => {
             }}
           />
       </TouchableOpacity>
-      
-      <Text style={styles.label}>Event Type</Text>
-      <RNPickerSelect
-        onValueChange={(value) => setEventType(value)}
-        items={eventTypes.map((type) => ({
-          label: type,
-          value: type,
-        }))}
-        style={pickerSelectStyles}
-        placeholder={{ label: "Select event type", value: null }}
-      />
+
+      <Text style={styles.eventLabel}>Event Type</Text>
+      <TouchableOpacity onPress={() => setShowEventPicker(true)}>
+        <Text style={styles.input}>{eventType || "Selected event type"}</Text>
+      </TouchableOpacity>
+      {showEventPicker && (
+        <Picker 
+          selectedValue={eventType}
+          onValueChange={(selectedEventType) => {
+            setShowEventPicker(false);
+            if(selectedEventType) setEventType(selectedEventType);
+          }}
+        >
+          <Picker.Item label="Select event type" value=" " />
+          {eventTypes.map((type) => (
+            <Picker.Item key={type} label={type} value={type} />
+          ))}
+        </Picker>
+      )}
 
       <Text style={styles.label}>Upload Image</Text>
       <TouchableOpacity style = {styles.imageUpload} onPress={pickImage}>
         <Text style={styles.uploadText}>Pick an Image</Text>
       </TouchableOpacity>
-      {image && <Image source={{ uri: image }} style={styles.image} />}
+      {image && (
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: image }} style={styles.image} />
+          <TouchableOpacity onPress={() => setImage(null)} style={styles.removeImageButton}>
+            <Text style={styles.removeImageText}>Remove Image</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitText}>Submit Event</Text>
@@ -126,7 +171,8 @@ const styles = StyleSheet.create({
     container: {
         padding: 20,
         backgroundColor: '#fff',
-        height: 'auto',
+        flexGrow: 1,
+        paddingBottom: 125,
     },
     label: {
         fontSize: 16,
@@ -140,16 +186,11 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginBottom: 15,
     },
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 5,
-        marginBottom: 20,
-        paddingVertical: 5,
-    },
-    picker: {
-        height: 35,
-        marginBotttom: 10,
+    eventLabel: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginBottom: 5,
+      marginTop: 5,
     },
     imageUpload: {
         backgroundColor: '#ddd',
@@ -169,6 +210,21 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginTop: 10,
         alignSelf: 'center',
+    },
+    imageContainer: {
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    removeImageButton: {
+      backgroundColor: 'red',
+      marginTop: 15,
+      borderRadius: 5,
+    },
+    removeImageText: {
+      color: 'white',
+      margin: 15,
+      fontSize: 14,
+      fontWeight: 'bold',
     },
     submitButton: {
         backgroundColor: '#007bff',

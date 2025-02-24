@@ -19,6 +19,7 @@ const HomeStack = createStackNavigator();
 const SettingStack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+
 function HomeStackScreen() {
   const [selectedCity, setSelectedCity] = useState('');
 
@@ -64,6 +65,8 @@ function HomeStackScreen() {
 }
 
 function SettingStackScreen() {
+  const [selectedCity, setSelectedCity] = useState('');
+
   return (
     <SettingStack.Navigator>
       <SettingStack.Screen name="Back" 
@@ -72,6 +75,8 @@ function SettingStackScreen() {
       />
 
       <SettingStack.Screen
+        selectedCity={selectedCity} 
+        setSelectedCity={setSelectedCity}
         name="Submit an Event"
         component={SubmitEventScreen}
         option={({ navigation }) => ({
@@ -87,6 +92,13 @@ function SettingStackScreen() {
             </Pressable>
           ),
         })}
+        initialParams={{
+          selectedCity,
+          setSelectedCity,
+          onSubmit: (newEvent) => {
+            console.log(newEvent);
+          }
+        }}
       />
 
       <SettingStack.Screen
