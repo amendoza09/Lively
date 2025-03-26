@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import { FlatList, View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Modal } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Platform, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback
+  } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
 
 const SubmitEventScreen = ({ route }) => {
-  const { onSubmit, selectedCity, setSelectedCity } = route.params;
+  const { onSubmit, selectedCity, setSelectedCity } = route.params || {};
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
   const [selectedLocation, setSelectedLocation] = useState(''); 
@@ -20,6 +21,9 @@ const SubmitEventScreen = ({ route }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showDatePicker, setDatePicker] = useState(false);
   const [showEventPicker, setShowEventPicker] = useState(false);
+  const [description, setDescription] = useState('');
+  const scrollViewRef = useRef(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const eventTypes = [
     'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Other'
@@ -37,6 +41,31 @@ const SubmitEventScreen = ({ route }) => {
       setImage(result.assets[0].uri);
     }
   }
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const keyboardDidHideListener = Keyboard.addListener("ketboardDidHide", () => {
+      setKeyboardHeight(0);
+    })
+
+    return() => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
+  const scrollToInput = (inputRef) => {
+    setTimeout(() => {
+      inputRef?.current?.measuerLayout(
+        scrollViewRef.current,
+        (_, y) => {
+          scrollViewRef.current.scrollTo({ y: y - 20, animated: true });
+        }
+      );
+    }, 100);
+  };
 
   const handleSubmit = async () => {
     try {
@@ -56,9 +85,10 @@ const SubmitEventScreen = ({ route }) => {
         time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         type: eventType,
         imgUrl: image,
+        description,
       };
 
-      const response = await fetch(`${API_BASE_URL}/event-data/${cityName}`, {
+      const response = await fetch(`${API_BASE_URL}/event-data/${cityName}/new-event`, {
         method: "POST",
         headers: { "Content-type": "application/json" },
         body: JSON.stringify(newEvent),
@@ -78,92 +108,112 @@ const SubmitEventScreen = ({ route }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
-      <Text style={styles.label}>Event Title</Text>
-      <TextInput 
-        style={styles.input}
-        placeholder="Enter event title"
-        value={title}
-        onChangeText={setTitle}
-      />
-
-      <Text style={styles.label}>Location</Text>
-      <TextInput 
-        style={styles.input}
-        placeholder="Enter Location"
-        value={location}
-        onChangeText={setLocation}
-      />
-
-      <Text style={styles.label}>Address</Text>
-      <TextInput 
-        style={styles.input}
-        placeholder="Enter Address (optional)"
-        value={address}
-        onChangeText={setAddress}
-      />
-      <Text style={styles.label}>Date</Text>
-      <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="default"
-          onChange={(event, selectDate) =>{
-            setDatePicker(false);
-            if (selectDate) setDate(selectDate);
-          }}
-        />
-      </TouchableOpacity>
-
-      <Text style={styles.label}>Time</Text>
-      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
-        <DateTimePicker 
-            value={time}
-            mode="time"
-            display="default"
-            onChange={(event, selectedTime) => {
-              setShowTimePicker(false);
-              if (selectedTime) setTime(selectedTime);
-            }}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 100}
+      style={{flexGrow: 1}}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+          <Text style={styles.label}>Event Title</Text>
+          <TextInput 
+            style={styles.input}
+            placeholder="Enter event title"
+            value={title}
+            onChangeText={setTitle}
           />
-      </TouchableOpacity>
 
-      <Text style={styles.eventLabel}>Event Type</Text>
-      <TouchableOpacity onPress={() => setShowEventPicker(true)}>
-        <Text style={styles.input}>{eventType || "Selected event type"}</Text>
-      </TouchableOpacity>
-      {showEventPicker && (
-        <Picker 
-          selectedValue={eventType}
-          onValueChange={(selectedEventType) => {
-            setShowEventPicker(false);
-            if(selectedEventType) setEventType(selectedEventType);
-          }}
-        >
-          <Picker.Item label="Select event type" value=" " />
-          {eventTypes.map((type) => (
-            <Picker.Item key={type} label={type} value={type} />
-          ))}
-        </Picker>
-      )}
+          <Text style={styles.label}>Location</Text>
+          <TextInput 
+            style={styles.input}
+            placeholder="Enter location"
+            value={location}
+            onChangeText={setLocation}
+          />
 
-      <Text style={styles.label}>Upload Image</Text>
-      <TouchableOpacity style = {styles.imageUpload} onPress={pickImage}>
-        <Text style={styles.uploadText}>Pick an Image</Text>
-      </TouchableOpacity>
-      {image && (
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: image }} style={styles.image} />
-          <TouchableOpacity onPress={() => setImage(null)} style={styles.removeImageButton}>
-            <Text style={styles.removeImageText}>Remove Image</Text>
+          <Text style={styles.label}>Address</Text>
+          <TextInput 
+            style={styles.input}
+            placeholder="Enter address (optional)"
+            value={address}
+            onChangeText={setAddress}
+            onFocus = {(event) => scrollToInput(event.target)}
+          />
+          <Text style={styles.label}>Date</Text>
+          <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="default"
+              onChange={(event, selectDate) =>{
+                setDatePicker(false);
+                if (selectDate) setDate(selectDate);
+              }}
+            />
           </TouchableOpacity>
-        </View>
-      )}
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-        <Text style={styles.submitText}>Submit Event</Text>
-      </TouchableOpacity>
-    </ScrollView>
+          <Text style={styles.label}>Time</Text>
+          <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
+            <DateTimePicker 
+                value={time}
+                mode="time"
+                display="default"
+                onChange={(event, selectedTime) => {
+                  setShowTimePicker(false);
+                  if (selectedTime) setTime(selectedTime);
+                }}
+              />
+          </TouchableOpacity>
+
+          <Text style={styles.eventLabel}>Event Type</Text>
+          <TouchableOpacity onPress={() => setShowEventPicker(true)}>
+            <Text style={styles.input}>{eventType || "Selected event type"}</Text>
+          </TouchableOpacity>
+          {showEventPicker && (
+            <Picker 
+              selectedValue={eventType}
+              onValueChange={(selectedEventType) => {
+                setShowEventPicker(false);
+                if(selectedEventType) setEventType(selectedEventType);
+              }}
+            >
+              <Picker.Item label="Select event type" value=" " />
+              {eventTypes.map((type) => (
+                <Picker.Item key={type} label={type} value={type} />
+              ))}
+            </Picker>
+          )}
+
+          <Text style={styles.eventLabel}>Description</Text>
+          <TextInput 
+            style={[ styles.input, {height: 100} ]}
+            placeholder="Enter description (optional)"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            onFocus = {(event) => scrollToInput(event.target)}
+          />
+
+          <Text style={styles.label}>Upload Image</Text>
+          <TouchableOpacity style = {styles.imageUpload} onPress={pickImage}>
+            <Text style={styles.uploadText}>Pick an Image</Text>
+          </TouchableOpacity>
+          {image && (
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: image }} style={styles.image} />
+              <TouchableOpacity onPress={() => setImage(null)} style={styles.removeImageButton}>
+                <Text style={styles.removeImageText}>Remove Image</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <Text style={styles.submitText}>Submit Event</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -172,7 +222,7 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#fff',
         flexGrow: 1,
-        paddingBottom: 125,
+        paddingBottom: 200,
     },
     label: {
         fontSize: 16,

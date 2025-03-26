@@ -68,16 +68,17 @@ app.get("/event-data/:City", async (req, res) => {
 })
 
 // create an event
-app.post('/event-data/:City', async (req, res) => {
+app.post('/event-data/:City/new-event', async (req, res) => {
 
     const { city } = req.params;
-    const { title, location, address, date, time, type, imgUrl, featured } = req.body;
+    const { title, location, address, date, time, type, description,  imgUrl, featured } = req.body;
 
     try {
         await client.connect();
 
-        const newEvent = new Event({
-            title, location, address, city, date, time, type, imgUrl, featured 
+        const EventModel = mongoose.model(`${city}`, Event.schema, `${city}`);
+        const newEvent = new EventModel({
+            title, location, address, city, date, time, type, description, imgUrl, featured
         });
         
         await newEvent.save();

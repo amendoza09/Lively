@@ -10,6 +10,7 @@ const eventSchema = new mongoose.Schema({
   type: { type: String, required: true },
   imageUrl: { type: String }, // Store image URL if using cloud storage
   feature: { type: Boolean, default: false },
+  description: { type: String}
 });
 
 module.exports = mongoose.model('Event', eventSchema);
