@@ -22,8 +22,8 @@ const PendingAccount = require('./schemas/pendingAccount');
 const ApprovedAccount = require('./schemas/approvedAccount');
 const Event = require('./schemas/eventSchema');
 
-app.use(express.json({ limit: '20mb' }));
-app.use(express.urlencoded({ limit: '20mb', extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 
 function getCollectionName(city) {
@@ -90,6 +90,7 @@ app.post('/event-data/:City', async (req, res) => {
         await db.collection(collectionName).insertOne(newEvent);
 
         res.status(201).json({ message: 'Event created successfully', event: newEvent });
+        console.log("Received Image Data:", imgUrl);
         console.log("Event created successfully");
     } catch (e) {
         console.error(e);
