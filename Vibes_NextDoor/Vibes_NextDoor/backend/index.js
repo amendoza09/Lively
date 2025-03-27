@@ -3,6 +3,7 @@ const { MongoClient } = require("mongodb");
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const multer = require('multer');
 
 require("dotenv").config({ path: "./config.env" });
 
@@ -21,7 +22,8 @@ const PendingAccount = require('./schemas/pendingAccount');
 const ApprovedAccount = require('./schemas/approvedAccount');
 const Event = require('./schemas/eventSchema');
 
-app.use(express.json())
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(cors());
 
 function getCollectionName(city) {

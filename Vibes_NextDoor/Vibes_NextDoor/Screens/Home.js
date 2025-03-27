@@ -38,9 +38,10 @@ const HomeScreen = ({ navigation }) => {
     }
   })
 
-  const getImgUri = (img => {
-    return img && img.trim() ? img : 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8='
-  })
+  const getImgUrl = (img) => {
+    if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
+    return img.startsWith("data:image") ? img : '';
+  };
 
   const groupByType = (events) => {
     return events.reduce((groups, event) => {
@@ -158,7 +159,7 @@ const HomeScreen = ({ navigation }) => {
                               <View style={[styles.eventCard, { backgroundColor }]}>
                                 <View style={styles.imageCard}>
                                   <Image 
-                                    source={{ uri: getImgUri(event.img) }} 
+                                    source={{ uri: getImgUrl(event.imgUrl) }} 
                                     style={styles.image} 
                                     resizeMode="cover" 
                                   />

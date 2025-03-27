@@ -6,6 +6,7 @@ import { useCity } from '../App';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import * as FileSystem from 'expo-file-system';
 
 const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
 
@@ -20,6 +21,8 @@ const SubmitEventScreen = ({ route  }) => {
   const [time, setTime] = useState(new Date());
   const [eventType, setEventType] = useState('');
   const [image, setImage] = useState(null);
+  const [imageBase64, setImageBase64] = useState(null);
+  const [imageType, setImageType] = useState('');
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showDatePicker, setDatePicker] = useState(false);
   const [showEventPicker, setShowEventPicker] = useState(false);
@@ -36,17 +39,20 @@ const SubmitEventScreen = ({ route  }) => {
   ];
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    let selectImage = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
+      base64: true,
       quality: 1,
-    });
+    })
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+    if (!selectImage.canceled) {
+      setImage(selectImage.assets[0].uri);
+      setImageBase64(selectImage.assets[0].base64);
+      setImageType(selectImage.assets[0].uri.split('.').pop().toLowerCase());
     }
-  }
+  };
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (event) => {
@@ -75,21 +81,22 @@ const SubmitEventScreen = ({ route  }) => {
 
   const handleSubmit = async () => {
     if (!title || !location || !eventType) {
-        alert('Please fill in all fields.');
+        alert('Please fill in all required fields.');
         return;
     }
 
     const newEvent = {
-        title,
-        location,
-        address: address || "",
-        date: date.toISOString().split('T')[0],
-        time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}),
-        type: eventType,
-        description,
-        imgUrl: image || "",
-        featured: false,
+      title,
+      location,
+      address: address || '',
+      date: date.toISOString().split('T')[0],
+      time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      type: eventType,
+      description,
+      featured: false,
+      imgUrl: `data:image/${imageType};base64,${imageBase64}`
     };
+
     const cityName = selectedCity.split(',')[0].toLowerCase();
     try {
       const response = await fetch(`${API_BASE_URL}/event-data/${cityName}`, {
@@ -110,7 +117,8 @@ const SubmitEventScreen = ({ route  }) => {
         setTime(new Date());
         setEventType('');
         setDescription('');
-        setImage(null);
+        setImage('');
+        setImageBase64('');
       } else {
         console.error("Failed to save event");
         alert("Failed to save event. Please try again.")
@@ -236,7 +244,10 @@ const SubmitEventScreen = ({ route  }) => {
           </TouchableOpacity>
           {image && (
             <View style={styles.imageContainer}>
-              <Image source={{ uri: image }} style={styles.image} />
+              <Image 
+                source={{ uri: image }} 
+                style={styles.image}
+              />
               <TouchableOpacity onPress={() => setImage(null)} style={styles.removeImageButton}>
                 <Text style={styles.removeImageText}>Remove Image</Text>
               </TouchableOpacity>
