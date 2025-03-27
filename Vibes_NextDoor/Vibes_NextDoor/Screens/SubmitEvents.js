@@ -2,17 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Platform, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback
   } from 'react-native';
+import { useCity } from '../App';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 
 const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
 
-const SubmitEventScreen = ({ route }) => {
-  const { onSubmit, selectedCity, setSelectedCity } = route.params || {};
+const SubmitEventScreen = ({ route  }) => {
+  const { onSubmit } = route.params || {};
+
+  const [selectedCity, setSelectedCity] = useState('');
   const [title, setTitle] = useState('');
-  const [location, setLocation] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState(''); 
+  const [location, setLocation] = useState(''); 
   const [address, setAddress] = useState(''); 
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
@@ -21,12 +23,16 @@ const SubmitEventScreen = ({ route }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showDatePicker, setDatePicker] = useState(false);
   const [showEventPicker, setShowEventPicker] = useState(false);
+  const [showCityPicker, setShowCityPicker] = useState(false);
   const [description, setDescription] = useState('');
   const scrollViewRef = useRef(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const eventTypes = [
     'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Other'
+  ];
+  const availableCities = [
+    'Charlotte, NC', 'Atlanta, GA','Athens, GA',
   ];
 
   const pickImage = async () => {
@@ -68,36 +74,46 @@ const SubmitEventScreen = ({ route }) => {
   };
 
   const handleSubmit = async () => {
-    try {
-      const cityName = selectedLocation.split(',')[0].toLowerCase();
-
-      if (!title || !location || !eventType) {
+    if (!title || !location || !eventType) {
         alert('Please fill in all fields.');
         return;
-      }
+    }
 
-      const newEvent = {
+    const newEvent = {
         title,
         location,
-        city: selectedLocation,
-        address,
+        address: address || "",
         date: date.toISOString().split('T')[0],
-        time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'}),
         type: eventType,
-        imgUrl: image,
         description,
-      };
-
-      const response = await fetch(`${API_BASE_URL}/event-data/${cityName}/new-event`, {
+        imgUrl: image || "",
+        featured: false,
+    };
+    const cityName = selectedCity.split(',')[0].toLowerCase();
+    try {
+      const response = await fetch(`${API_BASE_URL}/event-data/${cityName}`, {
         method: "POST",
-        headers: { "Content-type": "application/json" },
+        headers: { 
+          "Content-type": "application/json",
+        },
         body: JSON.stringify(newEvent),
       });
 
       if (response.ok) {
         console.log("Event saved!");
+        alert("Event successfully saved!");
+        setTitle('');
+        setLocation('');
+        setAddress('');
+        setDate(new Date());
+        setTime(new Date());
+        setEventType('');
+        setDescription('');
+        setImage(null);
       } else {
         console.error("Failed to save event");
+        alert("Failed to save event. Please try again.")
       }
       onSubmit(newEvent);
       
@@ -123,6 +139,25 @@ const SubmitEventScreen = ({ route }) => {
             value={title}
             onChangeText={setTitle}
           />
+
+          <Text style={styles.eventLabel}>City</Text>
+          <TouchableOpacity onPress={() => setShowCityPicker(true)}>
+            <Text style={styles.input}>{selectedCity || "Select city"}</Text>
+          </TouchableOpacity>
+          {showCityPicker && (
+            <Picker 
+              selectedValue={availableCities}
+              onValueChange={(selectedCity) => {
+                setShowCityPicker(false);
+                if(selectedCity) setSelectedCity(selectedCity);
+              }}
+            >
+              <Picker.Item label="Select event type" value=" " />
+              {availableCities.map((type) => (
+                <Picker.Item key={type} label={type} value={type} />
+              ))}
+            </Picker>
+          )}
 
           <Text style={styles.label}>Location</Text>
           <TextInput 
@@ -168,7 +203,7 @@ const SubmitEventScreen = ({ route }) => {
 
           <Text style={styles.eventLabel}>Event Type</Text>
           <TouchableOpacity onPress={() => setShowEventPicker(true)}>
-            <Text style={styles.input}>{eventType || "Selected event type"}</Text>
+            <Text style={styles.input}>{eventType || "Select event type"}</Text>
           </TouchableOpacity>
           {showEventPicker && (
             <Picker 

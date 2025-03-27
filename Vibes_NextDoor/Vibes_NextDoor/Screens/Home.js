@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
 
 import AppHeader from '../Components/AppHeader';
 import FeatureSection from '../Components/FeatureSection';
@@ -15,7 +14,8 @@ const HomeScreen = ({ navigation }) => {
   const [events,setEvents] = useState([]); 
   const [featuredEvents, setFeaturedEvents] = useState([]);
   const [error, setError] = useState(null);
-  const [selectedLocation, setSelectedLocation] = useState(''); 
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
   const currentDate = new Date();
 
   const formatDate = new Intl.DateTimeFormat("en-us", {
@@ -23,6 +23,20 @@ const HomeScreen = ({ navigation }) => {
     month: "short",
     day: "2-digit"
   });
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try{
+      console.log("Refreshing data...");
+      const cityName = selectedLocation.split(',')[0].toLowerCase();
+      const updatedEvents = fetchEvents;
+      setEvents(updatedEvents);
+    } catch(e) {
+      console.error("Error refreshing.", e);
+    } finally {
+      setRefreshing(false);
+    }
+  })
 
   const getImgUri = (img => {
     return img && img.trim() ? img : 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8='
@@ -102,7 +116,10 @@ const HomeScreen = ({ navigation }) => {
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation} />
-      <ScrollView contentContainerStyle={styles.container} >
+      <ScrollView 
+        contentContainerStyle={styles.container} 
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         {error && <Text style={styles.errorText}>{error}</Text>}
         {events.length === 0 && !error ? (
           <Text style={styles.emptyText}></Text>

@@ -3,15 +3,18 @@ const { MongoClient } = require("mongodb");
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const cors = require('cors');
+
 require("dotenv").config({ path: "./config.env" });
 
 const app = express()
 const PORT = process.env.PORT;
 const HOST = process.env.HOST;
-
-
 const Db = process.env.MONGO_URI;
-const client = new MongoClient(Db)
+const client = new MongoClient(Db);
+
+mongoose.connect(Db, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.log('Error connecting to MongoDB:', err));
 
 // models
 const PendingAccount = require('./schemas/pendingAccount');
@@ -68,27 +71,29 @@ app.get("/event-data/:City", async (req, res) => {
 })
 
 // create an event
-app.post('/event-data/:City/new-event', async (req, res) => {
-
-    const { city } = req.params;
-    const { title, location, address, date, time, type, description,  imgUrl, featured } = req.body;
+app.post('/event-data/:City', async (req, res) => {
+    const { City } = req.params;
+    const { title, location, address, date, time, type, description, imgUrl, featured } = req.body;
+    const collectionName = getCollectionName(City);
 
     try {
         await client.connect();
-
-        const EventModel = mongoose.model(`${city}`, Event.schema, `${city}`);
-        const newEvent = new EventModel({
-            title, location, address, city, date, time, type, description, imgUrl, featured
+        console.log("Connection Successful");
+        
+        const db = mongoose.connection.useDb("City");
+        const newEvent = new Event({
+            title, location, address, date, time, type, description, imgUrl, featured
         });
         
-        await newEvent.save();
+        await db.collection(collectionName).insertOne(newEvent);
 
         res.status(201).json({ message: 'Event created successfully', event: newEvent });
+        console.log("Event created successfully");
     } catch (e) {
         console.error(e);
         res.status(500).json({ message: 'Server error', e });
-    } finally {
-        await client.close()
+    }  finally {
+        await client.close();
     }
 })
 

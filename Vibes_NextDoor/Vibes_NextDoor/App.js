@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, createContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -15,13 +15,26 @@ import HelpScreen from './Screens/Help';
 import FeedbackScreen from './Screens/Feedback';
 import SubmitEventScreen from './Screens/SubmitEvents';
 
+
 const HomeStack = createStackNavigator();
 const SettingStack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 
+const CityContext = createContext();
+export const useCity = () => { return useContext(CityContext)};
+
+const CityProvider = ({ children }) => {
+    const [selectedCity, setSelectedCity] = useState('');
+    return (
+        <CityContext.Provider value={{ selectedCity, setSelectedCity }}>
+            {children}
+        </CityContext.Provider>
+    );
+};
+
 function HomeStackScreen() {
-  const [selectedCity, setSelectedCity] = useState('');
+  const { selectedCity, setSelectedCity } = useCity();
 
   return (
     <HomeStack.Navigator>
@@ -65,18 +78,16 @@ function HomeStackScreen() {
 }
 
 function SettingStackScreen() {
-  const [selectedCity, setSelectedCity] = useState('');
-
+  const  { selectedCity, setSelectedCity } = useCity();
   return (
     <SettingStack.Navigator>
-      <SettingStack.Screen name="Back" 
+      <SettingStack.Screen 
+        name="Back" 
         options={{ headerShown: false }} 
         component={SettingScreen} 
       />
 
       <SettingStack.Screen
-        selectedCity={selectedCity} 
-        setSelectedCity={setSelectedCity}
         name="Submit an Event"
         component={SubmitEventScreen}
         option={({ navigation }) => ({
@@ -177,33 +188,35 @@ function SettingStackScreen() {
 
 function RootNavigator() {
   return (
-    <NavigationContainer style={styles.bottomContainer}>
-      <Tab.Navigator
-        screenOptions={{
-        headerShown: false,
-        tabBarLabel: () => null,
-        tabBarStyle: styles.tabBar,
-      }}>
-        <Tab.Screen 
-          name="Home" 
-          component={HomeStackScreen} 
-          options={{
-            tabBarIcon: () => (
-              <Ionicons name="home-outline" size={24} color="white" style={styles.icons} />
-            )
-          }}  
-        />
-        <Tab.Screen 
-          name="Settings" 
-          component={SettingStackScreen} 
-          options={{
-            tabBarIcon: () => (
-              <Ionicons name="settings-outline" size={24} color="white" style={styles.icons}/>
-            )
-          }}  
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <CityProvider>
+      <NavigationContainer style={styles.bottomContainer}>
+        <Tab.Navigator
+          screenOptions={{
+          headerShown: false,
+          tabBarLabel: () => null,
+          tabBarStyle: styles.tabBar,
+        }}>
+          <Tab.Screen 
+            name="Home" 
+            component={HomeStackScreen} 
+            options={{
+              tabBarIcon: () => (
+                <Ionicons name="home-outline" size={24} color="white" style={styles.icons} />
+              )
+            }}  
+          />
+          <Tab.Screen 
+            name="Settings" 
+            component={SettingStackScreen} 
+            options={{
+              tabBarIcon: () => (
+                <Ionicons name="settings-outline" size={24} color="white" style={styles.icons}/>
+              )
+            }}  
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </CityProvider>
   )
 }
 
