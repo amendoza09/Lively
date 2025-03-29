@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl, TouchableOpacity } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import AppHeader from '../Components/AppHeader';
@@ -7,7 +8,7 @@ import FeatureSection from '../Components/FeatureSection';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const API_BASE_URL = process.env.HOST || 'http://192.168.1.132:5500';
+const API_BASE_URL = process.env.HOST || 'http://172.20.10.3:5500';
 const PORT = process.env.PORT;
 
 const HomeScreen = ({ navigation }) => {
@@ -16,6 +17,9 @@ const HomeScreen = ({ navigation }) => {
   const [error, setError] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState("7-Days");
+  const [markedDates, setMarkedDates] = useState({});
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const currentDate = new Date();
 
   const formatDate = new Intl.DateTimeFormat("en-us", {
@@ -25,18 +29,18 @@ const HomeScreen = ({ navigation }) => {
   });
 
   const onRefresh = useCallback(async () => {
+    /*
     setRefreshing(true);
     try{
-      console.log("Refreshing data...");
-      const cityName = selectedLocation.split(',')[0].toLowerCase();
-      const updatedEvents = fetchEvents;
-      setEvents(updatedEvents);
+      groupedEvents = groupByType;
     } catch(e) {
       console.error("Error refreshing.", e);
     } finally {
       setRefreshing(false);
     }
+      */
   })
+  
 
   const getImgUrl = (img) => {
     if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
@@ -54,14 +58,15 @@ const HomeScreen = ({ navigation }) => {
     }, {});
   };
 
+  const sevenDays = new Date(currentDate);
+  sevenDays.setDate(currentDate.getDate()+7);
   const upcomingEvents = events.filter(event => {
     const eventDate = new Date(event.date);
 
-    if(eventDate > currentDate) {
-      return true;
-    }
-    if(eventDate.toDateString() === currentDate.toDateString()) {
-      return event.time > currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if(viewMode === "7-Days") {
+      return eventDate >= currentDate && eventDate <= sevenDays;
+    } else if(viewMode === "Monthly") {
+      return eventDate.getMonth() == currentDate.getMonth() &&  eventDate.getFullYear() == currentDate.getFullYear();
     }
 
     return false;
@@ -76,10 +81,10 @@ const HomeScreen = ({ navigation }) => {
     }
   });
 
+
   const groupedEvents = groupByType(upcomingEvents);
 
   useEffect(() => {
-    
     const fetchEvents = async () => {
       try {
         const cityName = selectedLocation.split(',')[0].toLowerCase();
@@ -92,6 +97,18 @@ const HomeScreen = ({ navigation }) => {
 
         const featured = data.filter(event => event.feature === true);
         setFeaturedEvents(featured);
+        
+        setMarkedDates(
+          data.reduce((acc, event) => {
+            acc[event.date] = { 
+              marked: true, 
+              dotColor: "blue", 
+              selected: selectedDate === event.date,
+              selectedColor: selectedDate === event.date ? "red" : undefined
+            };
+            return acc;
+          }, {})
+        );
                 
         setError(null);
       } catch (error) {
@@ -104,12 +121,12 @@ const HomeScreen = ({ navigation }) => {
   }, [selectedLocation]);
 
   const eventTypeColors = {
-    music: '#FFDDC1', // Light Peach
-    fitness: '#C1FFD7', // Light Green
-    conference: '#D1C4E9',   // Lavender
-    art: '#FFCDD2',    // Light Pink
-    social: '#FFFFFF', // white
-    other: '#E0E0E0', // Light Gray (for unclassified types)
+    Music: '#FFDDC1', // Light Peach
+    Fitness: '#C1FFD7', // Light Green
+    Conference: '#D1C4E9',   // Lavender
+    Art: '#FFCDD2',    // Light Pink
+    Social: '#FFFFFF', // white
+    Other: '#E0E0E0', // Light Gray (for unclassified types)
   };
     
   return(
@@ -117,7 +134,65 @@ const HomeScreen = ({ navigation }) => {
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation} />
-      <ScrollView 
+      <View style={styles.viewContainer}>
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
+          onPress={() => setViewMode("7-Days")}
+          >
+            <Text style={styles.toggleText}>Weekly View</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
+          onPress={() => setViewMode("Monthly")}>
+            <Text style={styles.toggleText}>Monthly View</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      {viewMode === "Monthly" ? (
+        <View>
+          <Calendar current={new Date().toISOString().split("T")[0]}
+          onDayPress={(day) => setSelectedDate(day.dateString)}
+          markedDates={markedDates}
+          enableSwipeMonths={true}
+          />
+          {selectedDate && events.some(event => event.date === selectedDate) ? (
+            <View style={styles.eventList}>
+              <FlatList data={events.filter((event) => event.date === selectedDate)}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(event) => event._id.toString()}
+              renderItem={({ item: event }) => {
+                const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
+                return(
+                  <View style={[styles.eventCard, { backgroundColor }]}>
+                    <View style={styles.imageCard}>
+                      <Image 
+                        source={{ uri: getImgUrl(event.imgUrl) }} 
+                        style={styles.image} 
+                        resizeMode="cover" 
+                      />
+                    </View>
+                    <View> 
+                      <View style={styles.info}> 
+                        <Text style={styles.infoText}>{event.time} </Text>
+                        <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
+                        <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
+                      </View>
+                      <View style={styles.description}>
+                        <Text style={styles.eventTitle}>{event.title}</Text>
+                        <Text>{event.location}</Text>
+                      </View>
+                    </View>
+                  </View>
+                );
+              }}
+            />
+          </View>
+        ) : (
+          <Text style={styles.emptyText}>No Events on {selectedDate}</Text>
+        )}
+        </View>
+      ) : (
+        <ScrollView 
         contentContainerStyle={styles.container} 
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
@@ -186,8 +261,9 @@ const HomeScreen = ({ navigation }) => {
               )}
             </View>
         </ScrollView>
+      )}
     </View>
-  );
+  )
 };
 
 const styles = StyleSheet.create({
@@ -268,7 +344,38 @@ const styles = StyleSheet.create({
     },
     groupTitle: {
         paddingLeft: 10,
-    }
+    },
+    viewContainer: {
+      display: "flex",
+      alignItems: "center",
+      width: "100%",
+      backgroundColor: "rgba(0, 0 ,0 ,0)",
+    },
+    toggleContainer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      backgroundColor: "#ddd",
+      width: 350,
+      height: 35,
+      borderRadius: 20,
+      marginTop: 5,
+    },
+    toggleButton: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "175",
+    },
+    activeButtonWeekly: {
+      backgroundColor: "white",
+      borderTopLeftRadius: 20,
+      borderBottomLeftRadius: 20,
+    },
+    activeButtonMonthly: {
+      backgroundColor: "white",
+      borderTopRightRadius: 20,
+      borderBottomRightRadius: 20,
+    },
 });
 
 
