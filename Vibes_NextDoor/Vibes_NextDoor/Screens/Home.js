@@ -8,7 +8,7 @@ import FeatureSection from '../Components/FeatureSection';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const API_BASE_URL = process.env.HOST || 'http://172.20.10.3:5500';
+const API_BASE_URL = process.env.HOST || 'http://192.168.0.132:5500';
 const PORT = process.env.PORT;
 
 const HomeScreen = ({ navigation }) => {
@@ -21,6 +21,7 @@ const HomeScreen = ({ navigation }) => {
   const [markedDates, setMarkedDates] = useState({});
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
 
   const formatDate = new Intl.DateTimeFormat("en-us", {
     weekday: "short",
@@ -66,7 +67,7 @@ const HomeScreen = ({ navigation }) => {
     if(viewMode === "7-Days") {
       return eventDate >= currentDate && eventDate <= sevenDays;
     } else if(viewMode === "Monthly") {
-      return eventDate.getMonth() == currentDate.getMonth() &&  eventDate.getFullYear() == currentDate.getFullYear();
+      return events;
     }
 
     return false;
@@ -100,11 +101,12 @@ const HomeScreen = ({ navigation }) => {
         
         setMarkedDates(
           data.reduce((acc, event) => {
-            acc[event.date] = { 
+            const formatted = new Date(event.date).toISOString().split("T")[0];
+            acc[formatted] = { 
               marked: true, 
               dotColor: "blue", 
-              selected: selectedDate === event.date,
-              selectedColor: selectedDate === event.date ? "red" : undefined
+              selected: selectedDate === formatted,
+              selectedColor: selectedDate === formatted ? "red" : undefined
             };
             return acc;
           }, {})
@@ -150,7 +152,10 @@ const HomeScreen = ({ navigation }) => {
       {viewMode === "Monthly" ? (
         <View>
           <Calendar current={new Date().toISOString().split("T")[0]}
-          onDayPress={(day) => setSelectedDate(day.dateString)}
+          onDayPress={(day) => {
+            const formatted = new Date(day.dateString).toISOString().split("T")[0];
+            setSelectedDate(formatted);
+          }}
           markedDates={markedDates}
           enableSwipeMonths={true}
           />
