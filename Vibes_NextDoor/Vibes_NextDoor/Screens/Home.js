@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl, TouchableOpacity } from 'react-native';
-import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import AppHeader from '../Components/AppHeader';
 import FeatureSection from '../Components/FeatureSection';
+import MonthlyView from '../Components/monthlyView';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const API_BASE_URL = process.env.HOST || 'http://192.168.0.132:5500';
+const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
 const PORT = process.env.PORT;
 
 const HomeScreen = ({ navigation }) => {
@@ -18,8 +18,6 @@ const HomeScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState("7-Days");
-  const [markedDates, setMarkedDates] = useState({});
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
@@ -30,22 +28,32 @@ const HomeScreen = ({ navigation }) => {
   });
 
   const onRefresh = useCallback(async () => {
-    /*
     setRefreshing(true);
     try{
-      groupedEvents = groupByType;
+      const cityName = selectedLocation.split(',')[0].toLowerCase();
+      const response = await fetch(`${API_BASE_URL}/event-data/${cityName}`);
+      if(!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+      const data = await response.json();
+      setEvents(data);
+
+      const featured = data.filter(event => event.feature === true);
+      setFeaturedEvents(featured);
+                  
+      setError(null);
+
     } catch(e) {
       console.error("Error refreshing.", e);
     } finally {
       setRefreshing(false);
     }
-      */
   })
   
 
   const getImgUrl = (img) => {
     if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
-    return img.startsWith("data:image") ? img : '';
+    return events.imgUrl;
   };
 
   const groupByType = (events) => {
@@ -95,23 +103,8 @@ const HomeScreen = ({ navigation }) => {
         }
         const data = await response.json();
         setEvents(data);
-
         const featured = data.filter(event => event.feature === true);
         setFeaturedEvents(featured);
-        
-        setMarkedDates(
-          data.reduce((acc, event) => {
-            const formatted = new Date(event.date).toISOString().split("T")[0];
-            acc[formatted] = { 
-              marked: true, 
-              dotColor: "blue", 
-              selected: selectedDate === formatted,
-              selectedColor: selectedDate === formatted ? "red" : undefined
-            };
-            return acc;
-          }, {})
-        );
-                
         setError(null);
       } catch (error) {
         console.error('Error fetching events at home page:', error);
@@ -127,7 +120,7 @@ const HomeScreen = ({ navigation }) => {
     Fitness: '#C1FFD7', // Light Green
     Conference: '#D1C4E9',   // Lavender
     Art: '#FFCDD2',    // Light Pink
-    Social: '#FFFFFF', // white
+    Social: '#a6f1a6', // white
     Other: '#E0E0E0', // Light Gray (for unclassified types)
   };
     
@@ -136,81 +129,39 @@ const HomeScreen = ({ navigation }) => {
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation} />
-      <View style={styles.viewContainer}>
-        <View style={styles.toggleContainer}>
-          <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
-          onPress={() => setViewMode("7-Days")}
-          >
-            <Text style={styles.toggleText}>Weekly View</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
-          onPress={() => setViewMode("Monthly")}>
-            <Text style={styles.toggleText}>Monthly View</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      {viewMode === "Monthly" ? (
-        <View>
-          <Calendar current={new Date().toISOString().split("T")[0]}
-          onDayPress={(day) => {
-            const formatted = new Date(day.dateString).toISOString().split("T")[0];
-            setSelectedDate(formatted);
-          }}
-          markedDates={markedDates}
-          enableSwipeMonths={true}
-          />
-          {selectedDate && events.some(event => event.date === selectedDate) ? (
-            <View style={styles.eventList}>
-              <FlatList data={events.filter((event) => event.date === selectedDate)}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(event) => event._id.toString()}
-              renderItem={({ item: event }) => {
-                const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
-                return(
-                  <View style={[styles.eventCard, { backgroundColor }]}>
-                    <View style={styles.imageCard}>
-                      <Image 
-                        source={{ uri: getImgUrl(event.imgUrl) }} 
-                        style={styles.image} 
-                        resizeMode="cover" 
-                      />
-                    </View>
-                    <View> 
-                      <View style={styles.info}> 
-                        <Text style={styles.infoText}>{event.time} </Text>
-                        <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
-                        <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
-                      </View>
-                      <View style={styles.description}>
-                        <Text style={styles.eventTitle}>{event.title}</Text>
-                        <Text>{event.location}</Text>
-                      </View>
-                    </View>
-                  </View>
-                );
-              }}
-            />
-          </View>
-        ) : (
-          <Text style={styles.emptyText}>No Events on {selectedDate}</Text>
-        )}
-        </View>
-      ) : (
-        <ScrollView 
+      <ScrollView 
         contentContainerStyle={styles.container} 
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        {error && <Text style={styles.errorText}>{error}</Text>}
-        {events.length === 0 && !error ? (
-          <Text style={styles.emptyText}></Text>
-        ): ( 
-          <View>
-              <Text style={styles.titleFeature}>Featured</Text>
-              <FeatureSection data={featuredEvents} />
+        <View style={styles.viewContainer}>
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
+            onPress={() => setViewMode("7-Days")}
+            >
+              <Text style={styles.toggleText}>Weekly View</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
+            onPress={() => setViewMode("Monthly")}>
+              <Text style={styles.toggleText}>Monthly View</Text>
+            </TouchableOpacity>
           </View>
-        )}
-            <View style={styles.HomeContainer}>
+        </View>
+        {viewMode === "Monthly" ? (
+          <View style={styles.monthlyViewContainer}>
+            <MonthlyView eventData={events} />
+          </View>
+        ) : (
+        <>
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          {events.length === 0 && !error ? (
+            <Text style={styles.emptyText}></Text>
+          ) : ( 
+            <View>
+                <Text style={styles.titleFeature}>Featured</Text>
+                <FeatureSection data={featuredEvents} />
+            </View>
+          )}
+          <View style={styles.HomeContainer}>
               {error && <Text style={styles.errorText}>{error}</Text>}
               {events.length === 0 && !error ? (
                 <View style={styles.emptyContainer}>
@@ -265,22 +216,23 @@ const HomeScreen = ({ navigation }) => {
                 </View> 
               )}
             </View>
-        </ScrollView>
-      )}
+          </>
+        )}
+      </ScrollView>
     </View>
   )
 };
 
 const styles = StyleSheet.create({
     screen:{
-        
+        flex: 1,
     },
     container: {
-      flexGrow: 1,
+      display: "flex"
     },
     HomeContainer: {
       height: '100%',
-      paddingBottom: 190,
+      paddingBottom: 80,
     },
     emptyContainer: {
         width: screenWidth,
@@ -363,7 +315,7 @@ const styles = StyleSheet.create({
       width: 350,
       height: 35,
       borderRadius: 20,
-      marginTop: 5,
+      marginTop: 8,
     },
     toggleButton: {
       display: "flex",
@@ -381,6 +333,10 @@ const styles = StyleSheet.create({
       borderTopRightRadius: 20,
       borderBottomRightRadius: 20,
     },
+    monthlyViewContainer: {
+      flex: 1,
+      marginTop: 10,
+    }
 });
 
 
