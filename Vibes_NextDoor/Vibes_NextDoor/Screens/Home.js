@@ -147,9 +147,9 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
         {viewMode === "Monthly" ? (
-          <View style={styles.monthlyViewContainer}>
+          <ScrollView style={styles.monthlyViewContainer}>
             <MonthlyView eventData={events} />
-          </View>
+          </ScrollView>
         ) : (
         <>
           {error && <Text style={styles.errorText}>{error}</Text>}
@@ -334,7 +334,6 @@ const styles = StyleSheet.create({
       borderBottomRightRadius: 20,
     },
     monthlyViewContainer: {
-      flex: 1,
       marginTop: 10,
     }
 });

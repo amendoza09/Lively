@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { Card } from 'react-native-paper';
 import { Agenda } from "react-native-calendars";
 import { ScrollView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -46,13 +48,25 @@ const MonthlyView = ({ eventData }) => {
 
   const loadItems = (day) => {
     setTimeout(() => {
-      const strTime = day.timeStamp;
 
-      if(!items[strTime]) {
-        const newItems = { ...items, [strTime]: []};
-        setItems(newItems);
+      const newItems = {...items};
+      for (let i = -15; i < 15; i++) {
+        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
+        const strTime = new Date(time).toISOString().split("T")[0]; // Format YYYY-MM-DD
+  
+        if (!newItems[strTime]) {
+          newItems[strTime] = [
+            {
+              title: "",
+              time: "",
+              location: "No events today",
+              type: "Other",
+            },
+          ];
+        }
       }
-    }, 500);
+      setItems(newItems);
+    }, 1000);
   };
 
   const eventTypeColors = {
@@ -64,43 +78,41 @@ const MonthlyView = ({ eventData }) => {
     Other: "#E0E0E0",
   };
 
-  const emptyRender = () => {
-    return (
-      <View style={styles.emptyRender}>
-        <Text>Nothing to see here</Text>
-      </View>
-    );
-  };
-  
   const renderItem = (event) => {
       const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Other;
       return (
-        <ScrollView contentContainerStyle={styles.container}>
-          <View style={[styles.eventCard, { backgroundColor }]}>
+        <TouchableOpacity style={styles.container}>
+          <Card style={[styles.eventCard, { backgroundColor, shadowColor: "transparent" }]}>
+            <Card.Content>
               <View style={styles.info}>
                 <Text style={styles.eventTitle}>{event.title}</Text>
                 <Text style={styles.infoText}>{event.location}</Text>
                 <Text style={styles.infoText}>{event.time}</Text>
               </View>
-          </View>
-        </ScrollView>
+              </Card.Content>
+          </Card>
+        </TouchableOpacity>
       );
+  };
+  
+  const emptyRender = () => {
+    return (
+      <View style={styles.emptyRender}>
+        <Text style={{ fontSize: 16, color: "gray" }}>Nothing to see here</Text>
+      </View>
+    );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.cardsContainer}>
+      <View>
         <Agenda
           items={items}
           selected={selectedDate}
           loadItemsForMonth={loadItems}
-          onDayPress={day => setSelectedDate(day.dateString)}
           markedDates={markedDates}
           renderItem={renderItem}
-          renderEmptyData={emptyRender}
         />
       </View>
-    </SafeAreaView>
   );
 };
 
@@ -108,13 +120,11 @@ const MonthlyView = ({ eventData }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexGrow: 1,
-    height: "100%",
   },
   eventCard: {
     display: "flex",
     padddingLeft: 15,
-    height: 70,
+    height: 65,
     marginVertical: 10,
     borderRadius: 8,
     flexDirection: "row",
@@ -123,7 +133,6 @@ const styles = StyleSheet.create({
   },
   info: {
     display: "flex",
-    paddingLeft:15,
     paddingVertical: 5,
   },
   infoText: {
@@ -135,17 +144,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   emptyRender: {
-    display: "flex",
-    padddingLeft: 15,
-    marginVertical: 10,
-    borderRadius: 8,
-    flexDirection: "row",
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
   },
-  cardsContainer: {
-    display: "flex",
-    height: 300,
-  }
 });
 
 export default MonthlyView;
