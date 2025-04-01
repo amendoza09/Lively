@@ -6,7 +6,7 @@ import AppHeader from '../Components/AppHeader';
 import FeatureSection from '../Components/FeatureSection';
 import MonthlyView from '../Components/monthlyView';
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
 const PORT = process.env.PORT;
@@ -129,11 +129,7 @@ const HomeScreen = ({ navigation }) => {
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation} />
-      <ScrollView 
-        contentContainerStyle={styles.container} 
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <View style={styles.viewContainer}>
+      <View style={styles.viewContainer}>
           <View style={styles.toggleContainer}>
             <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
             onPress={() => setViewMode("7-Days")}
@@ -144,14 +140,17 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => setViewMode("Monthly")}>
               <Text style={styles.toggleText}>Monthly View</Text>
             </TouchableOpacity>
-          </View>
-        </View>
-        {viewMode === "Monthly" ? (
-          <ScrollView style={styles.monthlyViewContainer}>
-            <MonthlyView eventData={events} />
+      </View>
+      {viewMode === "Monthly" ? (
+        <ScrollView style={styles.agendaContainer} 
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            <View style={styles.monthlyViewContainer}>
+              <MonthlyView eventData={events} />
+            </View>
           </ScrollView>
-        ) : (
-        <>
+      ) : (
+        <ScrollView style={styles.container} 
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
           {error && <Text style={styles.errorText}>{error}</Text>}
           {events.length === 0 && !error ? (
             <Text style={styles.emptyText}></Text>
@@ -216,9 +215,9 @@ const HomeScreen = ({ navigation }) => {
                 </View> 
               )}
             </View>
-          </>
+          </ScrollView>
         )}
-      </ScrollView>
+      </View>
     </View>
   )
 };
@@ -230,9 +229,11 @@ const styles = StyleSheet.create({
     container: {
       display: "flex"
     },
+    agendaContainer: {
+    },
     HomeContainer: {
       height: '100%',
-      paddingBottom: 80,
+      marginBottom: 225
     },
     emptyContainer: {
         width: screenWidth,
@@ -334,7 +335,9 @@ const styles = StyleSheet.create({
       borderBottomRightRadius: 20,
     },
     monthlyViewContainer: {
+      width: screenWidth,
       marginTop: 10,
+      marginBottom: 250
     }
 });
 

@@ -13,28 +13,49 @@ const formatDate = (dateString) => {
   return `${year}-${month}-${day}`;
 };
 
-
 const MonthlyView = ({ eventData }) => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [items, setItems] = useState({});
 
   useEffect(() => {
-    const formattedItems = eventData.reduce((acc, event) => {
+    // Get the selected week's Monday–Sunday range
+    const { start, end } = getWeekRange(selectedDate);
+
+    // Create an empty template for the week's dates
+    const weekItems = {};
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const formattedDate = d.toISOString().split("T")[0];
+      weekItems[formattedDate] = []; // Default empty array
+    }
+
+    // Add events to the correct dates
+    eventData.forEach((event) => {
       const formattedDate = formatDate(event.date);
-      if (!acc[formattedDate]) {
-        acc[formattedDate] = [];
+      if (formattedDate in weekItems) {
+        weekItems[formattedDate].push({
+          title: event.title,
+          time: event.time,
+          location: event.location,
+          imgUrl: event.imgUrl,
+          type: event.type,
+        });
       }
-      acc[formattedDate].push({
-        title: event.title,
-        time: event.time,
-        location: event.location,
-        imgUrl: event.imgUrl,
-        type: event.type,
-      });
-      return acc;
-    }, {});
-    setItems(formattedItems);
-  }, [eventData]);
+    });
+    setItems(weekItems);
+  }, [eventData, selectedDate]);
+
+  const getWeekRange = (dateString) => {
+    const date = new Date(dateString);
+    const dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)
+
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek)); // Ensure start is Monday
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Sunday
+
+    return { start: startOfWeek, end: endOfWeek };
+  };
 
   const markedDates = eventData.reduce((acc, event) => {
     const formattedDate = formatDate(event.date);
@@ -46,28 +67,7 @@ const MonthlyView = ({ eventData }) => {
     return acc;
   }, {});
 
-  const loadItems = (day) => {
-    setTimeout(() => {
-
-      const newItems = {...items};
-      for (let i = -15; i < 15; i++) {
-        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
-        const strTime = new Date(time).toISOString().split("T")[0]; // Format YYYY-MM-DD
   
-        if (!newItems[strTime]) {
-          newItems[strTime] = [
-            {
-              title: "",
-              time: "",
-              location: "No events today",
-              type: "Other",
-            },
-          ];
-        }
-      }
-      setItems(newItems);
-    }, 1000);
-  };
 
   const eventTypeColors = {
     Music: "#FFDDC1",
@@ -81,17 +81,17 @@ const MonthlyView = ({ eventData }) => {
   const renderItem = (event) => {
       const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Other;
       return (
-        <TouchableOpacity style={styles.container}>
-          <Card style={[styles.eventCard, { backgroundColor, shadowColor: "transparent" }]}>
-            <Card.Content>
-              <View style={styles.info}>
-                <Text style={styles.eventTitle}>{event.title}</Text>
-                <Text style={styles.infoText}>{event.location}</Text>
-                <Text style={styles.infoText}>{event.time}</Text>
-              </View>
-              </Card.Content>
-          </Card>
-        </TouchableOpacity>
+        <ScrollView>
+            <Card style={[styles.eventCard, { backgroundColor, shadowColor: "transparent"}]}>
+              <Card.Content>
+                <View style={styles.info}>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
+                  <Text style={styles.infoText}>{event.location}</Text>
+                  <Text style={styles.infoText}>{event.time}</Text>
+                </View>
+                </Card.Content>
+            </Card>
+        </ScrollView>
       );
   };
   
@@ -104,23 +104,18 @@ const MonthlyView = ({ eventData }) => {
   };
 
   return (
-      <View>
         <Agenda
           items={items}
           selected={selectedDate}
-          loadItemsForMonth={loadItems}
           markedDates={markedDates}
+          onDayPress={(day) => setSelectedDate(day.dateString)}
           renderItem={renderItem}
         />
-      </View>
   );
 };
 
 // Define styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   eventCard: {
     display: "flex",
     padddingLeft: 15,
