@@ -5,10 +5,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AppHeader from '../Components/AppHeader';
 import FeatureSection from '../Components/FeatureSection';
 import MonthlyView from '../Components/monthlyView';
+import Calendar from '../Components/Calendar';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
+const API_BASE_URL = process.env.HOST || 'http://192.168.254.6:5500';
 const PORT = process.env.PORT;
 
 const HomeScreen = ({ navigation }) => {
@@ -145,7 +146,7 @@ const HomeScreen = ({ navigation }) => {
         <ScrollView style={styles.agendaContainer} 
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
             <View style={styles.monthlyViewContainer}>
-              <MonthlyView eventData={events} />
+              <Calendar events={events}/>
             </View>
           </ScrollView>
       ) : (
@@ -230,6 +231,7 @@ const styles = StyleSheet.create({
       display: "flex"
     },
     agendaContainer: {
+      height: screenHeight,
     },
     HomeContainer: {
       height: '100%',
@@ -337,7 +339,6 @@ const styles = StyleSheet.create({
     monthlyViewContainer: {
       width: screenWidth,
       marginTop: 10,
-      marginBottom: 250
     }
 });
 

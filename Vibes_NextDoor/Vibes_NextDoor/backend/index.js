@@ -3,7 +3,6 @@ const { MongoClient } = require("mongodb");
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const multer = require('multer');
 
 require("dotenv").config({ path: "./config.env" });
 
