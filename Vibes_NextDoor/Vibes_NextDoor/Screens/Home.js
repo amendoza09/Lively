@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl, TouchableOpacity, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import AppHeader from '../Components/AppHeader';
 import FeatureSection from '../Components/FeatureSection';
-import MonthlyView from '../Components/monthlyView';
 import Calendar from '../Components/Calendar';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -19,6 +18,7 @@ const HomeScreen = ({ navigation }) => {
   const [selectedLocation, setSelectedLocation] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [viewMode, setViewMode] = useState("7-Days");
+  const translateX = useRef(new Animated.Value(0)).current;
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
@@ -54,7 +54,7 @@ const HomeScreen = ({ navigation }) => {
 
   const getImgUrl = (img) => {
     if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
-    return events.imgUrl;
+    return img.imgUrl;
   };
 
   const groupByType = (events) => {
@@ -116,6 +116,14 @@ const HomeScreen = ({ navigation }) => {
     fetchEvents();
   }, [selectedLocation]);
 
+  useEffect(() => {
+    Animated.timing(translateX, {
+      toValue: viewMode === "Monthly" ? -1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [viewMode]);
+
   const eventTypeColors = {
     Music: '#FFDDC1', // Light Peach
     Fitness: '#C1FFD7', // Light Green
@@ -130,94 +138,108 @@ const HomeScreen = ({ navigation }) => {
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation} />
-      <View style={styles.viewContainer}>
-          <View style={styles.toggleContainer}>
-            <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
-            onPress={() => setViewMode("7-Days")}
-            >
-              <Text style={styles.toggleText}>Weekly View</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
-            onPress={() => setViewMode("Monthly")}>
-              <Text style={styles.toggleText}>Monthly View</Text>
-            </TouchableOpacity>
-      </View>
-      {viewMode === "Monthly" ? (
-        <ScrollView style={styles.agendaContainer} 
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-            <View style={styles.monthlyViewContainer}>
-              <Calendar events={events}/>
-            </View>
-          </ScrollView>
-      ) : (
-        <ScrollView style={styles.container} 
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-          {error && <Text style={styles.errorText}>{error}</Text>}
-          {events.length === 0 && !error ? (
-            <Text style={styles.emptyText}></Text>
-          ) : ( 
-            <View>
-                <Text style={styles.titleFeature}>Featured</Text>
-                <FeatureSection data={featuredEvents} />
-            </View>
-          )}
-          <View style={styles.HomeContainer}>
-              {error && <Text style={styles.errorText}>{error}</Text>}
-              {events.length === 0 && !error ? (
-                <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyText}>Nothing in {selectedLocation} yet...</Text>
-                </View>
-              ): (
-                <View>
-                  <Text style={styles.title}>Everything else</Text>
-                  <FlatList
-                    data={Object.entries(groupedEvents)}
-                    keyExtractor={(item) => item[0]}
-                    renderItem={({ item }) => {
-                    const [type, events] = item;
 
-                    return (
-                      <View style={styles.cardConatiners}>
-                        <Text style={styles.groupTitle}>{type}</Text>
-                        <FlatList
-                          data={events}
-                          horizontal
-                          showsHorizontalScrollIndicator={false}
-                          keyExtractor={(event) => event._id.toString()}
-                          renderItem={({ item: event }) => {
-                            const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
-                            return(
-                              <View style={[styles.eventCard, { backgroundColor }]}>
-                                <View style={styles.imageCard}>
-                                  <Image 
-                                    source={{ uri: getImgUrl(event.imgUrl) }} 
-                                    style={styles.image} 
-                                    resizeMode="cover" 
-                                  />
-                                </View>
-                                <View> 
-                                  <View style={styles.info}> 
-                                    <Text style={styles.infoText}>{event.time} </Text>
-                                    <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
-                                    <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
+      <View style={styles.toggleContainer}>
+        <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
+        onPress={() => setViewMode("7-Days")}
+        >
+          <Text style={styles.toggleText}>Weekly View</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
+        onPress={() => setViewMode("Monthly")}>
+          <Text style={styles.toggleText}>Monthly View</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.view}>
+        <Animated.View style={{
+          flexDireection: 'row',
+          width: "200%",
+          transform: [
+            {
+              translateX: translateX.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0 ,-100],
+              }),
+            },
+          ],
+        }}>
+          <View style={styles.page}>
+            <ScrollView style={styles.container} 
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+            {events.length === 0 && !error ? (
+              <Text style={styles.emptyText}></Text>
+            ) : ( 
+                <View>
+                    <Text style={styles.titleFeature}>Featured</Text>
+                    <FeatureSection data={featuredEvents} />
+                </View>
+            )}
+              <View style={styles.HomeContainer}>
+                {error && <Text style={styles.errorText}>{error}</Text>}
+                {events.length === 0 && !error ? (
+                  <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>Nothing in {selectedLocation} yet...</Text>
+                  </View>
+                ) : (
+                  <View>
+                    <Text style={styles.title}>Everything else</Text>
+                    <FlatList
+                      data={Object.entries(groupedEvents)}
+                      keyExtractor={(item) => item[0]}
+                      renderItem={({ item }) => {
+                        const [type, events] = item;
+
+                        return (
+                          <View style={styles.cardConatiners}>
+                            <Text style={styles.groupTitle}>{type}</Text>
+                            <FlatList
+                              data={events}
+                              horizontal
+                              showsHorizontalScrollIndicator={false}
+                              keyExtractor={(event) => event._id.toString()}
+                              renderItem={({ item: event }) => {
+                                const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
+                                return(
+                                  <View style={[styles.eventCard, { backgroundColor }]}>
+                                    <View style={styles.imageCard}>
+                                      <Image 
+                                        source={{ uri: getImgUrl(event.imgUrl) }} 
+                                        style={styles.image} 
+                                        resizeMode="cover" 
+                                      />
+                                    </View>
+                                    <View> 
+                                      <View style={styles.info}> 
+                                        <Text style={styles.infoText}>{event.time} </Text>
+                                        <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
+                                        <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
+                                      </View>
+                                      <View style={styles.description}>
+                                        <Text style={styles.eventTitle}>{event.title}</Text>
+                                        <Text>{event.location}</Text>
+                                      </View>
+                                    </View>
                                   </View>
-                                  <View style={styles.description}>
-                                    <Text style={styles.eventTitle}>{event.title}</Text>
-                                    <Text>{event.location}</Text>
-                                  </View>
-                                </View>
-                              </View>
-                            )
-                          }}
-                        />
-                      </View>
-                    )}}
-                  />  
-                </View> 
-              )}
-            </View>
-          </ScrollView>
-        )}
+                                )
+                              }}
+                            />
+                          </View>
+                        )}
+                      }
+                    />  
+                  </View> 
+                )}
+              </View>
+            </ScrollView>
+          </View>
+          <View sytle={styles.page}>
+            <ScrollView style={styles.agendaContainer} 
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                <Calendar events={events}/>
+            </ScrollView>
+          </View>
+        </Animated.View>
       </View>
     </View>
   )
@@ -229,9 +251,6 @@ const styles = StyleSheet.create({
     },
     container: {
       display: "flex"
-    },
-    agendaContainer: {
-      height: screenHeight,
     },
     HomeContainer: {
       height: '100%',
@@ -311,12 +330,18 @@ const styles = StyleSheet.create({
       width: "100%",
       backgroundColor: "rgba(0, 0 ,0 ,0)",
     },
+    view: {
+      height: '83%',
+      width: '100%',
+      overflow: 'hidden',
+    },
     toggleContainer: {
       flexDirection: "row",
+      flex: 1,
+      alginItems: 'center',
       justifyContent: "space-around",
       backgroundColor: "#ddd",
       width: 350,
-      height: 35,
       borderRadius: 20,
       marginTop: 8,
     },
@@ -324,7 +349,7 @@ const styles = StyleSheet.create({
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      width: "175",
+      width: 175,
     },
     activeButtonWeekly: {
       backgroundColor: "white",
@@ -339,6 +364,10 @@ const styles = StyleSheet.create({
     monthlyViewContainer: {
       width: screenWidth,
       marginTop: 10,
+    },
+    page: {
+      width: screenWidth,
+      height: screenHeight,
     }
 });
 

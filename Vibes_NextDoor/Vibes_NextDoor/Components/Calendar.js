@@ -66,7 +66,7 @@ const Calendar = ({ events }) => {
         return acc;
       }, {});
     }, [events]);
-
+    console.log(formattedEvents);
     return (
       <View style={{ flex: 1, padding: 10 }}>
         <View style={styles.agendaHeader}>
@@ -84,7 +84,7 @@ const Calendar = ({ events }) => {
               <View key={index} style={styles.dayHeaderCell}>
                 <Text style={styles.dayHeaderText}>{day}</Text>
               </View>
-            )
+            );
           })}
         </View>
         <FlatList
@@ -107,7 +107,9 @@ const Calendar = ({ events }) => {
                   <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
                     {format(item, 'd')}
                   </Text>
-                  {formattedEvents[formattedDate] && <View style={styles.eventIndicator} />}
+                  {formattedEvents[formattedDate] && (
+                    <View style={styles.eventIndicator} />
+                  )}
                 </TouchableOpacity>
               );
             }}
@@ -184,6 +186,7 @@ const styles = StyleSheet.create({
   dayCell: {
     flex: 1,
     margin: 10,
+    height: 25,
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -195,11 +198,10 @@ const styles = StyleSheet.create({
     heigth: 6,
     backgroundColor: 'blue',
     borderRadius: 3,
-    marginTop: 4,
   },
   todayIndicator: {
     backgroundColor: 'red',
-    borderRadius: 30,
+    borderRadius: 35,
     width: 30,
     height: 30,
     justifyContent: 'center',
@@ -233,10 +235,11 @@ const styles = StyleSheet.create({
   },
   selectedDay: {
     backgroundColor: 'black',
-    borderRadius: 30,
+    borderRadius: 35,
     width: 30,
     height: 30,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   selectedText: {
     color: 'white',
