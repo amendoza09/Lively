@@ -8,6 +8,8 @@ const Calendar = ({ events }) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [isExpanded, setIsExpanded] = useState(true);
+    const [dayPosition, setDayPosition] = useState(null);
+    const [dayPositions, setDayPositions] = useState({});
 
     const eventTypeColors = {
       Music: '#FFDDC1', // Light Peach
@@ -21,6 +23,7 @@ const Calendar = ({ events }) => {
     const dayAbbreviations = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const currentDate = format(new Date(), 'yyyy-MM-dd');
     const eventListHeight = useRef(new Animated.Value(0)).current;
+    const dayCellRef = useRef();
 
     const getEmptyDays = (date) => {
       const firstDay = startOfMonth(date);
@@ -51,6 +54,9 @@ const Calendar = ({ events }) => {
 
     const handleDayPress = (date) => {
         const formattedDate = format(date, 'yyyy-MM-dd');
+        const yPosition = dayPositions[formattedDate] || 0;
+
+        setDayPosition(yPosition);
         setSelectedDate(formattedDate);
         setIsExpanded(false);
 
@@ -82,59 +88,22 @@ const Calendar = ({ events }) => {
         return acc;
       }, {});
     }, [events]);
-    
-  return (
-      <View style={{ flex: 1 }}>
-        <View style={styles.agendaHeader}>
-          <TouchableOpacity onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-            <Text style={styles.navText}>{'<'}</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerText}>{format(currentMonth, 'MMMM')}</Text>
-          <TouchableOpacity onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-            <Text style={styles.navText}>{'>'}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.dayHeader}>
-          {dayAbbreviations.map((day, index) => {
-            return (
-              <View key={index} style={styles.dayHeaderCell}>
-                <Text style={styles.dayHeaderText}>{day}</Text>
-              </View>
-            );
-          })}
-        </View>
+  
+  const renderEventList = () => {
+    if(!dayPosition) return null;
 
-          <FlatList
-            data={isExpanded ? generateMonthDays(currentMonth) : generateWeekDays(new Date(selectedDate))}
-            keyExtractor={(item, index) => item ? item.toString() : index.toString()}
-            numColumns={7}
-            renderItem={({ item }) => {
-              if(!item) {
-                return <View style={styles.dayCell} />
-              }
-              const formattedDate = format(item, 'yyyy-MM-dd');
-              const isSelected = selectedDate === formattedDate;
-              const isToday = formattedDate === currentDate;
-          
-              return (
-                <TouchableOpacity
-                  style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator]}
-                  onPress={() => handleDayPress(item)}
-                >
-                  <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
-                    {format(item, 'd')}
-                  </Text>
-                  {formattedEvents[formattedDate] && (
-                    <View style={styles.eventIndicator} />
-                  )}
-                </TouchableOpacity>
-              );
-            }}
-          />
-
-        <Animated.View style={{ height: eventListHeight, overflow: 'hiddin' }}>
+    return (
+      <Animated.View style={[
+        styles.eventListContainer, 
+        { 
+          height: eventListHeight,
+          top: dayPosition + 50,
+          left: 0,
+          zIndex: 999,
+        }
+      ]}>
           {!isExpanded && selectedDate && (
-            <View style={styles.eventListContainer}>
+            <View>
               {formattedEvents[selectedDate] ? (
                 <FlatList
                   data={formattedEvents[selectedDate]}
@@ -168,6 +137,62 @@ const Calendar = ({ events }) => {
             </View>
           )}
         </Animated.View>
+    );
+  }
+
+  return (
+      <View style={{ flex: 1 }}>
+        <View style={styles.agendaHeader}>
+          <TouchableOpacity onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+            <Text style={styles.navText}>{'<'}</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerText}>{format(currentMonth, 'MMMM')}</Text>
+          <TouchableOpacity onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+            <Text style={styles.navText}>{'>'}</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.dayHeader}>
+          {dayAbbreviations.map((day, index) => {
+            return (
+              <View key={index} style={styles.dayHeaderCell}>
+                <Text style={styles.dayHeaderText}>{day}</Text>
+              </View>
+            );
+          })}
+        </View>
+
+          <FlatList
+            data={generateMonthDays(currentMonth)}
+            keyExtractor={(item, index) => item ? item.toString() : index.toString()}
+            numColumns={7}
+            renderItem={({ item }) => {
+              if(!item) {
+                return <View style={styles.dayCell} />
+              }
+              const formattedDate = format(item, 'yyyy-MM-dd');
+              const isSelected = selectedDate === formattedDate;
+              const isToday = formattedDate === currentDate;
+          
+              return (
+                <TouchableOpacity
+                  style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator]}
+                  onPress={() => handleDayPress(item)}
+                  onLayout={(event) => {
+                    if (!event.nativeEvent) return;
+                    const { y } = event.nativeEvent.layout;
+                    setDayPositions((prev) => ({ ...prev, [formattedDate]: y , }));
+                  }}
+                >
+                  <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
+                    {format(item, 'd')}
+                  </Text>
+                  {formattedEvents[formattedDate] && (<View style={styles.eventIndicator} />)}
+                </TouchableOpacity>
+              );
+            }}
+          />
+
+        {renderEventList()}
       </View>
   );
 };
