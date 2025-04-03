@@ -22,6 +22,12 @@ const HomeScreen = ({ navigation }) => {
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
+  translateX.interpolate({
+    inputRange: [0, screenWidth],
+    outputRange: [0, -screenWidth],
+    extrapolate: 'clamp',
+  })
+
   const formatDate = new Intl.DateTimeFormat("en-us", {
     weekday: "short",
     month: "short",
@@ -118,7 +124,7 @@ const HomeScreen = ({ navigation }) => {
 
   useEffect(() => {
     Animated.timing(translateX, {
-      toValue: viewMode === "Monthly" ? -1 : 0,
+      toValue: viewMode === "Monthly" ? -screenWidth : 0,
       duration: 300,
       useNativeDriver: true,
     }).start();
@@ -138,34 +144,30 @@ const HomeScreen = ({ navigation }) => {
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation} />
-
-      <View style={styles.toggleContainer}>
-        <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
-        onPress={() => setViewMode("7-Days")}
-        >
-          <Text style={styles.toggleText}>Weekly View</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
-        onPress={() => setViewMode("Monthly")}>
-          <Text style={styles.toggleText}>Monthly View</Text>
-        </TouchableOpacity>
+      <View style={styles.containerToggle}>
+        <View style={styles.toggleContainer}>
+          <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
+          onPress={() => setViewMode("7-Days")}
+          >
+            <Text style={styles.toggleText}>Weekly View</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
+          onPress={() => setViewMode("Monthly")}>
+            <Text style={styles.toggleText}>Monthly View</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.view}>
+      <View>
         <Animated.View style={{
-          flexDireection: 'row',
+          flexDirection: 'row',
           width: "200%",
-          transform: [
-            {
-              translateX: translateX.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0 ,-100],
-              }),
-            },
-          ],
+          transform: [{ translateX: translateX }],
         }}>
           <View style={styles.page}>
             <ScrollView style={styles.container} 
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            showsVerticalScrollIndicator={false}
+            >
             {error && <Text style={styles.errorText}>{error}</Text>}
             {events.length === 0 && !error ? (
               <Text style={styles.emptyText}></Text>
@@ -188,13 +190,13 @@ const HomeScreen = ({ navigation }) => {
                       data={Object.entries(groupedEvents)}
                       keyExtractor={(item) => item[0]}
                       renderItem={({ item }) => {
-                        const [type, events] = item;
+                        const [type, upcomingEvents] = item;
 
                         return (
                           <View style={styles.cardConatiners}>
                             <Text style={styles.groupTitle}>{type}</Text>
                             <FlatList
-                              data={events}
+                              data={upcomingEvents}
                               horizontal
                               showsHorizontalScrollIndicator={false}
                               keyExtractor={(event) => event._id.toString()}
@@ -225,16 +227,16 @@ const HomeScreen = ({ navigation }) => {
                               }}
                             />
                           </View>
-                        )}
-                      }
+                        );
+                      }}
                     />  
                   </View> 
                 )}
               </View>
             </ScrollView>
           </View>
-          <View sytle={styles.page}>
-            <ScrollView style={styles.agendaContainer} 
+          <View style={styles.monthPage}>
+            <ScrollView style={styles.agendaContainer}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 <Calendar events={events}/>
             </ScrollView>
@@ -247,18 +249,18 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     screen:{
-        flex: 1,
+      
     },
     container: {
-      display: "flex"
+      height: screenHeight,
     },
     HomeContainer: {
-      height: '100%',
-      marginBottom: 225
+      height: screenHeight,
+      marginBottom: -50,
     },
     emptyContainer: {
         width: screenWidth,
-        height: '100%',
+        height: screenHeight,
         alignItems: 'center',
         marginTop: 20,
     },
@@ -330,23 +332,21 @@ const styles = StyleSheet.create({
       width: "100%",
       backgroundColor: "rgba(0, 0 ,0 ,0)",
     },
-    view: {
-      height: '83%',
-      width: '100%',
-      overflow: 'hidden',
-    },
     toggleContainer: {
       flexDirection: "row",
-      flex: 1,
       alginItems: 'center',
       justifyContent: "space-around",
       backgroundColor: "#ddd",
       width: 350,
+      height: 35,
       borderRadius: 20,
       marginTop: 8,
     },
+    containerToggle:{
+      height: 50,
+      alignItems: 'center',
+    },
     toggleButton: {
-      display: "flex",
       alignItems: "center",
       justifyContent: "center",
       width: 175,
@@ -361,13 +361,15 @@ const styles = StyleSheet.create({
       borderTopRightRadius: 20,
       borderBottomRightRadius: 20,
     },
-    monthlyViewContainer: {
-      width: screenWidth,
-      marginTop: 10,
-    },
     page: {
       width: screenWidth,
+    },
+    monthPage: {
+      width: screenWidth,
       height: screenHeight,
+    },
+    agendaContainer: {
+      flex: 1,
     }
 });
 

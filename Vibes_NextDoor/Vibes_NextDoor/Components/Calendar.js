@@ -1,6 +1,8 @@
-import React, { useState, useMemo } from  'react';
-import { View, FlatList, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import React, { useState, useMemo, useRef } from  'react';
+import { View, FlatList, Text, TouchableOpacity, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import { format, startOfMonth, startOfWeek, endOfWeek, endOfMonth, eachDayOfInterval, addMonths, subMonths, subWeeks, addWeeks, getDay } from 'date-fns';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const Calendar = ({ events }) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -17,6 +19,8 @@ const Calendar = ({ events }) => {
     };
     
     const dayAbbreviations = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const currentDate = format(new Date(), 'yyyy-MM-dd');
+    const eventListHeight = useRef(new Animated.Value(0)).current;
 
     const getEmptyDays = (date) => {
       const firstDay = startOfMonth(date);
@@ -45,18 +49,30 @@ const Calendar = ({ events }) => {
       return eachDayOfInterval({ start: startOfSelectedWeek, end: endOfSelectedWeek });
     };
 
-    const currentDate = format(new Date(), 'yyyy-MM-dd');
-
     const handleDayPress = (date) => {
         const formattedDate = format(date, 'yyyy-MM-dd');
         setSelectedDate(formattedDate);
         setIsExpanded(false);
+
+        Animated.timing(eventListHeight, {
+            toValue: screenHeight-360,
+            duration: 300,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: false,
+        }).start();
     };
 
     const handleReset = () => {
-      setIsExpanded(true);
-      setSelectedDate(format(new Date(), 'yyyy-MM-dd'));
-    }
+      Animated.timing(eventListHeight, {
+          toValue: 0,
+          duration: 300,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }).start(() => {
+          setIsExpanded(true);
+          setSelectedDate(null);
+        });
+    };
 
     const formattedEvents = useMemo(() => {
       return events.reduce((acc, event) => {
@@ -66,9 +82,9 @@ const Calendar = ({ events }) => {
         return acc;
       }, {});
     }, [events]);
-    console.log(formattedEvents);
-    return (
-      <View style={{ flex: 1, padding: 10 }}>
+    
+  return (
+      <View style={{ flex: 1 }}>
         <View style={styles.agendaHeader}>
           <TouchableOpacity onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}>
             <Text style={styles.navText}>{'<'}</Text>
@@ -87,7 +103,8 @@ const Calendar = ({ events }) => {
             );
           })}
         </View>
-        <FlatList
+
+          <FlatList
             data={isExpanded ? generateMonthDays(currentMonth) : generateWeekDays(new Date(selectedDate))}
             keyExtractor={(item, index) => item ? item.toString() : index.toString()}
             numColumns={7}
@@ -98,11 +115,11 @@ const Calendar = ({ events }) => {
               const formattedDate = format(item, 'yyyy-MM-dd');
               const isSelected = selectedDate === formattedDate;
               const isToday = formattedDate === currentDate;
-        
+          
               return (
                 <TouchableOpacity
-                style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator]}
-                onPress={() => handleDayPress(item)}
+                  style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator]}
+                  onPress={() => handleDayPress(item)}
                 >
                   <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
                     {format(item, 'd')}
@@ -113,39 +130,45 @@ const Calendar = ({ events }) => {
                 </TouchableOpacity>
               );
             }}
-      />
-      {!isExpanded && selectedDate && (
-        <View style={styles.eventListContainer}>
-          {formattedEvents[selectedDate] ? (
-            <FlatList
-              data={formattedEvents[selectedDate]}
-              keyExtractor={(event) => event._id.toString()}
-              renderItem={({ item: event }) => {
-                const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
-                return (
-                    <View style={[styles.eventCard, { backgroundColor }]}>
+          />
+
+        <Animated.View style={{ height: eventListHeight, overflow: 'hiddin' }}>
+          {!isExpanded && selectedDate && (
+            <View style={styles.eventListContainer}>
+              {formattedEvents[selectedDate] ? (
+                <FlatList
+                  data={formattedEvents[selectedDate]}
+                  contentContainerStyle={styles.cardsContainer}
+                  keyExtractor={(event) => event._id.toString()}
+                  renderItem={({ item: event }) => {
+                    const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
+                    return (
+                      <View style={[styles.eventCard, { backgroundColor }]}>
                         <View>
-                            <View style={styles.description}>
-                                <Text style={styles.eventTitle}>{event.title}</Text>
-                                <Text>{event.location}</Text>
-                            </View>
-                            <View style={styles.info}> 
-                                <Text style={styles.infoText}>{event.time}</Text>
-                            </View>
+                          <View style={styles.description}>
+                            <Text style={styles.eventTitle}>{event.title}</Text>
+                            <Text>{event.location}</Text>
+                          </View>
+                          <View style={styles.info}> 
+                            <Text style={styles.infoText}>{event.time}</Text>
+                          </View>
                         </View>
-                    </View>
-                );
-              }}
-            />
-          ) : (
-            <Text styles={styles.noEventsText}>Nothing today</Text>
+                      </View>
+                    );
+                  }}
+                />
+                ) : (
+                  <View style={styles.emptyPlaceHolder}>
+                    <Text styles={styles.noEventsText}>Nothing today</Text>
+                  </View>
+              )}
+              <TouchableOpacity style={styles.closeButton} onPress={handleReset}>
+                <Text>Close</Text>
+              </TouchableOpacity>
+            </View>
           )}
-          <TouchableOpacity onPress={handleReset} style={styles.resetButton}>
-            <Text>Close</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+        </Animated.View>
+      </View>
   );
 };
 
@@ -158,13 +181,14 @@ const styles = StyleSheet.create({
   agendaHeader: {
     flexDirection: 'row', 
     justifyContent: 'space-between',
+    marginTop: 5,
     paddingHorizontal: 20, 
-    paddingVertical: 10,
+    paddingBottom: 25,
     alignItems: 'center',
   },
   navText: {
     flex: 1,
-    paddingHorizontal: 10, 
+    paddingHorizontal: 20, 
     alignItems: 'center',
   },
   dayHeader: {
@@ -186,7 +210,7 @@ const styles = StyleSheet.create({
   dayCell: {
     flex: 1,
     margin: 10,
-    height: 25,
+    height: 30,
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -201,10 +225,15 @@ const styles = StyleSheet.create({
   },
   todayIndicator: {
     backgroundColor: 'red',
-    borderRadius: 35,
+    borderRadius: 40,
     width: 30,
     height: 30,
+    alignItems: 'center',
     justifyContent: 'center',
+  },
+  cardsContainer: {
+    width: 350,
+    justifyContent: 'flex-end',
   },
   eventCard: {
     backgroundColor: 'white',
@@ -235,7 +264,8 @@ const styles = StyleSheet.create({
   },
   selectedDay: {
     backgroundColor: 'black',
-    borderRadius: 35,
+    flex: 1,
+    borderRadius: 40,
     width: 30,
     height: 30,
     justifyContent: 'center',
@@ -246,18 +276,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   eventListContainer: {
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    height: screenHeight,
+    backgroundColor: 'grey',
+    flex: 1,
+    alignItems: 'flex-end',
   },
-  noEventsText: {
-    textAlign: 'center',
-    fontStyle: 'italic',
-    color: 'gray',
+  emptyPlaceHolder: {
+    paddingTop: 15,
+    width: screenWidth,
+    flex: 1,
+    alignItems: 'center',
   },
   resetButton: {
     marginTop: 10,
     padding: 10,
-    alignItems: 'center'
+    bottom: 0,
   }
 });
 
