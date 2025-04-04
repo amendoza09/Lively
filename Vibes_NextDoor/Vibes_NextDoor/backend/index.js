@@ -3,6 +3,7 @@ const { MongoClient } = require("mongodb");
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 require("dotenv").config({ path: "./config.env" });
 
@@ -12,7 +13,7 @@ const HOST = process.env.HOST;
 const Db = process.env.MONGO_URI;
 const client = new MongoClient(Db);
 
-mongoose.connect(Db, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(Db)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.log('Error connecting to MongoDB:', err));
 
@@ -20,6 +21,7 @@ mongoose.connect(Db, { useNewUrlParser: true, useUnifiedTopology: true })
 const PendingAccount = require('./schemas/pendingAccount');
 const ApprovedAccount = require('./schemas/approvedAccount');
 const Event = require('./schemas/eventSchema');
+const createUser = require('./schemas/usersSchema');
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -28,6 +30,39 @@ app.use(cors());
 function getCollectionName(city) {
     return `${city.toLowerCase()}`;
 }
+
+app.post('/login', async(req, res) => {
+    const { username, password } = req.body;
+
+    try{
+        await client.connect();
+
+        const db = client.db("admin-login");
+        const User = db.collection('credentials');
+        const user = await User.findOne({ username });
+
+        if(!user) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        } else if(user) {
+            console.log("user found")
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if(!isMatch) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign({ username: user.username,  userId: user._id  }, process.env.JWT_SECRET, {
+            expiresIn: '1h',
+        });
+
+        res.json({ message: 'Login successful', token });
+    } catch(e) {
+        console.error(e);
+    }
+    
+});
 
 // get all cities in database
 app.get('/event-data/City', async (req, res) => {
