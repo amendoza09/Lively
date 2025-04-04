@@ -8,7 +8,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import * as FileSystem from 'expo-file-system';
 
-const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
+const API_BASE_URL = process.env.HOST || 'http://172.20.10.3:5500';
 
 const SubmitEventScreen = ({ route  }) => {
   const { onSubmit } = route.params || {};

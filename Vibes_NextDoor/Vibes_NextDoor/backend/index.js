@@ -50,7 +50,7 @@ app.get("/event-data/:City", async (req, res) => {
     const { City } = req.params
 
     if(!City) {
-        return res.status(400).json({ message: "City paramter is required"});
+        return res.status(400).json({ message: "City parameter is required"});
     }
     const collectionName = getCollectionName(City);
 
@@ -66,13 +66,12 @@ app.get("/event-data/:City", async (req, res) => {
     } catch (e) {
         console.error(e)
         res.status(500).json({ message: "Failed to fetch events" })
-    } finally {
-        await client.close()
-    }
+    } 
 })
 
-// create an event
-app.post('/event-data/:City', async (req, res) => {
+// create an event 
+/*
+app.post('/pending-events/:City', async (req, res) => {
     const { City } = req.params;
     const { title, location, address, date, time, type, description, imgUrl, featured } = req.body;
     const collectionName = getCollectionName(City);
@@ -81,15 +80,15 @@ app.post('/event-data/:City', async (req, res) => {
         await client.connect();
         console.log("Connection Successful");
         
-        const db = mongoose.connection.useDb("City");
+        const db = mongoose.connection.useDb("pending-events");
         const newEvent = new Event({
-            title, location, address, date, time, type, description, imgUrl, featured
+            title, location, address, date, time, type, description, imgUrl, featured, status
         });
         
         await db.collection(collectionName).insertOne(newEvent);
 
         res.status(201).json({ message: 'Event created successfully', event: newEvent });
-        console.log("Received Image Data:", imgUrl);
+
         console.log("Event created successfully");
     } catch (e) {
         console.error(e);
@@ -98,7 +97,52 @@ app.post('/event-data/:City', async (req, res) => {
         await client.close();
     }
 })
+*/
 
+app.get("/pending-events", async (req, res) => {
+    try {
+        await client.connect();
+        console.log("fetching all pending events...");
+
+        const db = client.db("pending-events");
+        const cityNames = ["athens", "atlanta"];
+        let allPendingEvents = {};
+
+        for(const city of cityNames) {
+            const cityCollection = db.collection(city);
+            const events = await cityCollection.find({}).toArray();
+
+            allPendingEvents[city] = events;
+        }
+        res.json(allPendingEvents);
+        
+    } catch(e) {
+        console.error("error fetching pending events: ", e);
+    } 
+});
+
+
+app.get("/approved-events", async (req, res) => {
+    try {
+        await client.connect();
+        console.log("fetching all approved events...");
+
+        const db = client.db("approved-events");
+        const cityNames = ["athens", "atlanta"];
+        let allPendingEvents = {};
+
+        for(const city of cityNames) {
+            const cityCollection = db.collection(city);
+            const events = await cityCollection.find({}).toArray();
+
+            allPendingEvents[city] = events;
+        }
+        res.json(allPendingEvents);
+        
+    } catch(e) {
+        console.error("error fetching pending events: ", e);
+    } 
+});
 
 // register new account
 app.post('/event-data/pending-accounts', async (req, res) => {
@@ -132,6 +176,8 @@ app.post('/event-data/pending-accounts', async (req, res) => {
 
 // get all pending account
 app.get('/event-data/pending-accounts', async (req, res) => {
+    const collectionName = getCollectionName(Creator_Account);
+
     try {
         const pendingAccounts = await PendingAccount.find();
         res.status(200).json(pendingAccounts);
