@@ -62,11 +62,11 @@ const Calendar = ({ events }) => {
         setIsExpanded(false);
 
         Animated.timing(eventListHeight, {
-            toValue: screenHeight-360,
+            toValue: screenHeight,
             duration: 300,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: false,
-        }),
+        }).start();
         Animated.timing(calendarOpacity, {
           toValue: 0,
           duration: 300,
@@ -81,7 +81,7 @@ const Calendar = ({ events }) => {
           duration: 300,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
-        }),
+        }).start();
         Animated.timing(calendarOpacity, {
           toValue: 1,
           duration: 300,
@@ -109,9 +109,7 @@ const Calendar = ({ events }) => {
       <Animated.View style={[
         styles.eventListContainer, 
         {
-          height: eventListHeight,
-          left: 0,
-          zIndex: 999,
+          height: eventListHeight
         }
       ]}>
           {!isExpanded && selectedDate && (
@@ -218,8 +216,7 @@ const Calendar = ({ events }) => {
                   const isToday = formattedDate === currentDate;
               
                   return (
-                    <View style={{ flex: 1, flexDirection: 'column', display: "flex"}}>
-                      <View>
+                    <View style={styles.weekCell}>
                         <TouchableOpacity
                           style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator,]}
                           onPress={() => handleDayPress(item)}
@@ -230,8 +227,6 @@ const Calendar = ({ events }) => {
                           </Text>
                           {formattedEvents[formattedDate] && (<View style={styles.eventIndicator} />)}
                         </TouchableOpacity>
-
-                      </View>
                     </View>
                   );
                 }}
@@ -284,8 +279,16 @@ const styles = StyleSheet.create({
   dayCell: {
     flex: 1,
     margin: 10,
-    width: 30,
-    height: 30,
+    width: 35,
+    height: 35,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  weekCell: {
+    flex: 1,
+    width: 50,
+    height: 50,
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center'
@@ -303,12 +306,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'red',
     borderRadius: 40,
-    width: 30,
-    height: 30,
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   cardsContainer: {
     width: 350,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
   eventCard: {
     backgroundColor: 'white',
@@ -341,18 +346,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     flex: 1,
     borderRadius: 40,
-    width: 30,
-    height: 30,
+    width: 35,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   selectedText: {
     color: 'white',
     fontWeight: 'bold',
   },
   eventListContainer: {
-    height: screenHeight,
     backgroundColor: 'grey',
     flex: 1,
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   emptyPlaceHolder: {
     paddingTop: 15,

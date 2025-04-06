@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import EventPage from './components/EventPage';
 import AccountPage from './components/AccountPage';
 
-function AdminPanel() {
+function AdminPanel({ onLogout }) {
   const [activeTab, setActiveTab] = useState(null);
 
   return (
@@ -24,6 +24,11 @@ function AdminPanel() {
             onClick={() => setActiveTab("accounts")}
           >
             Accounts
+          </li>
+          <li className={'p-4 cursor-pointer bg-red-600' }
+            onClick={onLogout}
+          >
+            Sign out
           </li>
         </ul>
       </div>

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
+  city:{ type: String, required: true},
   title: { type: String, required: true },
   location: { type: String, required: true },
   address: { type: String },
@@ -11,6 +12,8 @@ const eventSchema = new mongoose.Schema({
   imageUrl: { type: String }, // Store image URL if using cloud storage
   feature: { type: Boolean, default: false },
   status: { type: String, default: "pending" },
+  email: {type: String},
+  phone: {type: String}
 });
 
 module.exports = mongoose.model("Event", eventSchema);

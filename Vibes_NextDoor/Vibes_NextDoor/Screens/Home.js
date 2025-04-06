@@ -164,12 +164,12 @@ const HomeScreen = ({ navigation }) => {
           transform: [{ translateX: translateX }],
         }}>
           <View style={styles.page}>
-            <ScrollView style={styles.container} 
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-            showsVerticalScrollIndicator={false}
+            <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1}]} 
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+              showsVerticalScrollIndicator={false}
             >
             {error && <Text style={styles.errorText}>{error}</Text>}
-            {events.length === 0 && !error ? (
+            {upcomingEvents.length === 0 && !error ? (
               <Text style={styles.emptyText}></Text>
             ) : ( 
                 <View>
@@ -179,7 +179,7 @@ const HomeScreen = ({ navigation }) => {
             )}
               <View style={styles.HomeContainer}>
                 {error && <Text style={styles.errorText}>{error}</Text>}
-                {events.length === 0 && !error ? (
+                {upcomingEvents.length === 0 && !error ? (
                   <View style={styles.emptyContainer}>
                     <Text style={styles.emptyText}>Nothing in {selectedLocation} yet...</Text>
                   </View>
@@ -249,14 +249,15 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     screen:{
-      
     },
     container: {
-      height: screenHeight,
+      paddingBottom: 385,
     },
     HomeContainer: {
-      height: screenHeight,
-      marginBottom: -50,
+      flex: 1,
+      flexGrow: 1,
+      flexDirection: 'column',
+      height: 'auto'
     },
     emptyContainer: {
         width: screenWidth,
@@ -327,7 +328,6 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
     },
     viewContainer: {
-      display: "flex",
       alignItems: "center",
       width: "100%",
       backgroundColor: "rgba(0, 0 ,0 ,0)",
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
       width: 350,
       height: 35,
       borderRadius: 20,
-      marginTop: 8,
+      marginTop: 6,
     },
     containerToggle:{
       height: 50,
@@ -363,6 +363,9 @@ const styles = StyleSheet.create({
     },
     page: {
       width: screenWidth,
+      flex: 1,
+      flexGrow: 1,
+      height: 'auto',
     },
     monthPage: {
       width: screenWidth,

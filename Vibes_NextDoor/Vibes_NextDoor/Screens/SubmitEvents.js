@@ -28,6 +28,8 @@ const SubmitEventScreen = ({ route  }) => {
   const [showEventPicker, setShowEventPicker] = useState(false);
   const [showCityPicker, setShowCityPicker] = useState(false);
   const [description, setDescription] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const scrollViewRef = useRef(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -47,11 +49,10 @@ const SubmitEventScreen = ({ route  }) => {
       quality: 1,
     })
 
-    if (!selectImage.canceled) {
-      setImage(selectImage.assets[0].uri);
-      setImageBase64(selectImage.assets[0].base64);
-      setImageType(selectImage.assets[0].uri.split('.').pop().toLowerCase());
-    }
+    setImage(selectImage.assets[0].uri);
+    setImageBase64(selectImage.assets[0].base64);
+    setImageType(selectImage.assets[0].uri.split('.').pop().toLowerCase());
+    
   };
 
   useEffect(() => {
@@ -84,8 +85,9 @@ const SubmitEventScreen = ({ route  }) => {
         alert('Please fill in all required fields.');
         return;
     }
-
+    const cityName = selectedCity.split(',')[0].toLowerCase();
     const newEvent = {
+      city: cityName,
       title,
       location,
       address: address || '',
@@ -94,10 +96,12 @@ const SubmitEventScreen = ({ route  }) => {
       type: eventType,
       description,
       featured: false,
-      imgUrl: `data:image/${imageType};base64,${imageBase64}`
+      imgUrl: `data:image/${imageType};base64,${imageBase64}`,
+      email,
+      phone,
     };
 
-    const cityName = selectedCity.split(',')[0].toLowerCase();
+    
     try {
       const response = await fetch(`${API_BASE_URL}/pending-events/${cityName}`, {
         method: "POST",
@@ -111,6 +115,7 @@ const SubmitEventScreen = ({ route  }) => {
         console.log("Event saved!");
         alert("Event successfully saved!");
         setTitle('');
+        setSelectedCity('');
         setLocation('');
         setAddress('');
         setDate(new Date());
@@ -119,6 +124,8 @@ const SubmitEventScreen = ({ route  }) => {
         setDescription('');
         setImage('');
         setImageBase64('');
+        setEmail(''),
+        setPhone('')
       } else {
         console.error("Failed to save event");
         alert("Failed to save event. Please try again.")
@@ -234,6 +241,26 @@ const SubmitEventScreen = ({ route  }) => {
             placeholder="Enter description (optional)"
             value={description}
             onChangeText={setDescription}
+            multiline
+            onFocus = {(event) => scrollToInput(event.target)}
+          />
+
+          <Text style={styles.eventLabel}>Email</Text>
+          <TextInput 
+            style={[ styles.input ]}
+            placeholder="Enter email (in case we need to contact you)"
+            value={email}
+            onChangeText={setEmail}
+            multiline
+            onFocus = {(event) => scrollToInput(event.target)}
+          />
+
+          <Text style={styles.eventLabel}>Phone number</Text>
+          <TextInput 
+            style={[ styles.input ]}
+            placeholder="Enter phone number (optional)"
+            value={phone}
+            onChangeText={setPhone}
             multiline
             onFocus = {(event) => scrollToInput(event.target)}
           />

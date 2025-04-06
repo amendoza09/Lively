@@ -10,12 +10,16 @@ const App = () => {
     setIsLoggedIn(true);
   };
 
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+  };
+
   return (
     <div>
       {!isLoggedIn ? (
-        <AdminLogin onLogInSuccess={handleLogin()} />
+        <AdminLogin onLoginSuccess={handleLogin} />
       ) : (
-        <AdminPanel />
+        <AdminPanel onLogout={handleLogout} />
       )}
     </div>
   );

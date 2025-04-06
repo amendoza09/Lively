@@ -1,7 +1,7 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
 const bcrypt = require('bcrypt');
-const mongoose = require('mongoose');
+const { mongoose, Types } = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
@@ -106,7 +106,7 @@ app.get("/event-data/:City", async (req, res) => {
 // create an event 
 app.post('/pending-events/:City', async (req, res) => {
     const { City } = req.params;
-    const { title, location, address, date, time, type, description, imgUrl, featured, status } = req.body;
+    const { city, title, location, address, date, time, type, description, imgUrl, featured, status, email, phone } = req.body;
     const collectionName = getCollectionName(City);
 
     try {
@@ -115,7 +115,7 @@ app.post('/pending-events/:City', async (req, res) => {
         
         const db = mongoose.connection.useDb("pending-events");
         const newEvent = new Event({
-            title, location, address, date, time, type, description, imgUrl, featured, status
+            city, title, location, address, date, time, type, description, imgUrl, featured, status, email, phone
         });
         
         await db.collection(collectionName).insertOne(newEvent);
@@ -131,7 +131,74 @@ app.post('/pending-events/:City', async (req, res) => {
     }
 })
 
+// post approved event in correct database
+app.post('/event-data/:City', async (req, res) => {
+    const { City } = req.params;
+    const { event  } = req.body;
 
+    function sanitize(event) {
+        return {
+            ...event,
+            _id: new Types.ObjectId(event._id),
+            date: new Date(event.date),
+        }
+    }
+   
+    try {
+        await client.connect();
+        
+        const collectionName = getCollectionName(City);
+
+        const db = mongoose.connection.useDb("City");
+        await db.collection(collectionName).insertOne(sanitize(event));
+        
+        const fromDb = mongoose.connection.useDb("pending-events");
+        await fromDb.collection(collectionName).deleteOne({ _id: new Types.ObjectId(event._id) });
+
+        res.status(201).json({ message: 'Event approved and moved successfully', event });
+
+        console.log("Event approved and moved successfully.");
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Server error', e });
+    }  
+})
+
+// post rejected event in correct database
+app.post('/rejected-events/:City', async (req, res) => {
+    const { City } = req.params;
+    const { event  } = req.body;
+
+    function sanitize(event) {
+        return {
+            ...event,
+            _id: new Types.ObjectId(event._id),
+            date: new Date(event.date),
+        }
+    };
+   
+    try {
+        await client.connect();
+        
+        const collectionName = getCollectionName(City);
+
+        const db = mongoose.connection.useDb("rejected-events");
+        await db.collection(collectionName).insertOne(sanitize(event));
+        
+        const fromDb = mongoose.connection.useDb("pending-events");
+        await fromDb.collection(collectionName).deleteOne({ _id: new Types.ObjectId(event._id) });
+
+        res.status(201).json({ message: 'Event rejected and moved successfully', event });
+
+        console.log("Event rejected and moved successfully.");
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Server error', e });
+    }  
+})
+
+
+// get all pending events
 app.get("/pending-events", async (req, res) => {
     try {
         await client.connect();
@@ -154,13 +221,13 @@ app.get("/pending-events", async (req, res) => {
     } 
 });
 
-
+// get all approved events
 app.get("/approved-events", async (req, res) => {
     try {
         await client.connect();
         console.log("fetching all approved events...");
 
-        const db = client.db("approved-events");
+        const db = client.db("City");
         const cityNames = ["athens", "atlanta"];
         let allPendingEvents = {};
 
@@ -174,6 +241,29 @@ app.get("/approved-events", async (req, res) => {
         
     } catch(e) {
         console.error("error fetching pending events: ", e);
+    } 
+});
+
+// get all rejected events
+app.get("/rejected-events", async (req, res) => {
+    try {
+        await client.connect();
+        console.log("fetching all rejected events...");
+
+        const db = client.db("rejected-events");
+        const cityNames = ["athens", "atlanta"];
+        let allRejectedEvents = {};
+
+        for(const city of cityNames) {
+            const cityCollection = db.collection(city);
+            const events = await cityCollection.find({}).toArray();
+
+            allRejectedEvents[city] = events;
+        }
+        res.json(allRejectedEvents);
+        
+    } catch(e) {
+        console.error("error fetching rejected events: ", e);
     } 
 });
 

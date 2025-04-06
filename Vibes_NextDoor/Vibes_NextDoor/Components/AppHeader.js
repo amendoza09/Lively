@@ -13,7 +13,7 @@ const { width: screenWidth } = Dimensions.get('window');
 
 const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [slideAnim, setSlideAnim] = useState(new Animated.Value(110));
+    const [slideAnim] = useState(new Animated.Value(110));
     const [contentAnim] = useState(new Animated.Value(0));
     const navigation = useNavigation();
 
@@ -57,17 +57,21 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
             duration: 300,
             easing: Easing.out(Easing.ease), 
             useNativeDriver: false,
-        }).start();
+        }).start(() => {
+            
+        });
         Animated.timing(contentAnim, {
             toValue:  165,
             duration: 300,
             easing: Easing.out(Easing.ease), 
             useNativeDriver: false,
         }).start();
+        
     };
     
 
     const closeMenu = () => {
+        
         Animated.timing(slideAnim, {
             toValue: 110, // Slide back down below the header
             duration: 300,
@@ -82,6 +86,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
             easing: Easing.out(Easing.ease), 
             useNativeDriver: false,
         }).start();
+        
     };
 
     const handleSearchPress = () => {
@@ -117,9 +122,9 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
               </View>
               {modalVisible && (
                       <Animated.View
-                      style={{ height: contentAnim }}
+                      style={[styles.modalContainer, { height: contentAnim, opacity: contentAnim}]}
                       >
-                        <View style={styles.modalContainer}>
+                        <View>
                                 <Text style={styles.modalTitle}>Select a City</Text>
                                 <FlatList
                                     data={cities}
@@ -160,11 +165,12 @@ const styles = StyleSheet.create({
         width: screenWidth,
         borderColor: '#ddd',
         borderWidth: 1,
-        paddingBottom: -15
+        paddingBottom: -25
     },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'center',
+        paddingBottom: 10,
     },
     title: {
         fontSize: 24,
@@ -185,11 +191,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalContainer: {
-        zIndex: 0,
+        zIndex: 1,
         width: screenWidth,
         backgroundColor: 'white',
-        height: 166,
-        paddingTop: 20,
         alignItems: 'center',
     },
     modalTitle: {
@@ -206,6 +210,9 @@ const styles = StyleSheet.create({
     },
     cityText: {
         fontSize: 16,
+    },
+    modalOverlay: {
+        heght: 300,
     },
 
 });
