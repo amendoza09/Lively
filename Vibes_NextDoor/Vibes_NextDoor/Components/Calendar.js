@@ -205,7 +205,7 @@ const Calendar = ({ events }) => {
               }}
             />
           ) : (
-            <View style={{ height: screenHeight }}>
+            <View >
               <FlatList
                 data={ generateWeekDays(new Date(selectedDate)) }
                 keyExtractor={(item, index) => item ? item.toString() : index.toString()}
@@ -218,27 +218,27 @@ const Calendar = ({ events }) => {
                   const isToday = formattedDate === currentDate;
               
                   return (
-                    <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'center', display: 'flex'}}>
-                      <View style={{ height: 50}}>
+                    <View style={{ flex: 1, flexDirection: 'column', display: "flex"}}>
+                      <View>
                         <TouchableOpacity
                           style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator,]}
                           onPress={() => handleDayPress(item)}
-                          
+
                         >
                           <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
                             {format(item, 'd')}
                           </Text>
                           {formattedEvents[formattedDate] && (<View style={styles.eventIndicator} />)}
                         </TouchableOpacity>
-                        
-                      </View>
-                      <View style={{ height: screenHeight, width: screenWidth, display: 'flex', justifyContent: 'center'}}>
-                        {isSelected && renderEventList()}
+
                       </View>
                     </View>
                   );
                 }}
               />
+              <View style={{ height: screenHeight-360}}>
+                      {renderEventList()}
+              </View>
             </View>
           )}
         </Animated.View>
@@ -284,7 +284,9 @@ const styles = StyleSheet.create({
   dayCell: {
     flex: 1,
     margin: 10,
+    width: 30,
     height: 30,
+    borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -298,12 +300,11 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   todayIndicator: {
+    flex: 1,
     backgroundColor: 'red',
     borderRadius: 40,
     width: 30,
     height: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   cardsContainer: {
     width: 350,
@@ -342,8 +343,6 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     width: 30,
     height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   selectedText: {
     color: 'white',

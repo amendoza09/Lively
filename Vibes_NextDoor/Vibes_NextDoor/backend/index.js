@@ -87,13 +87,12 @@ app.get("/event-data/:City", async (req, res) => {
     if(!City) {
         return res.status(400).json({ message: "City parameter is required"});
     }
-    const collectionName = getCollectionName(City);
 
     try {
         await client.connect();
 
         console.log("Connection Successful");
-
+        const collectionName = getCollectionName(City);
         const collection = client.db("City").collection(collectionName);
         const events = await collection.find({}).toArray();
         
@@ -105,10 +104,9 @@ app.get("/event-data/:City", async (req, res) => {
 })
 
 // create an event 
-/*
 app.post('/pending-events/:City', async (req, res) => {
     const { City } = req.params;
-    const { title, location, address, date, time, type, description, imgUrl, featured } = req.body;
+    const { title, location, address, date, time, type, description, imgUrl, featured, status } = req.body;
     const collectionName = getCollectionName(City);
 
     try {
@@ -132,7 +130,7 @@ app.post('/pending-events/:City', async (req, res) => {
         await client.close();
     }
 })
-*/
+
 
 app.get("/pending-events", async (req, res) => {
     try {
@@ -180,7 +178,7 @@ app.get("/approved-events", async (req, res) => {
 });
 
 // register new account
-app.post('/event-data/pending-accounts', async (req, res) => {
+app.post('/pending-accounts', async (req, res) => {
     const { organizationName, accountOwner, email, password } = req.body;
 
     if(!organizationName || !accountOwner || !email || !password) {
@@ -210,19 +208,37 @@ app.post('/event-data/pending-accounts', async (req, res) => {
 })
 
 // get all pending account
-app.get('/event-data/pending-accounts', async (req, res) => {
-    const collectionName = getCollectionName(Creator_Account);
+app.get('/pending-accounts', async (req, res) => {
 
     try {
-        const pendingAccounts = await PendingAccount.find();
-        res.status(200).json(pendingAccounts);
+        console.log("fecthing pending accounts");
+        
+        const collectionName = getCollectionName("pending_accounts");
+        const collection = client.db("Creator_Account").collection(collectionName);
+        const pendingAccounts = await collection.find({}).toArray();
+        
+        res.json(pendingAccounts);
     } catch (error) {
-        consol.error('error fetching pending accounts: ', error);
+        console.error('error fetching pending accounts: ', error);
         res.status(500).json({ error: 'Internal server error.' });
     }
 });
 
-app.post('/event-data/approved_accounts', async(req, res) => {
+app.get('/approved-accounts', async(req, res) => {
+    try {
+        console.log("fecthing approved accounts");
+        const collectionName = getCollectionName("approved_accounts");
+        const collection = client.db("Creator_Account").collection(collectionName);
+        const approvedAccounts = await collection.find({}).toArray();
+        
+        res.json(approvedAccounts);
+    } catch (error) {
+        console.error('error fetching approved accounts: ', error);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+});
+
+app.post('/approved-accounts', async(req, res) => {
     const { accountId } = req.body;
 
     try {

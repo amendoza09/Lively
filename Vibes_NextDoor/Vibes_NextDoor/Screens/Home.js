@@ -8,7 +8,7 @@ import Calendar from '../Components/Calendar';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const API_BASE_URL = process.env.HOST || 'http://192.168.254.6:5500';
+const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
 const PORT = process.env.PORT;
 
 const HomeScreen = ({ navigation }) => {

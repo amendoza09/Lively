@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
     View, Text, Pressable, StyleSheet,
     FlatList, TouchableOpacity,
-    Animated, Dimensions
+    Animated, Dimensions, Easing
 } from 'react-native';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,7 +13,7 @@ const { width: screenWidth } = Dimensions.get('window');
 
 const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [slideAnim] = useState(new Animated.Value(-300));
+    const [slideAnim, setSlideAnim] = useState(new Animated.Value(110));
     const [contentAnim] = useState(new Animated.Value(0));
     const navigation = useNavigation();
 
@@ -53,30 +53,34 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     const openMenu = () => {
         setModalVisible(true);
         Animated.timing(slideAnim, {
-            toValue: 0, // Slide up to the top of the header
+            toValue: 275, // Slide up to the top of the header
             duration: 300,
-            useNativeDriver: true,
+            easing: Easing.out(Easing.ease), 
+            useNativeDriver: false,
         }).start();
         Animated.timing(contentAnim, {
-            toValie: 100,
+            toValue:  165,
             duration: 300,
-            useNativeDriver: true,
+            easing: Easing.out(Easing.ease), 
+            useNativeDriver: false,
         }).start();
     };
     
 
     const closeMenu = () => {
         Animated.timing(slideAnim, {
-            toValue: -300, // Slide back down below the header
+            toValue: 110, // Slide back down below the header
             duration: 300,
-            useNativeDriver: true,
+            easing: Easing.out(Easing.ease), 
+            useNativeDriver: false,
         }).start(() => {
             setModalVisible(false);
         });
         Animated.timing(contentAnim, {
             toValue: 0,
             duration: 300,
-            useNativeDriver: true,
+            easing: Easing.out(Easing.ease), 
+            useNativeDriver: false,
         }).start();
     };
 
@@ -90,29 +94,32 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     }, []);
 
     return (
+      <Animated.View style={[
+        styles.modalOverlay, 
+        { height: slideAnim },
+      ]}>
         <View style={styles.container}>
-            <SafeAreaView style={styles.safeArea}>
-                <View style={styles.header}>
-                    <View style={styles.headerRow}>
-                        <Text style={styles.title}>Discover </Text>
-                        <Pressable 
-                            style={styles.citySelectButton}
-                            onPress={modalVisible ? closeMenu : openMenu}
-                        >
-                            <Text style={styles.cityTitle}>{selectedLocation || 'Select a City'}</Text>
-                            <ArrowIcon 
-                                name={modalVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"}
-                                size={24} 
-                                style={styles.downArrow} 
-                            />
-                        </Pressable>
-                    </View>
-                    {modalVisible && (
-                        <Animated.View style={[
-                            styles.modalOverlay, 
-                            { transform: [{ translateY: slideAnim }] },
-                        ]}>
-                            <View style={styles.modalContainer}>
+          <SafeAreaView style={styles.safeArea}>
+            <View style={styles.header}>
+              <View style={styles.headerRow}>
+                <Text style={styles.title}>Discover </Text>
+                  <Pressable 
+                    style={styles.citySelectButton}
+                    onPress={modalVisible ? closeMenu : openMenu}
+                  >
+                    <Text style={styles.cityTitle}>{selectedLocation || 'Select a City'}</Text>
+                      <ArrowIcon 
+                        name={modalVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                        size={24} 
+                        style={styles.downArrow} 
+                      />
+                  </Pressable>
+              </View>
+              {modalVisible && (
+                      <Animated.View
+                      style={{ height: contentAnim }}
+                      >
+                        <View style={styles.modalContainer}>
                                 <Text style={styles.modalTitle}>Select a City</Text>
                                 <FlatList
                                     data={cities}
@@ -132,17 +139,12 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
                                 </Pressable>
                                 */}
                             </View>
-                        </Animated.View>
+                      </Animated.View>
                     )}
-                    <Animated.View
-                    style={[
-                        styles.content, 
-                        { transform: [{ translateY: contentAnim }] }, // Animate content position
-                    ]}
-                ></Animated.View>
-                </View>
-            </SafeAreaView>
+            </View>
+          </SafeAreaView>
         </View>
+      </Animated.View>
     );
 };
 
@@ -156,14 +158,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: 'white',
         width: screenWidth,
-        paddingBottom: -15,
         borderColor: '#ddd',
         borderWidth: 1,
+        paddingBottom: -15
     },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'center',
-        alignItems: 'center',
     },
     title: {
         fontSize: 24,
@@ -187,8 +188,8 @@ const styles = StyleSheet.create({
         zIndex: 0,
         width: screenWidth,
         backgroundColor: 'white',
-        height: 167,
-        paddingTop: 15,
+        height: 166,
+        paddingTop: 20,
         alignItems: 'center',
     },
     modalTitle: {

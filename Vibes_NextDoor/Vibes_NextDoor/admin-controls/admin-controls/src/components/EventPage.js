@@ -8,19 +8,20 @@ const EventPage = () => {
     useEffect(() => {
       const fetchPendingEvents = async () => {
         try {
-          const response = await fetch("http://192.168.254.6:5500/pending-events");
+          const response = await fetch("http://192.168.1.17:5500/pending-events");
           const data = await response.json();
-          setEventsByCity(data); // Set pending events by city
+          setEventsByCity(data); 
         } catch (error) {
           console.error("Error fetching pending events:", error);
         }
+        
       };
 
       const fetchApprovedEvents = async () => {
         try {
-                const response = await fetch("http://192.168.254.6:5500/approved-events");
+                const response = await fetch("http://192.168.1.17:5500/approved-events");
                 const data = await response.json();
-                setApprovedByCity(data); // Set approved events by city
+                setApprovedByCity(data);
             } catch (error) {
                 console.error("Error fetching approved events:", error);
             }

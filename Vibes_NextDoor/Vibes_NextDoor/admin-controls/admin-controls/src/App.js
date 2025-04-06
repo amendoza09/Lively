@@ -13,7 +13,7 @@ const App = () => {
   return (
     <div>
       {!isLoggedIn ? (
-        <AdminLogin onLogInSuccess={handleLogin} />
+        <AdminLogin onLogInSuccess={handleLogin()} />
       ) : (
         <AdminPanel />
       )}

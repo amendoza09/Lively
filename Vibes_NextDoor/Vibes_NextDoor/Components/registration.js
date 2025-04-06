@@ -49,7 +49,7 @@ const Registration = () => {
             <Text style={styles.title}>Request an Account</Text>
             <TextInput
                 style={styles.input}
-                placeholder="Prganization Name"
+                placeholder="organization Name"
                 value={organizationName}
                 onChangeText={setOrganizationName}
             />
