@@ -3,12 +3,11 @@ import {
   View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Platform, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback
   } from 'react-native';
 import { useCity } from '../App';
+import { config } from './config.env';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import * as FileSystem from 'expo-file-system';
-
-const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
 
 const SubmitEventScreen = ({ route  }) => {
   const { onSubmit } = route.params || {};
@@ -103,7 +102,7 @@ const SubmitEventScreen = ({ route  }) => {
 
     
     try {
-      const response = await fetch(`${API_BASE_URL}/pending-events/${cityName}`, {
+      const response = await fetch(`${config.api.HOST}/pending-events/${cityName}`, {
         method: "POST",
         headers: { 
           "Content-type": "application/json",

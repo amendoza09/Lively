@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpcaity, StyleSheet, Alert } from "react-native";
+import { config } from '../Screens/config.env';
 
 const Registration = () => {
     const [organizationName, setOrganizationName] = useState('');
@@ -14,7 +15,7 @@ const Registration = () => {
         }
 
         try {
-            const response = await fetch('http://192.168.1.132:5500/event-data/', {
+            const response = await fetch(`${config.api.HOST}/event-data/`, {
                 method: "POST",
                 header: {
                     "Content-Type": "application/json",

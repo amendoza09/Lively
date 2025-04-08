@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl, TouchableOpacity, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import { config } from './config.env';
 import AppHeader from '../Components/AppHeader';
 import FeatureSection from '../Components/FeatureSection';
 import Calendar from '../Components/Calendar';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
-const API_BASE_URL = process.env.HOST || 'http://192.168.1.17:5500';
-const PORT = process.env.PORT;
 
 const HomeScreen = ({ navigation }) => {
   const [events,setEvents] = useState([]); 
@@ -38,7 +35,7 @@ const HomeScreen = ({ navigation }) => {
     setRefreshing(true);
     try{
       const cityName = selectedLocation.split(',')[0].toLowerCase();
-      const response = await fetch(`${API_BASE_URL}/event-data/${cityName}`);
+      const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
       if(!response.ok) {
         throw new Error('Failed to fetch events');
       }
@@ -104,7 +101,7 @@ const HomeScreen = ({ navigation }) => {
     const fetchEvents = async () => {
       try {
         const cityName = selectedLocation.split(',')[0].toLowerCase();
-        const response = await fetch(`${API_BASE_URL}/event-data/${cityName}`);
+        const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
         if(!response.ok) {
           throw new Error('Failed to fetch events');
         }

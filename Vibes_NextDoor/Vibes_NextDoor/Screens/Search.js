@@ -3,6 +3,7 @@ import { TouchableOpacity, View,
     Text, StyleSheet, 
     TextInput, FlatList 
 } from 'react-native';
+import { config } from './config.env';
 
 // search feature will come soon
 
@@ -40,7 +41,7 @@ const SearchScreen = ({ route, navigation }) => {
         const fetchCities = async () => {
             try { 
                 setLoading(true);
-                const response = await fetch(`${API_BASE_URL}/event-data/City`);
+                const response = await fetch(`${config.api.HOST}/event-data/City`);
                 if(!response.ok) {
                     throw new Error('failed to fetch cities');
                 }
