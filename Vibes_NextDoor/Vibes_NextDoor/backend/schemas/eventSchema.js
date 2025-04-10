@@ -9,11 +9,13 @@ const eventSchema = new mongoose.Schema({
   time: { type: String, required: true },  // Can also use Date if needed
   type: { type: String, required: true },
   description: { type: String},
-  imageUrl: { type: String }, // Store image URL if using cloud storage
+  imgUrl: { type: String },
   feature: { type: Boolean, default: false },
-  status: { type: String, default: "pending" },
-  email: {type: String},
-  phone: {type: String}
+  email: { type: String },
+  phone: { type: String },
+  restrictions: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  link: { type: String },
 });
 
 module.exports = mongoose.model("Event", eventSchema);

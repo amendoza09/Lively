@@ -2,12 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Platform, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback
   } from 'react-native';
-import { useCity } from '../App';
 import { config } from './config.env';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import * as FileSystem from 'expo-file-system';
 
 const SubmitEventScreen = ({ route  }) => {
   const { onSubmit } = route.params || {};
@@ -29,6 +27,8 @@ const SubmitEventScreen = ({ route  }) => {
   const [description, setDescription] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [restrictions, setRestrictions] = useState('');
+  const [externalLink, setExternalLink] = useState('');
   const scrollViewRef = useRef(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -36,7 +36,7 @@ const SubmitEventScreen = ({ route  }) => {
     'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Other'
   ];
   const availableCities = [
-    'Charlotte, NC', 'Atlanta, GA','Athens, GA',
+    'Athens, GA',
   ];
 
   const pickImage = async () => {
@@ -98,6 +98,8 @@ const SubmitEventScreen = ({ route  }) => {
       imgUrl: `data:image/${imageType};base64,${imageBase64}`,
       email,
       phone,
+      restrictions,
+      externalLink,
     };
 
     
@@ -125,6 +127,7 @@ const SubmitEventScreen = ({ route  }) => {
         setImageBase64('');
         setEmail(''),
         setPhone('')
+        setRestrictions('');
       } else {
         console.error("Failed to save event");
         alert("Failed to save event. Please try again.")
@@ -166,7 +169,7 @@ const SubmitEventScreen = ({ route  }) => {
                 if(selectedCity) setSelectedCity(selectedCity);
               }}
             >
-              <Picker.Item label="Select event type" value=" " />
+              <Picker.Item label="Select city" value=" " />
               {availableCities.map((type) => (
                 <Picker.Item key={type} label={type} value={type} />
               ))}
@@ -189,31 +192,36 @@ const SubmitEventScreen = ({ route  }) => {
             onChangeText={setAddress}
             onFocus = {(event) => scrollToInput(event.target)}
           />
-          <Text style={styles.label}>Date</Text>
-          <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
-            <DateTimePicker
-              value={date}
-              mode="date"
-              display="default"
-              onChange={(event, selectDate) =>{
-                setDatePicker(false);
-                if (selectDate) setDate(selectDate);
-              }}
-            />
-          </TouchableOpacity>
-
-          <Text style={styles.label}>Time</Text>
-          <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
-            <DateTimePicker 
-                value={time}
-                mode="time"
-                display="default"
-                onChange={(event, selectedTime) => {
-                  setShowTimePicker(false);
-                  if (selectedTime) setTime(selectedTime);
-                }}
-              />
-          </TouchableOpacity>
+          <View style={styles.timeContainer}>
+            <View>
+              <Text style={styles.label}>Date</Text>
+              <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectDate) =>{
+                    setDatePicker(false);
+                    if (selectDate) setDate(selectDate);
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
+            <View>
+              <Text style={styles.label}>Time</Text>
+              <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
+                <DateTimePicker 
+                    value={time}
+                    mode="time"
+                    display="default"
+                    onChange={(event, selectedTime) => {
+                      setShowTimePicker(false);
+                      if (selectedTime) setTime(selectedTime);
+                    }}
+                  />
+              </TouchableOpacity>
+            </View>
+          </View>
 
           <Text style={styles.eventLabel}>Event Type</Text>
           <TouchableOpacity onPress={() => setShowEventPicker(true)}>
@@ -264,6 +272,26 @@ const SubmitEventScreen = ({ route  }) => {
             onFocus = {(event) => scrollToInput(event.target)}
           />
 
+          <Text style={styles.eventLabel}>Restrictions</Text>
+          <TextInput 
+            style={[ styles.input ]}
+            placeholder="Age restrictions, attire, limited seating, etc."
+            value={restrictions}
+            onChangeText={setRestrictions}
+            multiline
+            onFocus = {(event) => scrollToInput(event.target)}
+          />
+
+          <Text style={styles.eventLabel}>External Link</Text>
+          <TextInput 
+            style={[ styles.input ]}
+            placeholder="Tickets, RSVP, etc.."
+            value={externalLink}
+            onChangeText={setExternalLink}
+            multiline
+            onFocus = {(event) => scrollToInput(event.target)}
+          />
+
           <Text style={styles.label}>Upload Image</Text>
           <TouchableOpacity style = {styles.imageUpload} onPress={pickImage}>
             <Text style={styles.uploadText}>Pick an Image</Text>
@@ -279,7 +307,6 @@ const SubmitEventScreen = ({ route  }) => {
               </TouchableOpacity>
             </View>
           )}
-
           <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
             <Text style={styles.submitText}>Submit Event</Text>
           </TouchableOpacity>
@@ -290,16 +317,16 @@ const SubmitEventScreen = ({ route  }) => {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-        backgroundColor: '#fff',
-        flexGrow: 1,
-        paddingBottom: 200,
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 5,
+  container: {
+    padding: 20,
+    backgroundColor: '#fff',
+    flexGrow: 1,
+    paddingBottom: 200,
+  },
+  label: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginBottom: 5,
     },
     input: {
         borderWidth: 1,
@@ -332,6 +359,11 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginTop: 10,
         alignSelf: 'center',
+    },
+    timeContainer: {
+      flexDirection: 'row',
+      gap: 25,
+      marginBottom: 15,
     },
     imageContainer: {
       alignItems: 'center',
@@ -386,7 +418,7 @@ const styles = StyleSheet.create({
 const pickerSelectStyles = {
   inputIOS: {
     fontSize: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: '#ddd',

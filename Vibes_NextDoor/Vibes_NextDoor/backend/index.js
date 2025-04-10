@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const { mongoose, Types } = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const emailjs = require('@emailjs/nodejs');
 
 require("dotenv").config({ path: "./config.env" });
 
@@ -23,8 +24,8 @@ const ApprovedAccount = require('./schemas/approvedAccount');
 const Event = require('./schemas/eventSchema');
 const createUser = require('./schemas/usersSchema');
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }));
 app.use(cors());
 
 function getCollectionName(city) {
@@ -106,7 +107,7 @@ app.get("/event-data/:City", async (req, res) => {
 // create an event 
 app.post('/pending-events/:City', async (req, res) => {
     const { City } = req.params;
-    const { city, title, location, address, date, time, type, description, imgUrl, featured, status, email, phone } = req.body;
+    const { city, title, location, address, date, time, type, description, imgUrl, feature, status, email, phone, restrictions, createdAt, link } = req.body;
     const collectionName = getCollectionName(City);
 
     try {
@@ -115,7 +116,7 @@ app.post('/pending-events/:City', async (req, res) => {
         
         const db = mongoose.connection.useDb("pending-events");
         const newEvent = new Event({
-            city, title, location, address, date, time, type, description, imgUrl, featured, status, email, phone
+            city, title, location, address, date, time, type, description, imgUrl, feature, status, email, phone, restrictions, createdAt, link
         });
         
         await db.collection(collectionName).insertOne(newEvent);
@@ -131,6 +132,21 @@ app.post('/pending-events/:City', async (req, res) => {
     }
 })
 
+// edit a pending event
+app.put('/edit-event/:City/:eventId', async (req, res) => {
+    const { eventId, City } = req.params;
+    const updatedEvent = req.body;
+    const collectionName = getCollectionName(City);
+
+    try{
+        const db = mongoose.connection.useDb("City");
+        const event = await db.collection(collectionName).findByIdAndUpdate(eventId, updatedEvent, { new: true });
+        res.status(200).json(event);
+        console.log("Event updated successfully");
+    } catch (err) {
+        res.status(400).json({ message: 'Error updating event', error: err });
+    };
+});
 // post approved event in correct database
 app.post('/event-data/:City', async (req, res) => {
     const { City } = req.params;
@@ -372,6 +388,55 @@ app.post('/reject', async (req, res) => {
     }
 });
 
+// send emails
+app.post('/help', async (req, res) => {
+    const { name, contact, message } = req.body;
+
+    try {
+        const response = await emailjs.send(
+            process.env.SERVICEID,
+            process.env.TEMPLATEID,
+            {
+                name: name,
+                contact: contact,
+                message: message,
+            },
+            {
+                publicKey: process.env.PUBLICKEY,
+                privateKey: process.env.PRIVATEKEY,
+            }
+        );
+        return res.status(200).json({ success: true, response });
+    } catch (error) {
+        console.error('Email send error:', error);
+        return res.status(500).json({ error: 'Failed to send email' });
+    }
+});
+
+// send feeback
+app.post('/feedback', async (req, res) => {
+    const { name, contact, message } = req.body;
+
+    try {
+        const response = await emailjs.send(
+            process.env.SERVICEID,
+            process.env.TEMPLATEID,
+            {
+                name: name,
+                contact: contact,
+                message: message,
+            },
+            {
+                publicKey: process.env.PUBLICKEY,
+                privateKey: process.env.PRIVATEKEY,
+            }
+        );
+        return res.status(200).json({ success: true, response });
+    } catch (error) {
+        console.error('Feedback send error:', error);
+        return res.status(500).json({ error: 'Failed to send feedback' });
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)

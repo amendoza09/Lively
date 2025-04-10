@@ -8,6 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import HomeScreen from './Screens/Home';
 import SearchScreen from './Screens/Search';
+import EventDetailScreen from './Screens/EventDetails';
 import SettingScreen from './Screens/Settings';
 import AccountScreen from './Screens/Account';
 import PrivacyScreen from './Screens/Privacy';
@@ -54,7 +55,10 @@ function HomeStackScreen() {
         </>
         )}
       </HomeStack.Screen>
-
+      <HomeStack.Screen
+        name="Event Details"
+        component={EventDetailScreen}
+      />
       <HomeStack.Screen
         name="Search"
         component={SearchScreen}
@@ -78,7 +82,6 @@ function HomeStackScreen() {
 }
 
 function SettingStackScreen() {
-  const  { selectedCity, setSelectedCity } = useCity();
   return (
     <SettingStack.Navigator>
       <SettingStack.Screen 
@@ -103,13 +106,6 @@ function SettingStackScreen() {
             </Pressable>
           ),
         })}
-        initialParams={{
-          selectedCity,
-          setSelectedCity,
-          onSubmit: (newEvent) => {
-            console.log(newEvent);
-          }
-        }}
       />
 
       <SettingStack.Screen
@@ -166,11 +162,11 @@ function SettingStackScreen() {
         })}
       />
       <SettingStack.Screen
-        name="Feedback & Support"
+        name="Feedback"
         component={FeedbackScreen}
         option={({ navigation }) => ({
           headerShown: true,
-          Title: 'Feedback & Support',
+          Title: 'Feedback',
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 

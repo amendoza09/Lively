@@ -18,8 +18,6 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     const navigation = useNavigation();
 
     const cities = [
-        'Charlotte, NC',
-        'Atlanta, GA',
         'Athens, GA',
     ];
     
@@ -53,7 +51,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     const openMenu = () => {
         setModalVisible(true);
         Animated.timing(slideAnim, {
-            toValue: 275, // Slide up to the top of the header
+            toValue: 220, // Slide up to the top of the header
             duration: 300,
             easing: Easing.out(Easing.ease), 
             useNativeDriver: false,
@@ -61,7 +59,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
             
         });
         Animated.timing(contentAnim, {
-            toValue:  165,
+            toValue:  110,
             duration: 300,
             easing: Easing.out(Easing.ease), 
             useNativeDriver: false,
@@ -124,18 +122,23 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
                       <Animated.View
                       style={[styles.modalContainer, { height: contentAnim, opacity: contentAnim}]}
                       >
-                        <View>
-                                <Text style={styles.modalTitle}>Select a City</Text>
+                        <View style={{ alignItems: 'center'}}>
+                            <Text style={styles.modalTitle}>Select a City</Text>
                                 <FlatList
                                     data={cities}
                                     keyExtractor={(item) => item}
                                     renderItem={({ item }) => (
-                                        <TouchableOpacity
-                                            style={styles.cityItem}
-                                            onPress={() => handleCitySelect(item)}
-                                        >
-                                            <Text style={styles.cityText}>{item}</Text>
-                                        </TouchableOpacity>
+                                        <View>
+                                            <TouchableOpacity
+                                                style={styles.cityItem}
+                                                onPress={() => handleCitySelect(item)}
+                                            >
+                                                <Text style={styles.cityText}>{item}</Text>
+                                            </TouchableOpacity>
+                                            <View style={styles.selectSuspense}>
+                                                <Text>More cities available soon..</Text>
+                                            </View>
+                                        </View>
                                     )}
                                 />
                                 {/* search feature will come soon
@@ -212,9 +215,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     modalOverlay: {
-        heght: 300,
     },
-
+    selectSuspense: {
+        paddingTop: 10,
+        alignItems: 'center',
+    }
 });
 
 export default AppHeader;

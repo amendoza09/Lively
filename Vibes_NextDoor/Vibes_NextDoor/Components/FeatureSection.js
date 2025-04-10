@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, FlatList} from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, FlatList, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 import { BlurView } from 'expo-blur';
 
 const screenWidth = Dimensions.get("window").width;
@@ -9,6 +10,7 @@ const FeatureSection = ({ data }) => {
     const flatListRef = useRef();
     const [activeIndex, setActiveIndex] = useState(0);
     const currentDate = new Date();
+    const navigation = useNavigation();
 
     const getItemLayout = (data, index) => ({
         length: screenWidth,
@@ -16,9 +18,10 @@ const FeatureSection = ({ data }) => {
         index: index,
     });
 
-    const getImgUri = (img => {
-        return img && img.trim() ? img : 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8='
-    })
+    const getImgUrl = (img) => {
+      if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
+      return img;
+    };
 
     const handleScroll = (event) => {
         const scrollPosition = event.nativeEvent.contentOffset.x;
@@ -69,45 +72,50 @@ const FeatureSection = ({ data }) => {
         day: "2-digit"
     });
 
-    return (
-        <View style={styles.featureContainer}>
-            <FlatList 
-                ref={flatListRef}
-                showsHorizontalScrollIndicator={false}
-                getItemLayout={getItemLayout}
-                data={upcomingEvents}
-                renderItem={({ item }) => (
-                    <View style={styles.eventCard}>
-                        <Image 
-                            source={{ uri: getImgUri(item.img) }} 
-                            style={styles.image} 
-                            resizeMode="cover" 
-                        />
-                        <BlurView 
-                            style={styles.featureInfo}
-                            intensity={50} tint="dark"
-                        >  
-                            <View style={styles.info}> 
-                                <Text style={styles.infoText}>{item.time} </Text>
-                                <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
-                                <Text style={styles.infoText}>{formatDate.format(new Date(item.date))}</Text>
-                            </View>
-                            <View style={styles.description}>
-                                <Text style={styles.eventTitle}>{item.title}</Text>
-                                <Text style={styles.infoText}>{item.location}</Text>
-                            </View>
-                        </BlurView>
-                    </View>
-                )}
-                keyExtractor={(item)=>item._id.toString()}
-                horizontal={true} 
-                pagingEnabled={true}
-                onScroll={handleScroll}
-            />
-            <View style={styles.dotContainer}>
-                {renderDots()}
+  return (
+    <View style={styles.featureContainer}>
+      <FlatList 
+        ref={flatListRef}
+        showsHorizontalScrollIndicator={false}
+        getItemLayout={getItemLayout}
+        data={upcomingEvents}
+        renderItem={({ item: event }) => (
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('Event Details', { event })}
+          >
+            <View style={styles.eventCard}>
+              <Image 
+                source={{ uri: getImgUrl(event.imgUrl) }} 
+                style={styles.image} 
+                resizeMode="cover" 
+              />
+              <BlurView 
+                style={styles.featureInfo}
+                intensity={50} tint="dark"
+              >  
+                <View style={styles.info}> 
+                  <Text style={styles.infoText}>{event.time} </Text>
+                  <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
+                  <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
+                </View>
+                <View style={styles.description}>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
+                  <Text style={styles.infoText}>{event.location}</Text>
+                </View>
+              </BlurView>
             </View>
-        </View>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item)=>item._id.toString()}
+        horizontal={true} 
+        pagingEnabled={true}
+        onScroll={handleScroll}
+      />
+      <View style={styles.dotContainer}>
+        {renderDots()}
+      </View>
+          
+    </View>
     );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef } from  'react';
 import { View, FlatList, Text, TouchableOpacity, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import { format, startOfMonth, startOfWeek, endOfWeek, endOfMonth, eachDayOfInterval, addMonths, subMonths, subWeeks, addWeeks, getDay } from 'date-fns';
+import { useNavigation } from '@react-navigation/native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -10,6 +11,7 @@ const Calendar = ({ events }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [dayPosition, setDayPosition] = useState(null);
     const [dayPositions, setDayPositions] = useState({});
+    const navigation = useNavigation();
 
     const eventTypeColors = {
       Music: '#FFDDC1', // Light Peach
@@ -22,7 +24,6 @@ const Calendar = ({ events }) => {
     
     const dayAbbreviations = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const currentDate = format(new Date(), 'yyyy-MM-dd');
-    const [eventListHeight] = useState(new Animated.Value(0));
     const [weeklyViewHeight] = useState(new Animated.Value(0));
     const dayCellRef = useRef();
 
@@ -60,14 +61,8 @@ const Calendar = ({ events }) => {
         setDayPosition(yPosition);
         setSelectedDate(formattedDate);
 
-        Animated.timing(eventListHeight, {
-            toValue: screenHeight,
-            duration: 300,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: false,
-        }),
         Animated.timing(weeklyViewHeight, {
-          toValue: screenHeight-310,
+          toValue: screenHeight-360,
           duration: 300,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
@@ -78,15 +73,9 @@ const Calendar = ({ events }) => {
 
     const handleReset = () => {
       setSelectedDate(null);
-      Animated.timing(eventListHeight, {
-          toValue: 0,
-          duration: 300,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: false,
-        }),
         Animated.timing(weeklyViewHeight, {
           toValue: 0,
-          duration: 300,
+          duration: 200,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
         }).start(() =>{
@@ -109,21 +98,19 @@ const Calendar = ({ events }) => {
     return (
       <View style={{ flex: 1 }}>
         {!isExpanded && (
-          <Animated.View style={[
-            styles.eventListContainer, 
-            {
-              height: eventListHeight,
-            }
-          ]}>
-              {formattedEvents[selectedDate] ? (
-                <FlatList
-                  data={formattedEvents[selectedDate]}
-                  contentContainerStyle={styles.cardsContainer}
-                  keyExtractor={(event) => event._id.toString()}
-                  renderItem={({ item: event }) => {
-                    const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
-                    return (
-                      <View style={[styles.eventCard, { backgroundColor }]}>
+          <View style={styles.eventListContainer} >
+            {formattedEvents[selectedDate] ? (
+              <FlatList
+                data={formattedEvents[selectedDate]}
+                contentContainerStyle={styles.cardsContainer}
+                keyExtractor={(event) => event._id.toString()}
+                renderItem={({ item: event }) => {
+                  const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
+                  return (
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate('Event Details', { event })}
+                      >
+                        <View style={[styles.eventCard, { backgroundColor }]}>
                           <View>
                             <View style={styles.description}>
                               <Text style={styles.eventTitle}>{event.title}</Text>
@@ -134,6 +121,7 @@ const Calendar = ({ events }) => {
                             </View>
                           </View>
                         </View>
+                      </TouchableOpacity>
                     );
                   }}
                 />
@@ -145,7 +133,7 @@ const Calendar = ({ events }) => {
               <TouchableOpacity style={styles.closeButton} onPress={handleReset}>
                 <Text>Close</Text>
               </TouchableOpacity>
-          </Animated.View>
+          </View>
         )}
       </View>
     );
@@ -205,8 +193,7 @@ const Calendar = ({ events }) => {
             />
           ) : (
             <View >
-              <Animated.View style={{ height: weeklyViewHeight }}>
-                <FlatList
+              <FlatList
                   data={ generateWeekDays(new Date(selectedDate)) }
                   keyExtractor={(item, index) => item ? item.toString() : index.toString()}
                   numColumns={7}
@@ -233,10 +220,9 @@ const Calendar = ({ events }) => {
                     );
                   }}
                 />
-                <View style={{ height: screenHeight-360}}>
-                        {renderEventList()}
-                </View>
-              </Animated.View>
+                <Animated.View style={{ height: weeklyViewHeight}}>
+                  {renderEventList()}
+                </Animated.View>
             </View>
           )}
         </Animated.View>

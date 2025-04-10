@@ -7,10 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const SettingScreen = ({ navigation }) => {
     const settingOptions = [
         { id: '1', name: 'Submit an Event', action:() => navigation.navigate('Submit an Event') },
-        { id: '2', name: 'Creator Account', action: () => navigation.navigate('Creator Account') },
-        { id: '3', name: 'Privacy', action: () => navigation.navigate('Privacy') },
-        { id: '4', name: 'Help', action: () => navigation.navigate('Help') },
-        { id: '5', name: 'Feedback & Support', action: () => navigation.navigate('Feedback & Support')},
+        { id: '2', name: 'Privacy', action: () => navigation.navigate('Privacy') },
+        { id: '3', name: 'Help', action: () => navigation.navigate('Help') },
+        { id: '4', name: 'Feedback & Suggestions', action: () => navigation.navigate('Feedback')},
+        { id: '5', name: 'Creator Account', action: () => navigation.navigate('Creator Account') },
     ];
 
     const renderOption = ({ item }) => (
@@ -46,7 +46,7 @@ const styles =StyleSheet.create({
     safeArea: {
         alignItems: 'center',
         backgroundColor: 'white',
-        paddingBottom: -10,
+        paddingBottom: -15,
         borderWidth: 1,
         borderColor: '#ddd',
     },
