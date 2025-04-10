@@ -136,11 +136,13 @@ app.post('/pending-events/:City', async (req, res) => {
 app.put('/edit-event/:City/:eventId', async (req, res) => {
     const { eventId, City } = req.params;
     const updatedEvent = req.body;
-    const collectionName = getCollectionName(City);
 
     try{
-        const db = mongoose.connection.useDb("City");
-        const event = await db.collection(collectionName).findByIdAndUpdate(eventId, updatedEvent, { new: true });
+        console.log("Updating event...");
+        const collectionName = getCollectionName(City);
+        const collection = client.db("City").collection(collectionName);
+        const event = collection.findByIdAndUpdate(eventId, updatedEvent, { new: true });
+        
         res.status(200).json(event);
         console.log("Event updated successfully");
     } catch (err) {
