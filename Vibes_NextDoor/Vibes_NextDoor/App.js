@@ -1,4 +1,4 @@
-import React, { useState, useContext, createContext } from 'react';
+import React, { useState, useContext, createContext, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -6,6 +6,7 @@ import { Pressable, Text, StyleSheet } from 'react-native';
 import LeftArrow from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+import SplashScreen from './Screens/SplashScreen';
 import HomeScreen from './Screens/Home';
 import SearchScreen from './Screens/Search';
 import EventDetailScreen from './Screens/EventDetails';
@@ -217,6 +218,18 @@ function RootNavigator() {
 }
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if(isLoading) {
+    return <SplashScreen />;
+  }
   return <RootNavigator />;
 }
 

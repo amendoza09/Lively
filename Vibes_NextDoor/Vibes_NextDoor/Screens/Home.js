@@ -21,31 +21,22 @@ const HomeScreen = () => {
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
 
-  translateX.interpolate({
+  const interpolateTranslateX = translateX.interpolate({
     inputRange: [0, screenWidth],
     outputRange: [0, -screenWidth],
     extrapolate: 'clamp',
   })
 
-  const onRefresh = useCallback(async () => {
+  const onRefresh = async () => {
     setRefreshing(true);
     try{
-      const cityName = selectedLocation.split(',')[0].toLowerCase();
-      const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
-      if(!response.ok) {
-        throw new Error('Failed to fetch events');
-      }
-      const data = await response.json();
-      const featured = data.filter(event => event.feature === true);
-      setFeaturedEvents(featured);
-      setEvents(data);
-      setError(null);
+      fetchEvents();
     } catch(e) {
       console.error("Error refreshing.", e);
     } finally {
       setRefreshing(false);
     }
-  })
+  }
   
   const groupByType = (events) => {
     return events.reduce((groups, event) => {
@@ -76,29 +67,32 @@ const HomeScreen = () => {
     }
   });
 
+  const fetchEvents = async () => {
+    try {
+      const cityName = selectedLocation.split(',')[0].toLowerCase();
+      const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
+      if(!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+      const data = await response.json();
+      const featured = data.filter(event => event.feature === true);
+      setFeaturedEvents(featured);
+      setEvents(data);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching events at home page:', error);
+      setError('Unable to fetch events. Please try again later.');
+    }
+  };
 
   const groupedEvents = groupByType(upcomingEvents);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const cityName = selectedLocation.split(',')[0].toLowerCase();
-        const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
-        if(!response.ok) {
-          throw new Error('Failed to fetch events');
-        }
-        const data = await response.json();
-        const featured = data.filter(event => event.feature === true);
-        setFeaturedEvents(featured);
-        setEvents(data);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching events at home page:', error);
-        setError('Unable to fetch events. Please try again later.');
-      }
-    };
-
-    fetchEvents();
+    try{
+      fetchEvents();
+    } catch(e) {
+      console.error(e);
+    } 
   }, [selectedLocation]);
 
   useEffect(() => {
@@ -111,49 +105,55 @@ const HomeScreen = () => {
 
   return(
     <View style={styles.screen}>
-      <AppHeader 
-        selectedLocation={selectedLocation} 
-        setSelectedLocation={setSelectedLocation} />
-      <View style={styles.containerToggle}>
-        <View style={styles.toggleContainer}>
-          <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
-          onPress={() => setViewMode("7-Days")}
-          >
-            <Text style={styles.toggleText}>Weekly View</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
-          onPress={() => setViewMode("Monthly")}>
-            <Text style={styles.toggleText}>Monthly View</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View>
-        <Animated.View style={{
-          flexDirection: 'row',
-          width: "200%",
-          transform: [{ translateX: translateX }],
-        }}>
-          <View style={styles.page}>
-            <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1}]} 
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-              showsVerticalScrollIndicator={false}
-            >
-              <Weekly events={groupedEvents} error={error} selectedLocation={selectedLocation} featured={featuredEvents} />
-            </ScrollView>  
+          <AppHeader 
+            selectedLocation={selectedLocation} 
+            setSelectedLocation={setSelectedLocation} />
+          <View style={styles.containerToggle}>
+            <View style={styles.toggleContainer}>
+              <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
+              onPress={() => setViewMode("7-Days")}
+              >
+                <Text style={styles.toggleText}>Weekly View</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
+              onPress={() => setViewMode("Monthly")}>
+                <Text style={styles.toggleText}>Monthly View</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.monthPage}>
-            <ScrollView style={styles.agendaContainer}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-                <Calendar events={events}/>
-            </ScrollView>
+          <View>
+            <Animated.View style={{
+              flexDirection: 'row',
+              width: "200%",
+              transform: [{ translateX: translateX }],
+            }}>
+              <View style={styles.page}>
+                <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1}]} 
+                  refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                  showsVerticalScrollIndicator={false}
+                >
+                  <Weekly events={groupedEvents} error={error} selectedLocation={selectedLocation} featured={featuredEvents} />
+                </ScrollView>  
+              </View>
+              <View style={styles.monthPage}>
+                <ScrollView style={styles.agendaContainer}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                    <Calendar events={events}/>
+                </ScrollView>
+              </View>
+            </Animated.View>
           </View>
-        </Animated.View>
-      </View>
     </View>
   )
 };
 
 const styles = StyleSheet.create({
+  splashContainer: {
+    flex: 1,
+    backgroundColor: '#121212',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
     screen:{
       
     },
