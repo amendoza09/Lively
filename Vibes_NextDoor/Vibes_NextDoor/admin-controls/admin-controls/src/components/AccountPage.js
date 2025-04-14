@@ -8,7 +8,7 @@ const AccountPage = () => {
     useEffect(() => {
       const fetchPendingAccounts = async () => {
         try {
-          const response = await fetch("http://192.168.1.17:5500/pending-accounts");
+          const response = await fetch("http://192.168.40.132:5500/pending-accounts");
           const data = await response.json();
           console.log("pendingAccounts:", data);
           setPendingAccounts(data); 

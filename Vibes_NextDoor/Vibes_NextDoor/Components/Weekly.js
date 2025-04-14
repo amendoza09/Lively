@@ -9,9 +9,8 @@ import FeatureSection from '../Components/FeatureSection';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const Weekly = ({ events, error, selectedLocation, featured }) => {
+const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(true);
 
   const getImgUrl = (img) => {
     if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
@@ -31,25 +30,30 @@ const Weekly = ({ events, error, selectedLocation, featured }) => {
     Art: '#FFCDD2',    // Light Pink
     Social: '#a6f1a6', // white
     Other: '#E0E0E0', // Light Gray (for unclassified types)
-  };
+  }
   
-  const loadingAnimation = () => {
+  if(loading && !error) {
     return (
-      <View style={styles.loadingContainer}>
-        <LottieView 
-          source={require('../assets/loadingAnimation.json')}
-          autoplay
-          loop
-        />
+        <View style={styles.loadingContainer}>
+          <LottieView 
+            source={require('../assets/loadingAnimation.json')}
+            autoPlay
+            loop
+            style={{ width: 200, height: 200 }}
+          />
+        </View>
+    )
+  } 
+
+  else if(Object.keys(events).length === 0 && !error && !loading) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text>Nothing in {selectedLocation} yet...</Text>
       </View>
     )
-  };
-
-  return (
-    <>
-      {loading && events.length === 0 || error ? (
-        loadingAnimation()
-      ) : (
+  }
+  else {
+    return (
         <>
           {error && <Text>{error}</Text>}
           {featured.length === 0 && !error ? (
@@ -63,12 +67,7 @@ const Weekly = ({ events, error, selectedLocation, featured }) => {
           }
           <View style={styles.HomeContainer}>
             {error && <Text>{error}</Text>}
-            {events.length === 0 && !error ? (
-              <View style={styles.emptyContainer}>
-                <Text>Nothing in {selectedLocation} yet...</Text>
-              </View>
-            ) : (
-              <View>
+            <View>
                 <Text style={styles.title}>Everything else</Text>
                 <FlatList
                   data={Object.entries(events)}
@@ -118,20 +117,17 @@ const Weekly = ({ events, error, selectedLocation, featured }) => {
                   }}
                 />
               </View> 
-            )}
           </View>
         </>
-      )}
-    </>
-  );
+    )
+  };
 }
 
 const styles = StyleSheet.create({
   loadingContainer: {
-    width: 100,
-    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
   },
   HomeContainer: {
     flex: 1,

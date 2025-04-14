@@ -16,7 +16,7 @@ import PrivacyScreen from './Screens/Privacy';
 import HelpScreen from './Screens/Help';
 import FeedbackScreen from './Screens/Feedback';
 import SubmitEventScreen from './Screens/SubmitEvents';
-
+import PreviewEventScreen from './Screens/PreviewEventScreen';
 
 const HomeStack = createStackNavigator();
 const SettingStack = createStackNavigator();
@@ -94,9 +94,9 @@ function SettingStackScreen() {
       <SettingStack.Screen
         name="Submit an Event"
         component={SubmitEventScreen}
-        option={({ navigation }) => ({
+        options={({ navigation }) => ({
           headerShown: true,
-          Title: 'Submit an Event',
+          title: 'Submit an Event',
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 
@@ -168,6 +168,23 @@ function SettingStackScreen() {
         option={({ navigation }) => ({
           headerShown: true,
           Title: 'Feedback',
+          headerLeft: () => (
+            <Pressable 
+              onPress={() => navigation.goBack()} 
+              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
+            >
+              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
+            </Pressable>
+          ),
+        })}
+      />
+      <SettingStack.Screen
+        name="Preview Submission"
+        component={PreviewEventScreen}
+        options={({ navigation }) => ({
+          headerShown: true,
+          title: 'Preview Submission',
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 

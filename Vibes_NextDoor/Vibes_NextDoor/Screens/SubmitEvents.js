@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 
-const SubmitEventScreen = ({ route  }) => {
+const SubmitEventScreen = ({ route, navigation  }) => {
   const { onSubmit } = route.params || {};
 
   const [selectedCity, setSelectedCity] = useState('');
@@ -58,7 +58,7 @@ const SubmitEventScreen = ({ route  }) => {
     const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (event) => {
       setKeyboardHeight(event.endCoordinates.height);
     });
-    const keyboardDidHideListener = Keyboard.addListener("ketboardDidHide", () => {
+    const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardHeight(0);
     })
 
@@ -70,7 +70,7 @@ const SubmitEventScreen = ({ route  }) => {
 
   const scrollToInput = (inputRef) => {
     setTimeout(() => {
-      inputRef?.current?.measuerLayout(
+      inputRef?.current?.measureLayout(
         scrollViewRef.current,
         (_, y) => {
           scrollViewRef.current.scrollTo({ y: y - 20, animated: true });
@@ -85,6 +85,7 @@ const SubmitEventScreen = ({ route  }) => {
         return;
     }
     const cityName = selectedCity.split(',')[0].toLowerCase();
+
     const newEvent = {
       city: cityName,
       title,
@@ -102,42 +103,8 @@ const SubmitEventScreen = ({ route  }) => {
       externalLink,
     };
 
+    navigation.navigate("Preview Submission", { eventData: newEvent });
     
-    try {
-      const response = await fetch(`${config.api.HOST}/pending-events/${cityName}`, {
-        method: "POST",
-        headers: { 
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify(newEvent),
-      });
-
-      if (response.ok) {
-        console.log("Event saved!");
-        alert("Event successfully saved!");
-        setTitle('');
-        setSelectedCity('');
-        setLocation('');
-        setAddress('');
-        setDate(new Date());
-        setTime(new Date());
-        setEventType('');
-        setDescription('');
-        setImage('');
-        setImageBase64('');
-        setEmail(''),
-        setPhone('')
-        setRestrictions('');
-      } else {
-        console.error("Failed to save event");
-        alert("Failed to save event. Please try again.")
-      }
-      onSubmit(newEvent);
-      
-    } catch (error) {
-        console.error('Error submitting event:', error);
-        setError('Unable to submit event. Please try again later.');
-    }
   };
 
   return (
@@ -163,7 +130,7 @@ const SubmitEventScreen = ({ route  }) => {
           </TouchableOpacity>
           {showCityPicker && (
             <Picker 
-              selectedValue={availableCities}
+              selectedValue={selectedCity}
               onValueChange={(selectedCity) => {
                 setShowCityPicker(false);
                 if(selectedCity) setSelectedCity(selectedCity);
@@ -307,14 +274,14 @@ const SubmitEventScreen = ({ route  }) => {
               </TouchableOpacity>
             </View>
           )}
-          <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <TouchableOpacity style={styles.submitButton} onPress={() => handleSubmit()}>
             <Text style={styles.submitText}>Submit Event</Text>
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   )
-}
+};
 
 const styles = StyleSheet.create({
   container: {

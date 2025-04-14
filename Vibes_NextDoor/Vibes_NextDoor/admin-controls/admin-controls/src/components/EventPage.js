@@ -30,7 +30,7 @@ const EventPage = () => {
   const handleEditSubmit = async (editedEvent) => {
     const city = editedEvent.city;
     try {
-      await fetch(`http://192.168.1.17:5500/edit-event/${city}/${editedEvent._id}`, {
+      await fetch(`http://192.168.40.132:5500/edit-event/${city}/${editedEvent._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ const EventPage = () => {
 
   const fetchPendingEvents = async () => {
     try {
-      const response = await fetch("http://192.168.1.17:5500/pending-events");
+      const response = await fetch("http://1192.168.40.132:5500/pending-events");
       const data = await response.json();
       setEventsByCity(data); 
     } catch (error) {
@@ -57,7 +57,7 @@ const EventPage = () => {
 
   const fetchApprovedEvents = async () => {
     try {
-      const response = await fetch("http://192.168.1.17:5500/approved-events");
+      const response = await fetch("http://192.168.40.132:5500/approved-events");
       const data = await response.json();
       setApprovedByCity(data);
     } catch (error) {
@@ -67,7 +67,7 @@ const EventPage = () => {
 
   const fetchRejectedEvents = async () => {
     try {
-      const response = await fetch("http://192.168.1.17:5500/rejected-events");
+      const response = await fetch("http://192.168.40.132:5500/rejected-events");
       const data = await response.json();
       setRejectedByCity(data);
     } catch (error) {
@@ -78,7 +78,7 @@ const EventPage = () => {
   const approveEvent = async (event) => {
     const city = event.city;
     try{
-      await fetch(`http://192.168.1.17:5500/event-data/${city}`,{
+      await fetch(`http://192.168.40.132:5500/event-data/${city}`,{
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -95,7 +95,7 @@ const EventPage = () => {
   const rejectEvent = async (event) => {
     const city = event.city;
     try{
-      await fetch(`http://192.168.1.17:5500/rejected-events/${city}`,
+      await fetch(`http://192.168.40.132:5500/rejected-events/${city}`,
         {
           method: "POST",
           headers: {

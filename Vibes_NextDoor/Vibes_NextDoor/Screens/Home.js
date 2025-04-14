@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl, TouchableOpacity, Animated } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { config } from './config.env';
 import AppHeader from '../Components/AppHeader';
-
 import Weekly from '../Components/Weekly';
 import Calendar from '../Components/Calendar';
+import LottieView from 'lottie-react-native';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const HomeScreen = () => {
-  const [events,setEvents] = useState([]); 
+  const [events,setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -30,7 +30,7 @@ const HomeScreen = () => {
   const onRefresh = async () => {
     setRefreshing(true);
     try{
-      fetchEvents();
+      await fetchEvents();
     } catch(e) {
       console.error("Error refreshing.", e);
     } finally {
@@ -68,31 +68,30 @@ const HomeScreen = () => {
   });
 
   const fetchEvents = async () => {
-    try {
-      const cityName = selectedLocation.split(',')[0].toLowerCase();
-      const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
-      if(!response.ok) {
-        throw new Error('Failed to fetch events');
-      }
-      const data = await response.json();
-      const featured = data.filter(event => event.feature === true);
-      setFeaturedEvents(featured);
-      setEvents(data);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching events at home page:', error);
-      setError('Unable to fetch events. Please try again later.');
-    }
+    const cityName = selectedLocation.split(',')[0].toLowerCase();
+    const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
+
+    const data = await response.json();
+    const featured = data.filter(event => event.feature === true);
+    setFeaturedEvents(featured);
+    setEvents(data);
   };
 
   const groupedEvents = groupByType(upcomingEvents);
 
   useEffect(() => {
-    try{
-      fetchEvents();
-    } catch(e) {
-      console.error(e);
-    } 
+    const loadEvents = async () => {
+      try{
+        setLoading(true);
+        await fetchEvents();
+      } catch(e) {
+        setError('Unable to fetch events. Please try again later.');
+      } finally {
+        setError(null);
+        setLoading(false);
+      }
+    };
+    loadEvents();
   }, [selectedLocation]);
 
   useEffect(() => {
@@ -128,16 +127,42 @@ const HomeScreen = () => {
               transform: [{ translateX: translateX }],
             }}>
               <View style={styles.page}>
-                <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1}]} 
-                  refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-                  showsVerticalScrollIndicator={false}
-                >
-                  <Weekly events={groupedEvents} error={error} selectedLocation={selectedLocation} featured={featuredEvents} />
-                </ScrollView>  
+                {refreshing && (
+                  <View style={styles.refreshOverlay}>
+                    <LottieView 
+                      source={require('../assets/loadingAnimation.json')}
+                      autoPlay
+                      loop
+                      style={{ width: 150, height: 150 }}
+                    />
+                  </View>
+                )}
+                  <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1}]} 
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    <Weekly 
+                      events={groupedEvents} 
+                      error={error} 
+                      selectedLocation={selectedLocation} 
+                      featured={featuredEvents} 
+                      loading={loading} 
+                    />
+                  </ScrollView>
               </View>
               <View style={styles.monthPage}>
+              {refreshing && (
+                  <View style={styles.refreshOverlay}>
+                    <LottieView 
+                      source={require('../assets/loadingAnimation.json')}
+                      autoPlay
+                      loop
+                      style={{ width: 150, height: 150 }}
+                    />
+                  </View>
+                )}
                 <ScrollView style={styles.agendaContainer}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}>
                     <Calendar events={events}/>
                 </ScrollView>
               </View>
@@ -154,17 +179,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-    screen:{
-      
-    },
-    container: {
-      paddingBottom: 385,
-    },
-    viewContainer: {
-      alignItems: "center",
-      width: "100%",
-      backgroundColor: "rgba(0, 0 ,0 ,0)",
-    },
+  container: {
+    paddingBottom: 385,
+  },
+  refreshOverlay: {
+    marginTop: -40,
+    height: 30,
+    alignItems: 'center',
+    zIndex: 10,
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  viewContainer: {
+    alignItems: "center",
+    width: "100%",
+    backgroundColor: "rgba(0, 0 ,0 ,0)",
+  },
     toggleContainer: {
       flexDirection: "row",
       alginItems: 'center',
@@ -173,11 +204,11 @@ const styles = StyleSheet.create({
       width: 350,
       height: 35,
       borderRadius: 20,
-      marginTop: 6,
     },
     containerToggle:{
-      height: 50,
+      height: 45,
       alignItems: 'center',
+      justifyContent: 'center',
     },
     toggleButton: {
       alignItems: "center",
@@ -203,6 +234,7 @@ const styles = StyleSheet.create({
     monthPage: {
       width: screenWidth,
       height: screenHeight,
+      marginTop: 8,
     },
     agendaContainer: {
       flex: 1,
