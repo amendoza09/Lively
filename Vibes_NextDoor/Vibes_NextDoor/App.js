@@ -17,6 +17,7 @@ import HelpScreen from './Screens/Help';
 import FeedbackScreen from './Screens/Feedback';
 import SubmitEventScreen from './Screens/SubmitEvents';
 import PreviewEventScreen from './Screens/PreviewEventScreen';
+import ThankYouScreen from './Screens/ThankYouScreen';
 
 const HomeStack = createStackNavigator();
 const SettingStack = createStackNavigator();
@@ -195,6 +196,10 @@ function SettingStackScreen() {
             </Pressable>
           ),
         })}
+      />
+      <SettingStack.Screen
+        name="Thank You"
+        component={ThankYouScreen}
       />
     </SettingStack.Navigator>
   );

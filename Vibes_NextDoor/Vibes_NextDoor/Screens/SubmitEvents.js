@@ -6,6 +6,7 @@ import { config } from './config.env';
 import * as ImagePicker from 'expo-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import LottieView from 'lottie-react-native';
 
 const SubmitEventScreen = ({ route, navigation  }) => {
   const { onSubmit } = route.params || {};
@@ -29,6 +30,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
   const [phone, setPhone] = useState('');
   const [restrictions, setRestrictions] = useState('');
   const [externalLink, setExternalLink] = useState('');
+  const [loading, setLoading] = useState(true);
   const scrollViewRef = useRef(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -53,6 +55,22 @@ const SubmitEventScreen = ({ route, navigation  }) => {
     setImageType(selectImage.assets[0].uri.split('.').pop().toLowerCase());
     
   };
+
+  const clearForm = () => {
+    setTitle('');
+    setSelectedCity('');
+    setLocation('');
+    setAddress('');
+    setDate(new Date());
+    setTime(new Date());
+    setEventType('');
+    setDescription('');
+    setImage('');
+    setImageBase64('');
+    setEmail(''),
+    setPhone('')
+    setRestrictions('');
+  }
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (event) => {
@@ -103,7 +121,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
       externalLink,
     };
 
-    navigation.navigate("Preview Submission", { eventData: newEvent });
+    navigation.navigate("Preview Submission", { eventData: newEvent, clearForm });
     
   };
 
@@ -116,7 +134,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
-          <Text style={styles.label}>Event Title</Text>
+          <Text style={styles.label}>Event Title {title === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TextInput 
             style={styles.input}
             placeholder="Enter event title"
@@ -124,7 +142,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
             onChangeText={setTitle}
           />
 
-          <Text style={styles.eventLabel}>City</Text>
+          <Text style={styles.eventLabel}>City {selectedCity === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TouchableOpacity onPress={() => setShowCityPicker(true)}>
             <Text style={styles.input}>{selectedCity || "Select city"}</Text>
           </TouchableOpacity>
@@ -143,7 +161,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
             </Picker>
           )}
 
-          <Text style={styles.label}>Location</Text>
+          <Text style={styles.label}>Location {location === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TextInput 
             style={styles.input}
             placeholder="Enter location"
@@ -161,7 +179,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
           />
           <View style={styles.timeContainer}>
             <View>
-              <Text style={styles.label}>Date</Text>
+              <Text style={styles.label}>Date {date === null && <Text style={{color: 'red'}}>*</Text>}</Text>
               <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
                 <DateTimePicker
                   value={date}
@@ -175,7 +193,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
               </TouchableOpacity>
             </View>
             <View>
-              <Text style={styles.label}>Time</Text>
+              <Text style={styles.label}>Time {time === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
               <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
                 <DateTimePicker 
                     value={time}
@@ -190,7 +208,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
             </View>
           </View>
 
-          <Text style={styles.eventLabel}>Event Type</Text>
+          <Text style={styles.eventLabel}>Event Type {eventType === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TouchableOpacity onPress={() => setShowEventPicker(true)}>
             <Text style={styles.input}>{eventType || "Select event type"}</Text>
           </TouchableOpacity>

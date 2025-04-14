@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, ScrollView, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import config from './config.env';
+import LottieView from 'lottie-react-native';
+import { CommonActions } from '@react-navigation/native';
+
+import { config } from './config.env';
 
 const PreviewEventScreen = ({ route, navigation }) => {
-  const { eventData } = route.params;
+  const { eventData, clearForm } = route.params;
+  const [loading, setLoading] = useState(false);
 
   const handleFinalSubmit = async () => {
+    setLoading(true);
     try {
       const response = await fetch(`${config.api.HOST}/pending-events/${eventData.city}`, {
         method: "POST",
@@ -14,46 +19,84 @@ const PreviewEventScreen = ({ route, navigation }) => {
       });
 
       if (response.ok) {
-        alert("Event successfully saved!");
-        onSubmit(eventData);
-        navigation.navigate('Home');
-      } else {
-        alert("Failed to save event. Please try again.");
-      }
+        clearForm();
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "Thank You"}],
+          })
+        )}
     } catch (error) {
       console.error(error);
       alert("Error submitting event.");
+    } finally{
+      setLoading(false);
     }
   };
 
-  return (
-    <ScrollView style={styles.container }>
-      <View style={styles.titleContainer}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Preview</Text>
+  if(loading){
+    return (
+      <View style={styles.submissionOverlay}>
+        <LottieView 
+          source={require('../assets/loadingAnimation.json')}
+          autoPlay
+          loop
+          style={{ width: 200, height: 200 }}
+        />
       </View>
-      <View>
-        <Text>Title: {eventData.title}</Text>
-        <Text>Location: {eventData.location}</Text>
-        <Text>Address: {eventData.address}</Text>
-        <Text>Date: {eventData.date}</Text>
-        <Text>Time: {eventData.time}</Text>
-        <Text>Type: {eventData.type}</Text>
-        <Text>Description: {eventData.description}</Text>
-        <Text>Email: {eventData.email}</Text>
-        <Text>Phone: {eventData.phone}</Text>
-        <Text>Restrictions: {eventData.restrictions}</Text>
-        <Text>External Link: {eventData.externalLink}</Text>
-        {eventData.imgUrl && <Image source={{ uri: eventData.imgUrl }} style={{ height: 200, marginVertical: 10 }} />}
+    )
+  } else {
+    return (
+      <ScrollView style={styles.container }>
+        <View style={styles.titleContainer}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Preview</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Title: </Text><Text>{eventData.title}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Location:</Text><Text>{eventData.location}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Address:</Text><Text>{eventData.address}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Date:</Text><Text>{eventData.date}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Time:</Text><Text>{eventData.time}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Type:</Text><Text>{eventData.type}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Description:</Text><Text>{eventData.description}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Email:</Text><Text>{eventData.email}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Phone:</Text><Text>{eventData.phone}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Restrictions:</Text><Text>{eventData.restrictions}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>External Link:</Text><Text>{eventData.externalLink}</Text>
+          </View>
+          {eventData.imgUrl == '' && <Image source={{ uri: eventData.imgUrl }} style={{ height: 200, marginVertical: 10 }} />}
 
-        <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
-              <Text style={styles.editText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.submitButton} onPress={handleFinalSubmit}>
-              <Text style={styles.submitText}>Confirm & Submit</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
+          <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
+                <Text style={styles.editText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.submitButton} onPress={handleFinalSubmit}>
+                <Text style={styles.submitText}>Confirm & Submit</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  };
 };
 
 const styles = StyleSheet.create({
@@ -64,6 +107,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  infoContainer:{
+    flexDirection:'column',
+    gap: 8,
+  },
+  infoLine: {
+    flexDirection: 'row'
+  },
+  infoTitle: {
+    color: '#707070',
+    width: 100,
   },
   submitButton: {
     backgroundColor: '#007bff',
@@ -87,6 +141,11 @@ const styles = StyleSheet.create({
     color: '#007bff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  submissionOverlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
   },
 })
 
