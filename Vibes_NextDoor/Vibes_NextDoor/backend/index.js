@@ -5,6 +5,9 @@ const { mongoose, Types } = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const emailjs = require('@emailjs/nodejs');
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
+const admin = require("firebase-admin");
 
 require("dotenv").config({ path: "./config.env" });
 
@@ -12,7 +15,19 @@ const app = express()
 const PORT = process.env.PORT;
 const HOST = process.env.HOST;
 const Db = process.env.MONGO_URI;
+const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
+const storageBucket = process.env.STORAGE_BUCKET;
+const projectID = process.env.PROJECT_ID
 const client = new MongoClient(Db);
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: storageBucket,
+});
+const bucket = admin.storage().bucket();
+const storage = multer.memoryStorage();
+const upload = multer({ storage});
+module.exports = bucket;
 
 mongoose.connect(Db)
   .then(() => console.log('Connected to MongoDB'))
@@ -105,14 +120,41 @@ app.get("/event-data/:City", async (req, res) => {
 })
 
 // create an event 
-app.post('/pending-events/:City', async (req, res) => {
+app.post('/pending-events/:City', upload.single('image'), async (req, res) => {
     const { City } = req.params;
-    const { city, title, location, address, date, time, type, description, imgUrl, feature, status, email, phone, restrictions, createdAt, link } = req.body;
+    const { city, title, location, address, date, time, type, description, feature, status, email, phone, restrictions, createdAt, link } = req.body;
     const collectionName = getCollectionName(City);
 
     try {
         await client.connect();
         console.log("Connection Successful");
+        
+        let imgUrl = '';
+
+        if (req.file) {
+        const fileName = `${city}/${uuidv4()}_${req.file.originalname}`;
+        const blob = bucket.file(fileName);
+
+        const blobStream = blob.createWriteStream({
+            metadata: {
+            contentType: req.file.mimetype,
+            },
+        });
+
+        await new Promise((resolve, reject) => {
+            blobStream.on('error', reject);
+            blobStream.on('finish', async () => {
+            const [url] = await blob.getSignedUrl({
+                action: 'read',
+                expires: '03-01-2030',
+            });
+            imgUrl = url;
+            resolve();
+            });
+
+            blobStream.end(req.file.buffer);
+        });
+        }
         
         const db = mongoose.connection.useDb("pending-events");
         const newEvent = new Event({
@@ -130,7 +172,7 @@ app.post('/pending-events/:City', async (req, res) => {
     }  finally {
         await client.close();
     }
-})
+});
 
 // edit a pending event
 app.put('/edit-event/:City/:eventId', async (req, res) => {
