@@ -8,8 +8,8 @@ const eventSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   time: { type: String, required: true },  // Can also use Date if needed
   type: { type: String, required: true },
-  description: { type: String},
-  imgUrl: { type: String },
+  description: { data: Buffer, contentType: String},
+  image: { type:  String},
   feature: { type: Boolean, default: false },
   email: { type: String },
   phone: { type: String },

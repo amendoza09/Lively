@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, Dimensions, ScrollView, Image, RefreshControl, TouchableOpacity, Animated } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Dimensions, ScrollView, RefreshControl, TouchableOpacity, Animated } from 'react-native';
 
 import { config } from './config.env';
 import AppHeader from '../Components/AppHeader';
@@ -11,21 +11,16 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const HomeScreen = () => {
   const [events,setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [featuredEvents, setFeaturedEvents] = useState([]);
   const [viewMode, setViewMode] = useState("7-Days");
   const translateX = useRef(new Animated.Value(0)).current;
+  const scrollY = useRef(new Animated.Value(0)).current;
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
-
-  const interpolateTranslateX = translateX.interpolate({
-    inputRange: [0, screenWidth],
-    outputRange: [0, -screenWidth],
-    extrapolate: 'clamp',
-  })
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -104,70 +99,76 @@ const HomeScreen = () => {
 
   return(
     <View style={styles.screen}>
-          <AppHeader 
-            selectedLocation={selectedLocation} 
-            setSelectedLocation={setSelectedLocation} />
-          <View style={styles.containerToggle}>
-            <View style={styles.toggleContainer}>
-              <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
+      <AppHeader 
+        selectedLocation={selectedLocation} 
+        setSelectedLocation={setSelectedLocation}
+      />
+      {refreshing && (
+        <View style={styles.refreshOverlay}>
+          <LottieView 
+            source={require('../assets/loadingAnimation.json')}
+            autoPlay
+            loop
+            style={{ width: 150, height: 150 }}
+          />
+        </View>
+      )}
+      <Animated.View
+        style={{
+          opacity: scrollY.interpolate({
+            inputRange: [0, 20],
+            outputRange: [1, 0],
+            extrapolate: 'clamp',
+          }),
+          position: 'absolute',
+          top: 10,
+          alignSelf: 'center',
+          zIndex: 10,
+        }}
+      >
+        <Text style={{ color: '#999' }}>↓ Pull down to refresh</Text>
+      </Animated.View>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.containerToggle}>
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity style={[styles.toggleButton, viewMode === "7-Days" && styles.activeButtonWeekly]}
               onPress={() => setViewMode("7-Days")}
-              >
-                <Text style={styles.toggleText}>Weekly View</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
-              onPress={() => setViewMode("Monthly")}>
-                <Text style={styles.toggleText}>Monthly View</Text>
-              </TouchableOpacity>
-            </View>
+            >
+              <Text style={styles.toggleText}>Weekly View</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.toggleButton, viewMode === "Monthly" && styles.activeButtonMonthly]}
+              onPress={() => setViewMode("Monthly")}
+            >
+              <Text style={styles.toggleText}>Monthly View</Text>
+            </TouchableOpacity>
           </View>
-          <View>
-            <Animated.View style={{
-              flexDirection: 'row',
-              width: "200%",
-              transform: [{ translateX: translateX }],
-            }}>
-              <View style={styles.page}>
-                {refreshing && (
-                  <View style={styles.refreshOverlay}>
-                    <LottieView 
-                      source={require('../assets/loadingAnimation.json')}
-                      autoPlay
-                      loop
-                      style={{ width: 150, height: 150 }}
-                    />
-                  </View>
-                )}
-                  <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1}]} 
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    <Weekly 
-                      events={groupedEvents} 
-                      error={error} 
-                      selectedLocation={selectedLocation} 
-                      featured={featuredEvents} 
-                      loading={loading} 
-                    />
-                  </ScrollView>
-              </View>
-              <View style={styles.monthPage}>
-              {refreshing && (
-                  <View style={styles.refreshOverlay}>
-                    <LottieView 
-                      source={require('../assets/loadingAnimation.json')}
-                      autoPlay
-                      loop
-                      style={{ width: 150, height: 150 }}
-                    />
-                  </View>
-                )}
-                <ScrollView style={styles.agendaContainer}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}>
-                    <Calendar events={events}/>
-                </ScrollView>
-              </View>
-            </Animated.View>
+        </View>
+        <Animated.View style={{
+          flexDirection: 'row',
+          width: "200%",
+          transform: [{ translateX: translateX }],
+        }}>      
+          <View style={styles.page}>          
+            <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1}]} >
+              <Weekly 
+                events={groupedEvents} 
+                error={error} 
+                selectedLocation={selectedLocation} 
+                featured={featuredEvents} 
+                loading={loading} 
+              />
+            </ScrollView>
           </View>
+          <View style={styles.monthPage}>
+            <ScrollView style={styles.agendaContainer}>
+              <Calendar events={events}/>
+            </ScrollView>
+          </View>
+        </Animated.View>
+      </ScrollView>
     </View>
   )
 };
@@ -180,16 +181,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   container: {
-    paddingBottom: 385,
+    
   },
   refreshOverlay: {
-    marginTop: -40,
-    height: 30,
+    height: 80,
     alignItems: 'center',
-    zIndex: 10,
-    top: 0,
-    left: 0,
-    right: 0,
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   viewContainer: {
     alignItems: "center",

@@ -13,8 +13,8 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
   const navigation = useNavigation();
 
   const getImgUrl = (img) => {
-    if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
-    return img;
+    if(!img) return require('../assets/defaultImage.png');
+    return {uri: img};
   };
 
   const formatDate = new Intl.DateTimeFormat("en-us", {
@@ -91,7 +91,7 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
                                 <View style={[styles.eventCard, { backgroundColor }]}>
                                   <View style={styles.imageCard}>
                                     <Image 
-                                      source={{ uri: getImgUrl(event.imgUrl) }} 
+                                      source={getImgUrl(event.imgUrl)} 
                                       style={styles.image} 
                                       resizeMode="cover" 
                                     />
@@ -125,7 +125,7 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
 
 const styles = StyleSheet.create({
   loadingContainer: {
-    justifyContent: 'center',
+    paddingTop: 150,
     alignItems: 'center',
     flex: 1,
   },

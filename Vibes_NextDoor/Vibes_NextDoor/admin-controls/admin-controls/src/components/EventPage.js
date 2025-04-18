@@ -30,7 +30,7 @@ const EventPage = () => {
   const handleEditSubmit = async (editedEvent) => {
     const city = editedEvent.city;
     try {
-      await fetch(`http://192.168.40.132:5500/edit-event/${city}/${editedEvent._id}`, {
+      await fetch(`https://lively-backend.onrender.com/edit-event/${city}/${editedEvent._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ const EventPage = () => {
 
   const fetchPendingEvents = async () => {
     try {
-      const response = await fetch("http://1192.168.40.132:5500/pending-events");
+      const response = await fetch("https://lively-backend.onrender.com/pending-events");
       const data = await response.json();
       setEventsByCity(data); 
     } catch (error) {
@@ -57,7 +57,7 @@ const EventPage = () => {
 
   const fetchApprovedEvents = async () => {
     try {
-      const response = await fetch("http://192.168.40.132:5500/approved-events");
+      const response = await fetch("https://lively-backend.onrender.com/approved-events");
       const data = await response.json();
       setApprovedByCity(data);
     } catch (error) {
@@ -67,7 +67,7 @@ const EventPage = () => {
 
   const fetchRejectedEvents = async () => {
     try {
-      const response = await fetch("http://192.168.40.132:5500/rejected-events");
+      const response = await fetch("https://lively-backend.onrender.com/rejected-events");
       const data = await response.json();
       setRejectedByCity(data);
     } catch (error) {
@@ -78,7 +78,7 @@ const EventPage = () => {
   const approveEvent = async (event) => {
     const city = event.city;
     try{
-      await fetch(`http://192.168.40.132:5500/event-data/${city}`,{
+      await fetch(`https://lively-backend.onrender.com/event-data/${city}`,{
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,11 +91,29 @@ const EventPage = () => {
       console.error("Error approving event:", e);
     };
   };
+  const deleteApprovedEvent = async (event) => {
+    const city = event.city;
+    try{
+      const response = await fetch(`http://192.168.1.17:1000/event-data/${city}`,{
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({event})
+      });
+      if(response.ok) {
+        fetchPendingEvents();
+        fetchApprovedEvents();
+      }
+    } catch(e) {
+      console.error("Error approving event:", e);
+    };
+  };
 
   const rejectEvent = async (event) => {
     const city = event.city;
     try{
-      await fetch(`http://192.168.40.132:5500/rejected-events/${city}`,
+      await fetch(`https://lively-backend.onrender.com/rejected-events/${city}`,
         {
           method: "POST",
           headers: {
@@ -108,6 +126,25 @@ const EventPage = () => {
       fetchRejectedEvents();
     } catch(e) {
       console.error("Error rejecting event:", e);
+    };
+  };
+  const deleteRejectedEvent = async (event) => {
+    const city = event.city;
+    try{
+      const response = await fetch(`http://192.168.1.17:1000/delete-rejected-event/${city}`,{
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({event})
+      });
+      if(response.ok) {
+        fetchPendingEvents();
+        fetchApprovedEvents();
+        fetchRejectedEvents();
+      }
+    } catch(e) {
+      console.error("Error approving event:", e);
     };
   };
 
@@ -333,7 +370,15 @@ const EventPage = () => {
                 <summary className="cursor-pointer font-bold">{city} ({approvedByCity[city].length} approved)</summary>
                 <ul className="list-disc pl-5">
                   {approvedByCity[city].map((event) => (
-                    <li key={event._id}>{event.title} - {new Date(event.date).toLocaleDateString()}</li>
+                    <li key={event._id}>{event.title} - {new Date(event.date).toLocaleDateString()}
+                      
+                      <button
+                        onClick={() => deleteApprovedEvent(event)}
+                        className="ml-4 px-2 py-1 text-sm text-white bg-red-500 hover:bg-red-600 rounded"
+                      >
+                        Delete
+                      </button>
+                    </li>
                   ))}
                 </ul>
               </details>
@@ -351,7 +396,15 @@ const EventPage = () => {
                 <summary className="cursor-pointer font-bold">{city} ({rejectedByCity[city].length} rejected)</summary>
                 <ul className="list-disc pl-5">
                   {rejectedByCity[city].map((event) => (
-                    <li key={event._id}>{event.title} - {new Date(event.date).toLocaleDateString()}</li>
+                    <li key={event._id}>
+                      {event.title} - {new Date(event.date).toLocaleDateString()}
+                      <button
+                        onClick={() => deleteRejectedEvent(event)}
+                        className="ml-4 px-2 py-1 text-sm text-white bg-red-500 hover:bg-red-600 rounded"
+                      >
+                        Delete
+                      </button>
+                    </li>
                   ))}
                 </ul>
               </details>

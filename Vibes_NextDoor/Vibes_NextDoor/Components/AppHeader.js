@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
     View, Text, Pressable, StyleSheet,
     FlatList, TouchableOpacity,
-    Animated, Dimensions, Easing
+    Animated, Dimensions, Easing,
+    StatusBar, useColorScheme
 } from 'react-native';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,12 +21,13 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     const cities = [
         'Athens, GA',
     ];
-    
+
+
     const getLocation = async () => {
         try {
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-                setSelectedCity('Permission Denied');
+                setSelectedLocation('Permission Denied');
                 return;
             }
             const location = await Location.getCurrentPositionAsync({});
@@ -39,7 +41,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
             }
         } catch (error) {
             console.error('Error fetching location: ', error);
-            setSelectedCity('Location Error');
+            setSelectedLocation('Location Error');
         }
     };
 
@@ -69,7 +71,6 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     
 
     const closeMenu = () => {
-        
         Animated.timing(slideAnim, {
             toValue: 110, // Slide back down below the header
             duration: 300,
@@ -97,6 +98,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     }, []);
 
     return (
+        
       <Animated.View style={[
         styles.modalOverlay, 
         { height: slideAnim },
@@ -136,7 +138,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
                                                 <Text style={styles.cityText}>{item}</Text>
                                             </TouchableOpacity>
                                             <View style={styles.selectSuspense}>
-                                                <Text>More cities available soon..</Text>
+                                                <Text style={{ color: 'black'}}>More cities available soon...</Text>
                                             </View>
                                         </View>
                                     )}
@@ -158,16 +160,15 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'transparent',
+        backgroundColor: 'white',
     },
     safeArea: {
         zIndex: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'white',
         width: screenWidth,
         borderColor: '#ddd',
-        borderWidth: 1,
+        borderBottomWidth: 1,
         paddingBottom: -25
     },
     headerRow: {
@@ -179,15 +180,17 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         textAlignVertical: 'center',
+        color: 'Black',
     },
     cityTitle: {
-        color: '#2196f3',
+        color: '#5BC0EB',
         fontSize: 24,
         fontWeight: 'bold',
         textAlignVertical: 'center',
     },
     downArrow: {
         alignSelf: 'center',
+        color: 'black'
     },
     citySelectButton: {
         flexDirection: 'row',
@@ -196,13 +199,13 @@ const styles = StyleSheet.create({
     modalContainer: {
         zIndex: 1,
         width: screenWidth,
-        backgroundColor: 'white',
         alignItems: 'center',
     },
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 8,
+        color: 'black',
     },
     cityItem: {
         padding: 10,
@@ -210,9 +213,11 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ddd',
         width: '100%',
         alignItems: 'center',
+        
     },
     cityText: {
         fontSize: 16,
+        color: 'black'
     },
     modalOverlay: {
     },

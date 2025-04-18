@@ -19,8 +19,8 @@ const FeatureSection = ({ data }) => {
     });
 
     const getImgUrl = (img) => {
-      if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
-      return img;
+      if(!img) return require('../assets/defaultImage.png');
+      return {uri: img};
     };
 
     const handleScroll = (event) => {
@@ -85,7 +85,7 @@ const FeatureSection = ({ data }) => {
           >
             <View style={styles.eventCard}>
               <Image 
-                source={{ uri: getImgUrl(event.imgUrl) }} 
+                source={getImgUrl(event.imgUrl)} 
                 style={styles.image} 
                 resizeMode="cover" 
               />
@@ -132,12 +132,12 @@ const styles = StyleSheet.create ({
     },
     eventCard: {
         width: screenWidth,
-        height: 200,
+        height: 250,
         marginBottom: 10,
     },
     image: {
         width: screenWidth,
-        height: 200,
+        height: 250,
     },
     eventTitle: {
         fontSize: 18,

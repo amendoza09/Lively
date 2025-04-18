@@ -18,6 +18,8 @@ import FeedbackScreen from './Screens/Feedback';
 import SubmitEventScreen from './Screens/SubmitEvents';
 import PreviewEventScreen from './Screens/PreviewEventScreen';
 import ThankYouScreen from './Screens/ThankYouScreen';
+import ThankYouHelpScreen from './Screens/ThankYouHelp';
+import ThankYouFeedbackScreen from './Screens/ThankYouFeedback';
 
 const HomeStack = createStackNavigator();
 const SettingStack = createStackNavigator();
@@ -87,8 +89,10 @@ function SettingStackScreen() {
   return (
     <SettingStack.Navigator>
       <SettingStack.Screen 
-        name="Back" 
-        options={{ headerShown: false }} 
+        name="Settings"
+        options={{ 
+          headerShown: false,
+        }} 
         component={SettingScreen} 
       />
 
@@ -97,6 +101,9 @@ function SettingStackScreen() {
         component={SubmitEventScreen}
         options={({ navigation }) => ({
           headerShown: true,
+          headerStyle: {
+            height: 108,
+          },
           title: 'Submit an Event',
           headerLeft: () => (
             <Pressable 
@@ -104,7 +111,7 @@ function SettingStackScreen() {
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
               <LeftArrow name="arrow-back" size={24} color="#007AFF" />
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
         })}
@@ -113,8 +120,11 @@ function SettingStackScreen() {
       <SettingStack.Screen
         name="Creator Account"
         component={AccountScreen}
-        option={({ navigation }) => ({
+        options={({ navigation }) => ({
           headerShown: true,
+          headerStyle: {
+            height: 108,
+          },
           Title: 'Creator Account',
           headerLeft: () => (
             <Pressable 
@@ -122,7 +132,7 @@ function SettingStackScreen() {
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
               <LeftArrow name="arrow-back" size={24} color="#007AFF" />
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
         })}
@@ -131,16 +141,19 @@ function SettingStackScreen() {
       <SettingStack.Screen
         name="Privacy"
         component={PrivacyScreen}
-        option={({ navigation }) => ({
+        options={({ navigation }) => ({
           headerShown: true,
           Title: 'Privacy',
+          headerStyle: {
+            height: 108,
+          },
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
               <LeftArrow name="arrow-back" size={24} color="#007AFF" />
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
         })}
@@ -149,8 +162,11 @@ function SettingStackScreen() {
       <SettingStack.Screen
         name="Help"
         component={HelpScreen}
-        option={({ navigation }) => ({
+        options={({ navigation }) => ({
           headerShown: true,
+          headerStyle: {
+            height: 108,
+          },
           Title: 'Help',
           headerLeft: () => (
             <Pressable 
@@ -158,7 +174,7 @@ function SettingStackScreen() {
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
               <LeftArrow name="arrow-back" size={24} color="#007AFF" />
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
         })}
@@ -166,8 +182,11 @@ function SettingStackScreen() {
       <SettingStack.Screen
         name="Feedback"
         component={FeedbackScreen}
-        option={({ navigation }) => ({
+        options={({ navigation }) => ({
           headerShown: true,
+          headerStyle: {
+            height: 108,
+          },
           Title: 'Feedback',
           headerLeft: () => (
             <Pressable 
@@ -186,6 +205,9 @@ function SettingStackScreen() {
         options={({ navigation }) => ({
           headerShown: true,
           title: 'Preview Submission',
+          headerStyle: {
+            height: 108,
+          },
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 
@@ -200,6 +222,23 @@ function SettingStackScreen() {
       <SettingStack.Screen
         name="Thank You"
         component={ThankYouScreen}
+        options={() => ({
+          headerShown: false
+        })}
+      />
+      <SettingStack.Screen
+        name="Thank You Help"
+        component={ThankYouHelpScreen}
+        options={() => ({
+          headerShown: false
+        })}
+      />
+      <SettingStack.Screen
+        name="Thank You Feedback"
+        component={ThankYouFeedbackScreen}
+        options={() => ({
+          headerShown: false,
+        })}
       />
     </SettingStack.Navigator>
   );
@@ -248,7 +287,7 @@ export default function App() {
     }, 2500);
     return () => clearTimeout(timer);
   }, []);
-
+  
   if(isLoading) {
     return <SplashScreen />;
   }
@@ -258,19 +297,13 @@ export default function App() {
 const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute', 
-    backgroundColor: 'black', // Tab bar background color
-    shadowColor: '#000', // Shadow for floating effect (iOS)
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5, // Shadow for Android
+    backgroundColor: '#211A1E', // Tab bar background color
     borderColor: 'none',
     justifyContent: 'center',
     
   },
   bottomContainer: {
-    flex: 1,
-    backgroundColor: 'transparent',
+    height: 40,
   },
   icons: {
     height: 50,

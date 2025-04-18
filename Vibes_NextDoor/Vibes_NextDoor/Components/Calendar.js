@@ -25,6 +25,8 @@ const Calendar = ({ events }) => {
     const dayAbbreviations = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const currentDate = format(new Date(), 'yyyy-MM-dd');
     const [weeklyViewHeight] = useState(new Animated.Value(0));
+    const [monthTranslateY] = useState(new Animated.Value(0));
+    const [weekTranslateY] = useState(new Animated.Value(screenHeight));
     const dayCellRef = useRef();
 
     const getEmptyDays = (date) => {
@@ -61,26 +63,50 @@ const Calendar = ({ events }) => {
         setDayPosition(yPosition);
         setSelectedDate(formattedDate);
 
-        Animated.timing(weeklyViewHeight, {
-          toValue: screenHeight-360,
-          duration: 300,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: false,
-        }).start(() => {
-          setIsExpanded(false);
-        })
+        Animated.parallel([
+          Animated.timing(monthTranslateY, {
+            toValue: screenHeight,
+            duration: 300,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(weekTranslateY, {
+            toValue: 60,
+            duration: 300,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }).start(),
+          Animated.timing(weeklyViewHeight, {
+            toValue: screenHeight - 365,
+            duration: 300,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: false,
+          }),
+        ]).start(() => setIsExpanded(false));
     };
 
     const handleReset = () => {
       setSelectedDate(null);
+      Animated.parallel([
+        Animated.timing(monthTranslateY, {
+          toValue: 0,
+          duration: 300,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(weekTranslateY, {
+          toValue: screenHeight,
+          duration: 300,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }).start(),
         Animated.timing(weeklyViewHeight, {
           toValue: 0,
-          duration: 200,
+          duration: 300,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
-        }).start(() =>{
-          setIsExpanded(true);
-        });
+        }),
+      ]).start(() => setIsExpanded(true));
     };
 
     const formattedEvents = useMemo(() => {
@@ -141,91 +167,91 @@ const Calendar = ({ events }) => {
 
   return (
     <View style={{ flex: 1 }}>
-        <View style={styles.agendaHeader}>
-          <TouchableOpacity onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-            <Text style={styles.navText}>{'<'}</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerText}>{format(currentMonth, 'MMMM')}</Text>
-          <TouchableOpacity onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-            <Text style={styles.navText}>{'>'}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.dayHeader}>
-          {dayAbbreviations.map((day, index) => {
-            return (
-              <View key={index} style={styles.dayHeaderCell}>
-                <Text style={styles.dayHeaderText}>{day}</Text>
-              </View>
-            );
-          })}
-        </View>
-        <Animated.View>
-          {isExpanded ? (
-            <FlatList
-              data={ generateMonthDays(currentMonth) }
-              keyExtractor={(item, index) => item ? item.toString() : index.toString()}
-              numColumns={7}
-              renderItem={({ item }) => {
-                if(!item) {
-                  return <View style={styles.dayCell} />
-                }
-                const formattedDate = format(item, 'yyyy-MM-dd');
-                const isSelected = selectedDate === formattedDate;
-                const isToday = formattedDate === currentDate;
-            
-                return (
-                    <TouchableOpacity
-                      style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator]}
-                      onPress={() => handleDayPress(item)}
-                      onLayout={(event) => {
-                        if (!event.nativeEvent) return;
-                        const { y } = event.nativeEvent.layout;
-                        setDayPositions((prev) => ({ ...prev, [formattedDate]: y , }));
-                      }}
-                    >
-                      <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
-                        {format(item, 'd')}
-                      </Text>
-                      {formattedEvents[formattedDate] && (<View style={styles.eventIndicator} />)}
-                    </TouchableOpacity>
-                );
-              }}
-            />
-          ) : (
-            <View >
-              <FlatList
-                  data={ generateWeekDays(new Date(selectedDate)) }
-                  keyExtractor={(item, index) => item ? item.toString() : index.toString()}
-                  numColumns={7}
-                  renderItem={({ item }) => {
-                    if(!item) return <View style={styles.dayCell} />
-                  
-                    const formattedDate = format(item, 'yyyy-MM-dd');
-                    const isSelected = selectedDate === formattedDate;
-                    const isToday = formattedDate === currentDate;
-                
-                    return (
-                      <View style={styles.weekCell}>
-                          <TouchableOpacity
-                            style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator,]}
-                            onPress={() => handleDayPress(item)}
-
-                          >
-                            <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
-                              {format(item, 'd')}
-                            </Text>
-                            {formattedEvents[formattedDate] && (<View style={styles.eventIndicator} />)}
-                          </TouchableOpacity>
-                      </View>
-                    );
-                  }}
-                />
-                <Animated.View style={{ height: weeklyViewHeight}}>
-                  {renderEventList()}
-                </Animated.View>
+      <View style={styles.agendaHeader}>
+        <TouchableOpacity onPress={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+          <Text style={styles.navText}>{'<'}</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerText}>{format(currentMonth, 'MMMM')}</Text>
+        <TouchableOpacity onPress={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+          <Text style={styles.navText}>{'>'}</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.dayHeader}>
+        {dayAbbreviations.map((day, index) => {
+          return (
+            <View key={index} style={styles.dayHeaderCell}>
+              <Text style={styles.dayHeaderText}>{day}</Text>
             </View>
-          )}
+          );
+        })}
+      </View>
+      <View style={{ height: screenHeight - 70, overflow: 'hidden'}}>
+        <Animated.View style={{ transform: [{ translateY: monthTranslateY }] }}>
+          <FlatList
+            data={ generateMonthDays(currentMonth) }
+            keyExtractor={(item, index) => item ? item.toString() : index.toString()}
+            numColumns={7}
+            renderItem={({ item }) => {
+              if(!item) {
+                return <View style={styles.dayCell} />
+              }
+              const formattedDate = format(item, 'yyyy-MM-dd');
+              const isSelected = selectedDate === formattedDate;
+              const isToday = formattedDate === currentDate;
+              
+              return (
+                <TouchableOpacity
+                  style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator]}
+                  onPress={() => handleDayPress(item)}
+                  onLayout={(event) => {
+                    if (!event.nativeEvent) return;
+                    const { y } = event.nativeEvent.layout;
+                    setDayPositions((prev) => ({ ...prev, [formattedDate]: y , }));
+                  }}
+                >
+                  <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
+                    {format(item, 'd')}
+                  </Text>
+                    {formattedEvents[formattedDate] && (<View style={styles.eventIndicator} />)}
+                </TouchableOpacity>
+              );
+            }}
+          />
         </Animated.View>
+      </View>
+      <Animated.View style={{ 
+        transform: [{ translateY: weekTranslateY }], 
+        position: 'absolute', top: 0, left: 0, right: 0, zIndex: isExpanded ? 0 : 2 }}>
+          <FlatList
+            data={ generateWeekDays(new Date(selectedDate)) }
+            keyExtractor={(item, index) => item ? item.toString() : index.toString()}
+            numColumns={7}
+            renderItem={({ item }) => {
+              if(!item) return <View style={styles.dayCell} />
+                    
+              const formattedDate = format(item, 'yyyy-MM-dd');
+              const isSelected = selectedDate === formattedDate;
+              const isToday = formattedDate === currentDate;
+                  
+              return (
+                <View style={styles.weekCell}>
+                  <TouchableOpacity
+                    style={[styles.dayCell, isSelected && styles.selectedDay, isToday && styles.todayIndicator,]}
+                    onPress={() => handleDayPress(item)}
+                  >
+                    <Text style={[isSelected ? styles.selectedText : styles.dayText, isToday && styles.todayText]}>
+                      {format(item, 'd')}
+                    </Text>
+                    {formattedEvents[formattedDate] && (<View style={styles.eventIndicator} />)}
+                    </TouchableOpacity>
+                </View>
+              );
+            }}
+          />
+          <Animated.View style={{ height: weeklyViewHeight}}>
+            {renderEventList()}
+          </Animated.View>
+      </Animated.View>
     </View>
   );
 };
@@ -277,8 +303,6 @@ const styles = StyleSheet.create({
   weekCell: {
     flex: 1,
     margin: 3,
-    width: 50,
-    height: 50,
     borderRadius: 40,
     justifyContent: 'center',
     alignItems: 'center'
@@ -288,13 +312,12 @@ const styles = StyleSheet.create({
   },
   eventIndicator: {
     width: 5,
-    heigth: 5,
-    backgroundColor: 'blue',
+    height: 5,
+    backgroundColor: '#EB504E',
     borderRadius: 3,
   },
   todayIndicator: {
-    flex: 1,
-    backgroundColor: 'red',
+    backgroundColor: '#5BC0EB',
     borderRadius: 40,
     width: 35,
     height: 35,
@@ -333,7 +356,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   selectedDay: {
-    backgroundColor: 'black',
+    backgroundColor: '#211A1E',
     flex: 1,
     borderRadius: 40,
     width: 35,
@@ -346,10 +369,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   eventListContainer: {
-    backgroundColor: 'grey',
+    backgroundColor: '#ddd',
     flex: 1,
     display:'flex',
     alignItems: 'center',
+    
   },
   emptyPlaceHolder: {
     paddingTop: 15,

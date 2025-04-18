@@ -1,13 +1,13 @@
 const express = require("express");
 const { MongoClient } = require("mongodb");
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { mongoose, Types } = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const emailjs = require('@emailjs/nodejs');
-const multer = require("multer");
-const { v4: uuidv4 } = require("uuid");
-const admin = require("firebase-admin");
+const multer = require('multer');
+const storage = multer.memoryStorage(); 
+const upload = multer({ storage: storage });
 
 require("dotenv").config({ path: "./config.env" });
 
@@ -15,19 +15,11 @@ const app = express()
 const PORT = process.env.PORT;
 const HOST = process.env.HOST;
 const Db = process.env.MONGO_URI;
-const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
-const storageBucket = process.env.STORAGE_BUCKET;
-const projectID = process.env.PROJECT_ID
+// const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
+// const storageBucket = process.env.STORAGE_BUCKET;
+// const projectID = process.env.PROJECT_ID
 const client = new MongoClient(Db);
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: storageBucket,
-});
-const bucket = admin.storage().bucket();
-const storage = multer.memoryStorage();
-const upload = multer({ storage});
-module.exports = bucket;
 
 mongoose.connect(Db)
   .then(() => console.log('Connected to MongoDB'))
@@ -39,8 +31,8 @@ const ApprovedAccount = require('./schemas/approvedAccount');
 const Event = require('./schemas/eventSchema');
 const createUser = require('./schemas/usersSchema');
 
-app.use(express.json({ limit: '20mb' }));
-app.use(express.urlencoded({ limit: '20mb', extended: true }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
 app.use(cors());
 
 function getCollectionName(city) {
@@ -124,41 +116,20 @@ app.post('/pending-events/:City', upload.single('image'), async (req, res) => {
     const { City } = req.params;
     const { city, title, location, address, date, time, type, description, feature, status, email, phone, restrictions, createdAt, link } = req.body;
     const collectionName = getCollectionName(City);
+    const imageBuffer = req.file?.buffer;
+    const imageType = req.file?.mimetype;
 
     try {
         await client.connect();
         console.log("Connection Successful");
         
-        let imgUrl = '';
-
-        if (req.file) {
-        const fileName = `${city}/${uuidv4()}_${req.file.originalname}`;
-        const blob = bucket.file(fileName);
-
-        const blobStream = blob.createWriteStream({
-            metadata: {
-            contentType: req.file.mimetype,
-            },
-        });
-
-        await new Promise((resolve, reject) => {
-            blobStream.on('error', reject);
-            blobStream.on('finish', async () => {
-            const [url] = await blob.getSignedUrl({
-                action: 'read',
-                expires: '03-01-2030',
-            });
-            imgUrl = url;
-            resolve();
-            });
-
-            blobStream.end(req.file.buffer);
-        });
-        }
-        
         const db = mongoose.connection.useDb("pending-events");
         const newEvent = new Event({
-            city, title, location, address, date, time, type, description, imgUrl, feature, status, email, phone, restrictions, createdAt, link
+            city, title, location, address, date, time, type, description, 
+            image: {
+                data: binaryImage,
+                contentType: 'image/${imageType}',
+            }, feature, status, email, phone, restrictions, createdAt, link
         });
         
         await db.collection(collectionName).insertOne(newEvent);
@@ -191,6 +162,7 @@ app.put('/edit-event/:City/:eventId', async (req, res) => {
         res.status(400).json({ message: 'Error updating event', error: err });
     };
 });
+
 // post approved event in correct database
 app.post('/event-data/:City', async (req, res) => {
     const { City } = req.params;
@@ -303,6 +275,25 @@ app.get("/approved-events", async (req, res) => {
         console.error("error fetching pending events: ", e);
     } 
 });
+// delete an approved event
+app.delete('/event-data/:City', async (req, res) => {
+    const { City } = req.params;
+    const { event  } = req.body;
+    try {
+        await client.connect();
+        
+        const collectionName = getCollectionName(City);
+        const db = mongoose.connection.useDb("City");
+        
+        await db.collection(collectionName).deleteOne({ _id: new Types.ObjectId(event._id) });
+
+        res.status(200).json({ message: 'Rejected Event deleted successfully' });
+        console.log("Event was deleted successfully.");
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Server error', e });
+    }
+})
 
 // get all rejected events
 app.get("/rejected-events", async (req, res) => {
@@ -325,6 +316,25 @@ app.get("/rejected-events", async (req, res) => {
     } catch(e) {
         console.error("error fetching rejected events: ", e);
     } 
+});
+// delete rejected event
+app.delete('/delete-rejected-event/:City', async (req, res) => {
+    const { City } = req.params;
+    const { event  } = req.body;
+    try {
+        await client.connect();
+        
+        const collectionName = getCollectionName(City);
+        const db = mongoose.connection.useDb("rejected-events");
+        
+        await db.collection(collectionName).deleteOne({ _id: new Types.ObjectId(event._id) });
+
+        res.status(200).json({ message: 'Rejected Event deleted successfully' });
+        console.log("Event was deleted successfully.");
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Server error', e });
+    }  
 });
 
 // register new account
@@ -482,10 +492,6 @@ app.post('/feedback', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
-});
-
 app.listen(PORT, HOST, () => {
-    console.log(`Server is running from: ${HOST} on port: ${PORT}`)
+    console.log(`Server is running on ${HOST}:${PORT}`)
 });

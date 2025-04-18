@@ -4,6 +4,7 @@ import {
   } from 'react-native';
 import { config } from './config.env';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import LottieView from 'lottie-react-native';
@@ -46,14 +47,19 @@ const SubmitEventScreen = ({ route, navigation  }) => {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      base64: true,
       quality: 1,
+      base64: false,
     })
 
-    setImage(selectImage.assets[0].uri);
-    setImageBase64(selectImage.assets[0].base64);
-    setImageType(selectImage.assets[0].uri.split('.').pop().toLowerCase());
-    
+    if (!selectImage.canceled) {
+      const imageUri = selectImage.assets[0].uri;
+      const ext = imageUri.split('.').pop().toLowerCase();
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      setImage(`data:image/${ext};base64,${base64}`);
+      setImageType(ext);
+    }
   };
 
   const clearForm = () => {
@@ -66,7 +72,6 @@ const SubmitEventScreen = ({ route, navigation  }) => {
     setEventType('');
     setDescription('');
     setImage('');
-    setImageBase64('');
     setEmail(''),
     setPhone('')
     setRestrictions('');
@@ -114,7 +119,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
       type: eventType,
       description,
       featured: false,
-      imgUrl: `data:image/${imageType};base64,${imageBase64}`,
+      img: image,
       email,
       phone,
       restrictions,
@@ -284,7 +289,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
           {image && (
             <View style={styles.imageContainer}>
               <Image 
-                source={{ uri: image }} 
+                source={{ uri: image }}
                 style={styles.image}
               />
               <TouchableOpacity onPress={() => setImage(null)} style={styles.removeImageButton}>

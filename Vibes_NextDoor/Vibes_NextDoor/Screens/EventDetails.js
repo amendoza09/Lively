@@ -8,9 +8,9 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const EventDetailScreen = ({ route }) => {
   const { event } = route.params;
 
-  const getImgUri = (img) => {
-    if(!img) return 'https://media.istockphoto.com/id/1346125184/photo/group-of-successful-multiethnic-business-team.jpg?s=612x612&w=0&k=20&c=5FHgRQZSZed536rHji6w8o5Hco9JVMRe8bpgTa69hE8=';
-    return img;
+  const getImgUrl = (img) => {
+    if(!img) return require('../assets/defaultImage.png');
+    return {uri: img};
   };
 
   const formatDate = new Intl.DateTimeFormat("en-us", {
@@ -24,7 +24,7 @@ const EventDetailScreen = ({ route }) => {
       <View style={styles.imgContainer}>
         <Image 
           style={styles.img}
-          source={{ uri: getImgUri(event.imgUrl) }} 
+          source={getImgUrl(event.imgUrl)} 
           resizeMode="cover" 
         />
       </View>

@@ -12,7 +12,7 @@ const PreviewEventScreen = ({ route, navigation }) => {
   const handleFinalSubmit = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${config.api.HOST}/pending-events/${eventData.city}`, {
+      const response = await fetch(`http://192.168.1.17:1000/pending-events/${eventData.city}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(eventData),
@@ -47,7 +47,7 @@ const PreviewEventScreen = ({ route, navigation }) => {
     )
   } else {
     return (
-      <ScrollView style={styles.container }>
+      <ScrollView style={styles.container}>
         <View style={styles.titleContainer}>
           <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Preview</Text>
         </View>
@@ -85,7 +85,7 @@ const PreviewEventScreen = ({ route, navigation }) => {
           <View style={styles.infoLine}>
             <Text style={styles.infoTitle}>External Link:</Text><Text>{eventData.externalLink}</Text>
           </View>
-          {eventData.imgUrl == '' && <Image source={{ uri: eventData.imgUrl }} style={{ height: 200, marginVertical: 10 }} />}
+          {eventData.img && <Image source={{ uri: eventData.img }} style={{ height: 200, marginVertical: 10 }} />}
 
           <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
                 <Text style={styles.editText}>Edit</Text>
@@ -102,6 +102,7 @@ const PreviewEventScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    paddingBottom: 50,
   },
   titleContainer:{
     justifyContent: 'center',
@@ -135,7 +136,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
-    marginTop: 10,
   },
   editText: {
     color: '#007bff',

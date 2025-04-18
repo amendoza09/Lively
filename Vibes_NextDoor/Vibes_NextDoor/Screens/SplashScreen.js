@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, Image } from 'react-native';
 
 export default function SplashScreen() {
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [scaleAnim] = useState(new Animated.Value(1.2));
+  const [scaleAnim] = useState(new Animated.Value(0.19));
 
   useEffect(() => {
     Animated.sequence([
@@ -15,7 +15,7 @@ export default function SplashScreen() {
           useNativeDriver: true,
         }),
         Animated.timing(scaleAnim, {
-          toValue: 1.5,
+          toValue: 0.19,
           duration: 1000,
           useNativeDriver: true,
         }),
@@ -27,7 +27,7 @@ export default function SplashScreen() {
           useNativeDriver: true,
         }),
         Animated.timing(scaleAnim, {
-          toValue: 1.6,
+          toValue: 0.2,
           duration: 1000,
           easing: Easing.out(Easing.ease), 
           useNativeDriver: true,
@@ -39,18 +39,16 @@ export default function SplashScreen() {
   return (
     <Animated.View style={[
         styles.container,
-        { opacity: fadeAnim }
       ]}>
-      <Animated.Text
+      <Animated.Image
+        source={require('../assets/logo.png')}
         style={[
-          styles.text, {
+          styles.img, {
             opacity: fadeAnim,
             transform: [{ scale: scaleAnim }],
           }
         ]}
-      >
-        <Text style={styles.text}>Lively</Text>
-      </Animated.Text>
+      />
     </Animated.View>
   );
 }
@@ -58,13 +56,8 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: '#211A1E',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  text: {
-    fontSize: 32,
-    color: 'white',
-    fontWeight: 'bold',
   },
 });

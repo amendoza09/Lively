@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Text, StyleSheet, TextInput, Alert, Keyboard, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Alert, Keyboard, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
+import LottieView from 'lottie-react-native';
 
 import { config } from './config.env';
 
-const FeedbackScreen = () => {
+const FeedbackScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const clearForm = () => {
+    setName('');
+    setContact('');
+    setMessage('');
+  };
 
   const handleSubmit = async () => {
     if(!message) {
       Alert.alert('Please fill out message field');
       return;
     };
-    
+    setLoading(true);
     const response = await fetch(`${config.api.HOST}/feedback`, {
       method: 'POST',
       headers: {
@@ -23,54 +32,79 @@ const FeedbackScreen = () => {
     });
 
     const data = await response.json();
-
-    if (data.success) {
-      Alert.alert('Thank you for your feedback!');
-      setName('');
-      setContact('');
-      setMessage('');
-    } else {
-      Alert.alert('Failed to send feedback. Please try again.');
+    try {
+      if (data.success) {
+        clearForm();
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "Thank You Feedback"}],
+          })
+        )
+      } 
+    } catch(e) {
+      console.error(error);
+      alert("Error submitting form.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.title}>Have feedback?</Text>
-        <Text style={styles.subtitle}> We appreciate any feedback and suggestions to make Lively better!</Text>
-      
-        <TextInput
-          placeholder="Your Name (Optional)"
-          value={name}
-          onChangeText={setName}
-          style={styles.input}
+  if(loading){
+    return (
+      <View style={styles.submissionOverlay}>
+        <LottieView 
+          source={require('../assets/loadingAnimation.json')}
+          autoPlay
+          loop
+          style={{ width: 200, height: 200 }}
         />
-        <TextInput
-          placeholder="Email or Phone (Optional)"
-          value={contact}
-          onChangeText={setContact}
-          style={styles.input}
-          keyboardType="email-address"
-        />
-        <TextInput
-          placeholder="Your Message"
-          value={message}
-          onChangeText={setMessage}
-          style={[styles.input, styles.textArea]}
-          multiline
-          numberOfLines={4}
-        />
-      
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Send Feedback</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </TouchableWithoutFeedback>
-  );
+      </View>
+    )
+  } else {
+    return (
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView style={styles.container}>
+          <Text style={styles.title}>Have feedback?</Text>
+          <Text style={styles.subtitle}> We appreciate any feedback and suggestions to make Lively better!</Text>
+        
+          <TextInput
+            placeholder="Your Name (Optional)"
+            value={name}
+            onChangeText={setName}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Email or Phone (Optional)"
+            value={contact}
+            onChangeText={setContact}
+            style={styles.input}
+            keyboardType="email-address"
+          />
+          <TextInput
+            placeholder="Your Message"
+            value={message}
+            onChangeText={setMessage}
+            style={[styles.input, styles.textArea]}
+            multiline
+            numberOfLines={4}
+          />
+        
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Send Feedback</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    );
+  };
 };
 
 const styles = StyleSheet.create({
+  submissionOverlay: {
+    paddingTop: 150,
+    alignItems: 'center',
+    flex: 1,
+  },
   container: {
     flex: 1,
     paddingTop: 50,

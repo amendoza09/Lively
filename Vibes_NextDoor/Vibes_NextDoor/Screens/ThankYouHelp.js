@@ -3,21 +3,21 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 
-const ThankYouScreen = ({ navigation }) => {
+const ThankYouHelpScreen = ({ navigation }) => {
 
-    const done = () => navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            {
-              name: 'Home',
-              state: {
-                routes: [{ name: 'Settings' }],
-              },
-            },
-          ],
-        })
-      );
+  const done = () => navigation.dispatch(
+    CommonActions.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'Home',
+          state: {
+            routes: [{ name: 'Settings' }],
+          },
+        },
+      ],
+    })
+  );
 
   return (
     <View style={styles.container}>
@@ -29,7 +29,7 @@ const ThankYouScreen = ({ navigation }) => {
       />
       <Text style={styles.title}>Thank you!</Text>
       <Text style={styles.subtitle}>
-        Your event has been submitted. Please allow 2-3 business days for review.
+        Your submission will be reviewed. We will contact you regarding your issue as soon as possible.
       </Text>
       <TouchableOpacity style={styles.button} onPress={(done)}>
         <Text style={styles.buttonText}>Back to Home</Text>
@@ -78,4 +78,4 @@ const styles = StyleSheet.create({
     },
   });
 
-export default ThankYouScreen;
+export default ThankYouHelpScreen;
