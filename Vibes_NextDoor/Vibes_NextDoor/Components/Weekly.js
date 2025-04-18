@@ -14,7 +14,7 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
 
   const getImgUrl = (img) => {
     if(!img) return require('../assets/defaultImage.png');
-    return {uri: img};
+    return {uri: `data:image/jpeg;base64,${img}`};
   };
 
   const formatDate = new Intl.DateTimeFormat("en-us", {
@@ -91,10 +91,11 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
                                 <View style={[styles.eventCard, { backgroundColor }]}>
                                   <View style={styles.imageCard}>
                                     <Image 
-                                      source={getImgUrl(event.imgUrl)} 
+                                      source={getImgUrl(event.image?.data)}
                                       style={styles.image} 
                                       resizeMode="cover" 
                                     />
+                                   
                                   </View>
                                   <View> 
                                     <View style={styles.info}> 
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexGrow: 1,
     flexDirection: 'column',
-    height: 'auto'
+    paddingBottom: 185,
   },
   titleFeature: {
     margin: 5,

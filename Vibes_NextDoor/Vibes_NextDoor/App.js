@@ -62,6 +62,22 @@ function HomeStackScreen() {
       <HomeStack.Screen
         name="Event Details"
         component={EventDetailScreen}
+        options={({ navigation }) => ({
+          headerShown: true,
+          headerStyle: {
+            height: 108,
+          },
+          Title: 'Event Details',
+          headerLeft: () => (
+            <Pressable 
+              onPress={() => navigation.goBack()} 
+              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
+            >
+              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
+            </Pressable>
+          ),
+        })}
       />
       <HomeStack.Screen
         name="Search"

@@ -126,7 +126,6 @@ const HomeScreen = () => {
           zIndex: 10,
         }}
       >
-        <Text style={{ color: '#999' }}>↓ Pull down to refresh</Text>
       </Animated.View>
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
@@ -181,7 +180,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   container: {
-    
   },
   refreshOverlay: {
     height: 80,
@@ -226,12 +224,9 @@ const styles = StyleSheet.create({
     page: {
       width: screenWidth,
       flex: 1,
-      flexGrow: 1,
-      height: 'auto',
     },
     monthPage: {
       width: screenWidth,
-      height: screenHeight,
       marginTop: 8,
     },
     agendaContainer: {

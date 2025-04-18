@@ -119,7 +119,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
       type: eventType,
       description,
       featured: false,
-      img: image,
+      image: image,
       email,
       phone,
       restrictions,

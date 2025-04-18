@@ -1,13 +1,45 @@
 import React, { useState } from 'react';
-import { View, Text, Image, ScrollView, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, ScrollView, Button, Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { CommonActions } from '@react-navigation/native';
 
 import { config } from './config.env';
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
 const PreviewEventScreen = ({ route, navigation }) => {
   const { eventData, clearForm } = route.params;
   const [loading, setLoading] = useState(false);
+
+  const formData = new FormData();
+
+  formData.append('city', eventData.city);
+  formData.append('title', eventData.title);
+  formData.append('location', eventData.location);
+  formData.append('address', eventData.address);
+  formData.append('date', eventData.date);
+  formData.append('time', eventData.time);
+  formData.append('type', eventData.type);
+  formData.append('description', eventData.description);
+  formData.append('feature', false); // or whatever you want
+  formData.append('status', 'pending'); // or default
+  formData.append('email', eventData.email);
+  formData.append('phone', eventData.phone);
+  formData.append('restrictions', eventData.restrictions);
+  formData.append('createdAt', new Date().toISOString());
+  formData.append('link', eventData.externalLink || '');
+
+  if (eventData.image) {
+    const filename = eventData.image.split('/').pop();
+    const match = /\.(\w+)$/.exec(filename ?? '');
+    const type = match ? `image/${match[1]}` : `image`;
+
+    formData.append('image', {
+      uri: eventData.image,
+      name: filename,
+      type,
+    });
+  }
 
   const handleFinalSubmit = async () => {
     setLoading(true);
@@ -15,7 +47,7 @@ const PreviewEventScreen = ({ route, navigation }) => {
       const response = await fetch(`http://192.168.1.17:1000/pending-events/${eventData.city}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(eventData),
+        body: formData,
       });
 
       if (response.ok) {
@@ -47,7 +79,7 @@ const PreviewEventScreen = ({ route, navigation }) => {
     )
   } else {
     return (
-      <ScrollView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.titleContainer}>
           <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Preview</Text>
         </View>
@@ -85,7 +117,7 @@ const PreviewEventScreen = ({ route, navigation }) => {
           <View style={styles.infoLine}>
             <Text style={styles.infoTitle}>External Link:</Text><Text>{eventData.externalLink}</Text>
           </View>
-          {eventData.img && <Image source={{ uri: eventData.img }} style={{ height: 200, marginVertical: 10 }} />}
+          {eventData.image && <Image source={{ uri: eventData.image }} style={{ height: 200, marginVertical: 10 }} />}
 
           <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
                 <Text style={styles.editText}>Edit</Text>
@@ -102,7 +134,9 @@ const PreviewEventScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    paddingBottom: 50,
+    backgroundColor: '#fff',
+    flexGrow: 1,
+    paddingBottom: 200,
   },
   titleContainer:{
     justifyContent: 'center',
@@ -114,7 +148,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   infoLine: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    width: 250,
   },
   infoTitle: {
     color: '#707070',

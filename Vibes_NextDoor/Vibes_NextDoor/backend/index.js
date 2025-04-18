@@ -126,12 +126,17 @@ app.post('/pending-events/:City', upload.single('image'), async (req, res) => {
         const db = mongoose.connection.useDb("pending-events");
         const newEvent = new Event({
             city, title, location, address, date, time, type, description, 
-            image: {
-                data: binaryImage,
-                contentType: 'image/${imageType}',
-            }, feature, status, email, phone, restrictions, createdAt, link
+            feature, status, email, phone, restrictions, createdAt, link
         });
-        
+        if (imageBuffer && imageType) {
+            newEvent.image = {
+              data: imageBuffer,
+              contentType: imageType
+            };
+        }
+        console.log("Received file:", req.file);
+        console.log("File buffer length:", req.file?.buffer?.length);
+        console.log("File type:", req.file?.mimetype);
         await db.collection(collectionName).insertOne(newEvent);
 
         res.status(201).json({ message: 'Event created successfully', event: newEvent });
@@ -240,13 +245,28 @@ app.get("/pending-events", async (req, res) => {
         const cityNames = ["athens", "atlanta"];
         let allPendingEvents = {};
 
-        for(const city of cityNames) {
+        for (const city of cityNames) {
             const cityCollection = db.collection(city);
             const events = await cityCollection.find({}).toArray();
-
-            allPendingEvents[city] = events;
+      
+            // Convert image binary to base64
+            const processedEvents = events.map(event => {
+              if (event.image && event.image.data) {
+                const base64Image = event.image.data.toString("base64");
+                return {
+                  ...event,
+                  image: {
+                    data: base64Image,
+                    contentType: event.image.contentType,
+                  },
+                };
+              }
+              return event;
+            });
+      
+            allPendingEvents[city] = processedEvents;
         }
-        res.json(allPendingEvents);
+        res.json(processedEvents);
         
     } catch(e) {
         console.error("error fetching pending events: ", e);
@@ -276,7 +296,7 @@ app.get("/approved-events", async (req, res) => {
     } 
 });
 // delete an approved event
-app.delete('/event-data/:City', async (req, res) => {
+app.delete('/delete-approved-event/:City', async (req, res) => {
     const { City } = req.params;
     const { event  } = req.body;
     try {
@@ -287,8 +307,8 @@ app.delete('/event-data/:City', async (req, res) => {
         
         await db.collection(collectionName).deleteOne({ _id: new Types.ObjectId(event._id) });
 
-        res.status(200).json({ message: 'Rejected Event deleted successfully' });
-        console.log("Event was deleted successfully.");
+        res.status(200).json({ message: 'Approved Event deleted successfully' });
+        console.log("Approved event was deleted successfully.");
     } catch (e) {
         console.error(e);
         res.status(500).json({ message: 'Server error', e });

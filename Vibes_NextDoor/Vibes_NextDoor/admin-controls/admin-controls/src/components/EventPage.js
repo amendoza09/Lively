@@ -94,7 +94,7 @@ const EventPage = () => {
   const deleteApprovedEvent = async (event) => {
     const city = event.city;
     try{
-      const response = await fetch(`http://192.168.1.17:1000/event-data/${city}`,{
+      const response = await fetch(`http://192.168.1.17:1000/delete-approved-event/${city}`,{
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -102,11 +102,10 @@ const EventPage = () => {
         body: JSON.stringify({event})
       });
       if(response.ok) {
-        fetchPendingEvents();
         fetchApprovedEvents();
       }
     } catch(e) {
-      console.error("Error approving event:", e);
+      console.error("Error deleting approved event:", e);
     };
   };
 
@@ -139,8 +138,6 @@ const EventPage = () => {
         body: JSON.stringify({event})
       });
       if(response.ok) {
-        fetchPendingEvents();
-        fetchApprovedEvents();
         fetchRejectedEvents();
       }
     } catch(e) {
@@ -190,9 +187,9 @@ const EventPage = () => {
                 <p><span className="font-bold">Email:</span> {event.email}</p>
                 <p><span className="font-bold">Phone:</span> {event.phone}</p>
                 <p><span className="font-bold">Restrictions:</span> {event.restrictions}</p>
-                {event.imgUrl && (
+                {event.image?.data && (
                   <img 
-                    src={event.imgUrl}
+                    src={`data:${event.image.contentType};base64,${event.image.data}`}
                     alt="Event"
                     className="mt-2 max-w-xs"
                   />
