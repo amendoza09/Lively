@@ -94,7 +94,7 @@ const EventPage = () => {
   const deleteApprovedEvent = async (event) => {
     const city = event.city;
     try{
-      const response = await fetch(`http://192.168.1.17:1000/delete-approved-event/${city}`,{
+      const response = await fetch(`https://lively-backend.onrender.com/delete-approved-event/${city}`,{
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -130,7 +130,7 @@ const EventPage = () => {
   const deleteRejectedEvent = async (event) => {
     const city = event.city;
     try{
-      const response = await fetch(`http://192.168.1.17:1000/delete-rejected-event/${city}`,{
+      const response = await fetch(`https://lively-backend.onrender.com/delete-rejected-event/${city}`,{
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

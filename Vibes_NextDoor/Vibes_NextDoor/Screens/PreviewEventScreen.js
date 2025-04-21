@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, Image, ScrollView, Button, Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { CommonActions } from '@react-navigation/native';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
 
 import { config } from './config.env';
 
@@ -21,36 +23,41 @@ const PreviewEventScreen = ({ route, navigation }) => {
   formData.append('time', eventData.time);
   formData.append('type', eventData.type);
   formData.append('description', eventData.description);
-  formData.append('feature', false); // or whatever you want
-  formData.append('status', 'pending'); // or default
+  formData.append('feature', false);
+  formData.append('status', 'pending');
   formData.append('email', eventData.email);
   formData.append('phone', eventData.phone);
   formData.append('restrictions', eventData.restrictions);
   formData.append('createdAt', new Date().toISOString());
   formData.append('link', eventData.externalLink || '');
-
-  if (eventData.image) {
-    const filename = eventData.image.split('/').pop();
-    const match = /\.(\w+)$/.exec(filename ?? '');
-    const type = match ? `image/${match[1]}` : `image`;
-
-    formData.append('image', {
-      uri: eventData.image,
-      name: filename,
-      type,
-    });
-  }
-
+  
   const handleFinalSubmit = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://192.168.1.17:1000/pending-events/${eventData.city}`, {
+      if (eventData.image) {
+        const compressed = await ImageManipulator.manipulateAsync(
+          eventData.image,
+          [],
+          { compress: 0.4, format: ImageManipulator.SaveFormat.JPEG }
+        );
+  
+        const base64 = await FileSystem.readAsStringAsync(compressed.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+  
+        formData.append('image', {
+          data: base64,
+          contentType: 'image/jpeg',
+        });
+      }
+      console.log("Sending data:", JSON.stringify(formData, null, 2));
+      const response = await fetch(`${config.api.HOST}/pending-events/${eventData.city}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: formData,
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
+    
         clearForm();
         navigation.dispatch(
           CommonActions.reset({
@@ -117,13 +124,14 @@ const PreviewEventScreen = ({ route, navigation }) => {
           <View style={styles.infoLine}>
             <Text style={styles.infoTitle}>External Link:</Text><Text>{eventData.externalLink}</Text>
           </View>
-          {eventData.image && <Image source={{ uri: eventData.image }} style={{ height: 200, marginVertical: 10 }} />}
-
+          {eventData.image && 
+            <Image source={{ uri: eventData.image }} style={{ height: 200, marginVertical: 10 }} />
+          }
           <TouchableOpacity style={styles.editButton} onPress={() => navigation.goBack()}>
-                <Text style={styles.editText}>Edit</Text>
+            <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.submitButton} onPress={handleFinalSubmit}>
-                <Text style={styles.submitText}>Confirm & Submit</Text>
+            <Text style={styles.submitText}>Confirm & Submit</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, Dimensions, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, FlatList, TouchableOpacity, Dimensions, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -11,10 +11,27 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
   const navigation = useNavigation();
+  const [contentHeight, setContentHeight] = useState(0);
 
   const getImgUrl = (img) => {
-    if(!img) return require('../assets/defaultImage.png');
-    return {uri: `data:image/jpeg;base64,${img}`};
+    if (!img) return Image.resolveAssetSource(require('../assets/defaultImage.png')).uri;
+    return `data:image/${img.contentType};base64,${img}`;
+  };
+
+  const LazyImage = ({ uri, style }) => {
+    const [loaded, setLoaded] = useState(false);
+  
+    return (
+      <View style={style}>
+        {!loaded && <ActivityIndicator size="small" style={StyleSheet.absoluteFill} />}
+        <Image
+          source={{ uri }}
+          style={[style, { opacity: loaded ? 1 : 0 }]}
+          resizeMode="cover"
+          onLoadEnd={() => setLoaded(true)}
+        />
+      </View>
+    );
   };
 
   const formatDate = new Intl.DateTimeFormat("en-us", {
@@ -51,10 +68,14 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
         <Text>Nothing in {selectedLocation} yet...</Text>
       </View>
     )
-  }
-  else {
+  } else {
     return (
-        <>
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={{ paddingBottom: 190 }}
+        crollEnabled={contentHeight > screenHeight}
+        onContentSizeChange={(w, h) => setContentHeight(h)}
+      >
           {error && <Text>{error}</Text>}
           {featured.length === 0 && !error ? (
             <Text></Text>
@@ -68,58 +89,46 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
           <View style={styles.HomeContainer}>
             {error && <Text>{error}</Text>}
             <View>
-                <Text style={styles.title}>Everything else</Text>
-                <FlatList
-                  data={Object.entries(events)}
-                  keyExtractor={(item) => item[0]}
-                  renderItem={({ item }) => {
-                    const [type, events] = item;
-                    return (
-                      <View>
-                        <Text style={styles.groupTitle}>{type}</Text>
-                        <FlatList
-                          data={events}
-                          horizontal
-                          showsHorizontalScrollIndicator={false}
-                          keyExtractor={(event) => event._id.toString()}
-                          renderItem={({ item: event }) => {
-                            const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
-                            return(
-                              <TouchableOpacity 
-                                onPress={() => navigation.navigate('Event Details', { event })}
-                              >
-                                <View style={[styles.eventCard, { backgroundColor }]}>
-                                  <View style={styles.imageCard}>
-                                    <Image 
-                                      source={getImgUrl(event.image?.data)}
-                                      style={styles.image} 
-                                      resizeMode="cover" 
-                                    />
-                                   
-                                  </View>
-                                  <View> 
-                                    <View style={styles.info}> 
-                                      <Text style={styles.infoText}>{event.time} </Text>
-                                      <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
-                                      <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
-                                    </View>
-                                    <View style={styles.description}>
-                                      <Text style={styles.eventTitle}>{event.title}</Text>
-                                      <Text>{event.location}</Text>
-                                    </View>
-                                  </View>
-                                </View>
-                              </TouchableOpacity>
-                            )
-                          }}
-                        />
-                      </View>
-                    );
-                  }}
-                />
+              <Text style={styles.title}>Everything else</Text>
+              {Object.entries(events).map(([type, events]) => (
+                <View key={type}>
+                  <Text style={styles.groupTitle}>{type}</Text>
+                  <FlatList
+                    data={events}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    keyExtractor={(event) => event._id.toString()}
+                    renderItem={({ item: event }) => {
+                      const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
+                      return (
+                        <TouchableOpacity 
+                          onPress={() => navigation.navigate('Event Details', { event })}
+                        >
+                          <View style={[styles.eventCard, { backgroundColor }]}>
+                            <View style={styles.imageCard}>
+                              <LazyImage uri={getImgUrl(event.image?.data)} style={styles.image} />
+                            </View>
+                            <View> 
+                              <View style={styles.info}> 
+                                <Text style={styles.infoText}>{event.time}</Text>
+                                <Icon name="fiber-manual-record" size={5} style={[styles.infoText, styles.icon]}/>
+                                <Text style={styles.infoText}>{formatDate.format(new Date(event.date))}</Text>
+                              </View>
+                              <View style={styles.description}>
+                                <Text style={styles.eventTitle}>{event.title}</Text>
+                                <Text>{event.location}</Text>
+                              </View>
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      )
+                    }}
+                  />
+                </View>
+              ))}
               </View> 
           </View>
-        </>
+        </ScrollView>
     )
   };
 }
@@ -134,7 +143,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexGrow: 1,
     flexDirection: 'column',
-    paddingBottom: 185,
   },
   titleFeature: {
     margin: 5,
@@ -144,7 +152,6 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     width: screenWidth,
-    height: screenHeight,
     alignItems: 'center',
     marginTop: 20,
   },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, RefreshControl, TouchableOpacity, Animated } from 'react-native';
 
 import { config } from './config.env';
@@ -16,6 +16,7 @@ const HomeScreen = () => {
   const [selectedLocation, setSelectedLocation] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [featuredEvents, setFeaturedEvents] = useState([]);
+  const eventCache = useRef({});
   const [viewMode, setViewMode] = useState("7-Days");
   const translateX = useRef(new Animated.Value(0)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -64,15 +65,31 @@ const HomeScreen = () => {
 
   const fetchEvents = async () => {
     const cityName = selectedLocation.split(',')[0].toLowerCase();
-    const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
 
-    const data = await response.json();
-    const featured = data.filter(event => event.feature === true);
-    setFeaturedEvents(featured);
-    setEvents(data);
+    if(eventCache.current[cityName]) {
+      const cached = eventCache.current[cityName];
+      setFeaturedEvents(cached.featured);
+      setEvents(cached.data);
+      return;
+    }
+    try{
+      const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
+      const data = await response.json();
+      const featured = data.filter(event => event.feature === true);
+      
+      eventCache.current[cityName] =  { data, featured };
+
+      setFeaturedEvents(featured);
+      setEvents(data);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      setError(error);
+    }
   };
 
-  const groupedEvents = groupByType(upcomingEvents);
+  const groupedEvents = useMemo(() => { 
+    return groupByType(upcomingEvents);
+  },  [upcomingEvents]);
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -98,7 +115,7 @@ const HomeScreen = () => {
   }, [viewMode]);
 
   return(
-    <View style={styles.screen}>
+    <View style={[styles.screen]}>
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation}
@@ -113,20 +130,6 @@ const HomeScreen = () => {
           />
         </View>
       )}
-      <Animated.View
-        style={{
-          opacity: scrollY.interpolate({
-            inputRange: [0, 20],
-            outputRange: [1, 0],
-            extrapolate: 'clamp',
-          }),
-          position: 'absolute',
-          top: 10,
-          alignSelf: 'center',
-          zIndex: 10,
-        }}
-      >
-      </Animated.View>
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
         showsVerticalScrollIndicator={false}
@@ -149,22 +152,21 @@ const HomeScreen = () => {
           flexDirection: 'row',
           width: "200%",
           transform: [{ translateX: translateX }],
+          height: screenHeight - 50
         }}>      
           <View style={styles.page}>          
-            <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1}]} >
               <Weekly 
                 events={groupedEvents} 
                 error={error} 
                 selectedLocation={selectedLocation} 
                 featured={featuredEvents} 
-                loading={loading} 
+                loading={loading}
               />
-            </ScrollView>
           </View>
           <View style={styles.monthPage}>
-            <ScrollView style={styles.agendaContainer}>
+            <View style={styles.agendaContainer}>
               <Calendar events={events}/>
-            </ScrollView>
+            </View>
           </View>
         </Animated.View>
       </ScrollView>
@@ -180,9 +182,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   container: {
+    
   },
   refreshOverlay: {
-    height: 80,
+    height: 70,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
@@ -194,22 +197,23 @@ const styles = StyleSheet.create({
   },
     toggleContainer: {
       flexDirection: "row",
-      alginItems: 'center',
       justifyContent: "space-around",
       backgroundColor: "#ddd",
-      width: 350,
+      width: '90%',
       height: 35,
       borderRadius: 20,
     },
     containerToggle:{
-      height: 45,
+      marginVertical: 5,
       alignItems: 'center',
       justifyContent: 'center',
+      backgroundColor: "transparent",
     },
     toggleButton: {
       alignItems: "center",
       justifyContent: "center",
-      width: 175,
+      width: '50%',
+      backgroundColor: "transparent",
     },
     activeButtonWeekly: {
       backgroundColor: "white",
@@ -224,6 +228,7 @@ const styles = StyleSheet.create({
     page: {
       width: screenWidth,
       flex: 1,
+      flexGrow: 1,
     },
     monthPage: {
       width: screenWidth,

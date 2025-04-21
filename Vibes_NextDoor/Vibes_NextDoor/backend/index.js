@@ -134,9 +134,6 @@ app.post('/pending-events/:City', upload.single('image'), async (req, res) => {
               contentType: imageType
             };
         }
-        console.log("Received file:", req.file);
-        console.log("File buffer length:", req.file?.buffer?.length);
-        console.log("File type:", req.file?.mimetype);
         await db.collection(collectionName).insertOne(newEvent);
 
         res.status(201).json({ message: 'Event created successfully', event: newEvent });
@@ -266,7 +263,7 @@ app.get("/pending-events", async (req, res) => {
       
             allPendingEvents[city] = processedEvents;
         }
-        res.json(processedEvents);
+        res.json(allPendingEvents);
         
     } catch(e) {
         console.error("error fetching pending events: ", e);

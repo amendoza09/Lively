@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, Linking, TouchableOpacity,ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, Dimensions, Linking, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ExternalIcon from 'react-native-vector-icons/Feather';
 
@@ -9,10 +9,26 @@ const EventDetailScreen = ({ route }) => {
   const { event } = route.params;
 
   const getImgUrl = (img) => {
-    if(!img) return require('../assets/defaultImage.png');
-    return {uri: img};
+      if (!img) return Image.resolveAssetSource(require('../assets/defaultImage.png')).uri;
+      return `data:image/${img.contentType};base64,${img}`;
   };
 
+  const LazyImage = ({ uri, style }) => {
+      const [loaded, setLoaded] = useState(false);
+    
+      return (
+        <View style={style}>
+          {!loaded && <ActivityIndicator size="small" style={StyleSheet.absoluteFill} />}
+          <Image
+            source={{ uri }}
+            style={[style, { opacity: loaded ? 1 : 0 }]}
+            resizeMode="cover"
+            onLoadEnd={() => setLoaded(true)}
+          />
+        </View>
+      );
+    };
+  
   const formatDate = new Intl.DateTimeFormat("en-us", {
     weekday: "short",
     month: "short",
@@ -22,11 +38,7 @@ const EventDetailScreen = ({ route }) => {
   return (
     <View style={styles.detailsContainer}>
       <View style={styles.imgContainer}>
-        <Image 
-          style={styles.img}
-          source={getImgUrl(event.imgUrl)} 
-          resizeMode="cover" 
-        />
+        <LazyImage uri={getImgUrl(event.image?.data)} style={styles.img} />
       </View>
       <ScrollView style={styles.infoContainer}>
         <View style={styles.titleContainer}>
