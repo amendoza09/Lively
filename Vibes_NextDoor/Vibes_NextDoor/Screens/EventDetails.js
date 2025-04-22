@@ -10,7 +10,7 @@ const EventDetailScreen = ({ route }) => {
 
   const getImgUrl = (img) => {
       if (!img) return Image.resolveAssetSource(require('../assets/defaultImage.png')).uri;
-      return `data:image/${img.contentType};base64,${img}`;
+      return img;
   };
 
   const LazyImage = ({ uri, style }) => {
@@ -36,69 +36,68 @@ const EventDetailScreen = ({ route }) => {
   });
 
   return (
-    <View style={styles.detailsContainer}>
-      <View style={styles.imgContainer}>
-        <LazyImage uri={getImgUrl(event.image?.data)} style={styles.img} />
-      </View>
-      <ScrollView style={styles.infoContainer}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>{event.title}</Text>
-        </View> 
-        <View style={styles.timeInfo}>
-          <Text style={styles.timeText}>{event.time}</Text>
-          <Icon name="fiber-manual-record" size={5} style={[styles.timeText, styles.icon]}/>
-          <Text style={styles.timeText}>{formatDate.format(new Date(event.date))}</Text>
-          <Icon name="fiber-manual-record" size={5} style={[styles.timeText, styles.icon]}/>
-          <Text style={styles.type}>{event.type}</Text>
+    <ScrollView contentContainerStyle={styles.infoContainer}>
+        <View style={styles.imgContainer}>
+          <LazyImage uri={getImgUrl(event.image)} style={styles.img} />
         </View>
-        
-        <View style={styles.locationInfo}>
-          {event.location && (
-            <Text style={styles.locationText}>{event.location}</Text>
-          )}
-          {event.location && event.address && (
+        <View style={styles.detailsContainer}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>{event.title}</Text>
+          </View> 
+          <View style={styles.timeInfo}>
+            <Text style={styles.timeText}>{event.time}</Text>
             <Icon name="fiber-manual-record" size={5} style={[styles.timeText, styles.icon]}/>
+            <Text style={styles.timeText}>{formatDate.format(new Date(event.date))}</Text>
+            <Icon name="fiber-manual-record" size={5} style={[styles.timeText, styles.icon]}/>
+            <Text style={styles.type}>{event.type}</Text>
+          </View>
+          
+          <View style={styles.locationInfo}>
+            {event.location && (
+              <Text style={styles.locationText}>{event.location}</Text>
+            )}
+            {event.location && event.address && (
+              <Icon name="fiber-manual-record" size={5} style={[styles.timeText, styles.icon]}/>
+            )}
+            {event.address && (
+              <Text style={styles.locationAddy}>{event.address}</Text>
+            )}
+          </View>
+          <View style={styles.description}>
+            <Text style={styles.descriptionText}>{event.description}</Text>
+          </View>
+          {event.restrictions && (
+            <View style={styles.ageRestrictonContainer}>
+              <Text style={styles.ageRestrictionText}>Event is {event.restrictions}</Text>
+            </View>
           )}
-          {event.address && (
-            <Text style={styles.locationAddy}>{event.address}</Text>
+          {event.link && (
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.linkButton}
+                onPress={() => Linking.openURL(event.link)}
+              >
+                <Text style={styles.linkButtonText}>More</Text>
+                <ExternalIcon name="external-link" size={16} color="#fff" style={styles.externalIcon} />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
-        <View style={styles.description}>
-          <Text style={styles.descriptionText}>{event.description}</Text>
-        </View>
-        {event.restrictions && (
-          <View style={styles.ageRestrictonContainer}>
-            <Text style={styles.ageRestrictionText}>Event is {event.restrictions}</Text>
-          </View>
-        )}
-        {event.link && (
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.linkButton}
-              onPress={() => Linking.openURL(event.link)}
-            >
-              <Text style={styles.linkButtonText}>Tickets</Text>
-              <ExternalIcon name="external-link" size={16} color="#fff" style={styles.externalIcon} />
-            </TouchableOpacity>
-          </View>
-        )}
         
       </ScrollView>
-    </View>
   );
 };
 
 const styles = StyleSheet.create({
   detailsContainer:{
-    width: screenWidth,
+    paddingHorizontal: 10,
   },
   imgContainer: {
     width: screenWidth,
     height:250,
   },
   infoContainer: {
-    paddingHorizontal: 10,
-    height: '100%'
+    paddingBottom: 90,
   },
   img: {
     width: '100%',
@@ -120,6 +119,7 @@ const styles = StyleSheet.create({
     gap: 8,
     alignItems: 'center',
     marginTop: 5,
+    width: screenWidth,
   },
   timeText: {
     color: '#667085',
@@ -129,10 +129,12 @@ const styles = StyleSheet.create({
     fontSize: 8,
   },
   locationInfo: {
+    width: screenWidth,
     flexDirection: "row",
     alignItems: 'center',
     gap: 8,
     marginVertical: 5,
+    flexWrap: 'wrap',
   },
   locationText: {
     color: '#667085',

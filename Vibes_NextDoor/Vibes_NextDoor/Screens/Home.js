@@ -66,18 +66,10 @@ const HomeScreen = () => {
   const fetchEvents = async () => {
     const cityName = selectedLocation.split(',')[0].toLowerCase();
 
-    if(eventCache.current[cityName]) {
-      const cached = eventCache.current[cityName];
-      setFeaturedEvents(cached.featured);
-      setEvents(cached.data);
-      return;
-    }
     try{
       const response = await fetch(`${config.api.HOST}/event-data/${cityName}`);
       const data = await response.json();
       const featured = data.filter(event => event.feature === true);
-      
-      eventCache.current[cityName] =  { data, featured };
 
       setFeaturedEvents(featured);
       setEvents(data);
@@ -131,8 +123,8 @@ const HomeScreen = () => {
         </View>
       )}
       <ScrollView
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
-        showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
+          showsVerticalScrollIndicator={false}
       >
         <View style={styles.containerToggle}>
           <View style={styles.toggleContainer}>
@@ -148,12 +140,14 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
+        
         <Animated.View style={{
           flexDirection: 'row',
           width: "200%",
           transform: [{ translateX: translateX }],
           height: screenHeight - 50
-        }}>      
+        }}> 
+        
           <View style={styles.page}>          
               <Weekly 
                 events={groupedEvents} 
@@ -163,13 +157,14 @@ const HomeScreen = () => {
                 loading={loading}
               />
           </View>
-          <View style={styles.monthPage}>
-            <View style={styles.agendaContainer}>
-              <Calendar events={events}/>
-            </View>
+          
+            <View style={styles.monthPage}>
+              <View style={styles.agendaContainer}>
+                <Calendar events={events}/>
+              </View>
           </View>
         </Animated.View>
-      </ScrollView>
+        </ScrollView>
     </View>
   )
 };
@@ -233,6 +228,7 @@ const styles = StyleSheet.create({
     monthPage: {
       width: screenWidth,
       marginTop: 8,
+      height: screenHeight - 55,
     },
     agendaContainer: {
       flex: 1,

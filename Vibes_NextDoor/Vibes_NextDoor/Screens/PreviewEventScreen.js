@@ -2,62 +2,52 @@ import React, { useState } from 'react';
 import { View, Text, Image, ScrollView, Button, Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { CommonActions } from '@react-navigation/native';
-import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
+import { storage } from '../Components/firebase';
+
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 import { config } from './config.env';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const PreviewEventScreen = ({ route, navigation }) => {
   const { eventData, clearForm } = route.params;
   const [loading, setLoading] = useState(false);
-
-  const formData = new FormData();
-
-  formData.append('city', eventData.city);
-  formData.append('title', eventData.title);
-  formData.append('location', eventData.location);
-  formData.append('address', eventData.address);
-  formData.append('date', eventData.date);
-  formData.append('time', eventData.time);
-  formData.append('type', eventData.type);
-  formData.append('description', eventData.description);
-  formData.append('feature', false);
-  formData.append('status', 'pending');
-  formData.append('email', eventData.email);
-  formData.append('phone', eventData.phone);
-  formData.append('restrictions', eventData.restrictions);
-  formData.append('createdAt', new Date().toISOString());
-  formData.append('link', eventData.externalLink || '');
   
   const handleFinalSubmit = async () => {
     setLoading(true);
     try {
-      if (eventData.image) {
-        const compressed = await ImageManipulator.manipulateAsync(
-          eventData.image,
-          [],
-          { compress: 0.4, format: ImageManipulator.SaveFormat.JPEG }
-        );
-  
-        const base64 = await FileSystem.readAsStringAsync(compressed.uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-  
-        formData.append('image', {
-          data: base64,
-          contentType: 'image/jpeg',
-        });
-      }
-      console.log("Sending data:", JSON.stringify(formData, null, 2));
+      let imageUrl = '';
+
+      imageUrl = await uploadImageToFirebase(eventData.image);
+      
+      const payload = {
+        city: eventData.city,
+        title: eventData.title,
+        location: eventData.location,
+        address: eventData.address,
+        date: eventData.date,
+        time: eventData.time,
+        type: eventData.type,
+        description: eventData.description,
+        feature: false,
+        status: 'pending',
+        email: eventData.email,
+        phone: eventData.phone,
+        restrictions: eventData.restrictions,
+        createdAt: new Date().toISOString(),
+        link: eventData.externalLink || '',
+        image: imageUrl, // Send as string
+      };
+      
       const response = await fetch(`${config.api.HOST}/pending-events/${eventData.city}`, {
         method: "POST",
-        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
-
+      
       if (response.ok) {
-    
         clearForm();
         navigation.dispatch(
           CommonActions.reset({
@@ -71,6 +61,19 @@ const PreviewEventScreen = ({ route, navigation }) => {
     } finally{
       setLoading(false);
     }
+  };
+
+  const uploadImageToFirebase = async (imageUri) => {
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+  
+    const fileName = `lively/${Date.now()}.jpg`;
+    const imageRef = ref(storage, fileName);
+  
+    await uploadBytes(imageRef, blob);
+    const downloadURL = await getDownloadURL(imageRef);
+  
+    return downloadURL;
   };
 
   if(loading){

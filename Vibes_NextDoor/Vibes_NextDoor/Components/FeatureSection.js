@@ -85,7 +85,7 @@ const FeatureSection = ({ data }) => {
           >
             <View style={styles.eventCard}>
               <Image 
-                source={getImgUrl(event.imgUrl)} 
+                source={getImgUrl(event.image)} 
                 style={styles.image} 
                 resizeMode="cover" 
               />

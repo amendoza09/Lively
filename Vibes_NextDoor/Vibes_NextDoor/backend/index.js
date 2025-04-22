@@ -9,11 +9,11 @@ const multer = require('multer');
 const storage = multer.memoryStorage(); 
 const upload = multer({ storage: storage });
 
-require("dotenv").config({ path: "./config.env" });
+// require("dotenv").config({ path: "./config.env" });
 
 const app = express()
 const PORT = process.env.PORT;
-const HOST = process.env.HOST;
+// const HOST = process.env.HOST;
 const Db = process.env.MONGO_URI;
 // const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT);
 // const storageBucket = process.env.STORAGE_BUCKET;
@@ -31,8 +31,8 @@ const ApprovedAccount = require('./schemas/approvedAccount');
 const Event = require('./schemas/eventSchema');
 const createUser = require('./schemas/usersSchema');
 
-app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ limit: '15mb', extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 
 function getCollectionName(city) {
@@ -112,12 +112,10 @@ app.get("/event-data/:City", async (req, res) => {
 })
 
 // create an event 
-app.post('/pending-events/:City', upload.single('image'), async (req, res) => {
+app.post('/pending-events/:City', async (req, res) => {
     const { City } = req.params;
-    const { city, title, location, address, date, time, type, description, feature, status, email, phone, restrictions, createdAt, link } = req.body;
+    const { city, title, location, address, date, time, type, description, feature, status, email, phone, restrictions, createdAt, link, image } = req.body;
     const collectionName = getCollectionName(City);
-    const imageBuffer = req.file?.buffer;
-    const imageType = req.file?.mimetype;
 
     try {
         await client.connect();
@@ -126,14 +124,9 @@ app.post('/pending-events/:City', upload.single('image'), async (req, res) => {
         const db = mongoose.connection.useDb("pending-events");
         const newEvent = new Event({
             city, title, location, address, date, time, type, description, 
-            feature, status, email, phone, restrictions, createdAt, link
+            feature, status, email, phone, restrictions, createdAt, link, image
         });
-        if (imageBuffer && imageType) {
-            newEvent.image = {
-              data: imageBuffer,
-              contentType: imageType
-            };
-        }
+
         await db.collection(collectionName).insertOne(newEvent);
 
         res.status(201).json({ message: 'Event created successfully', event: newEvent });
@@ -509,6 +502,6 @@ app.post('/feedback', async (req, res) => {
     }
 });
 
-app.listen(PORT, HOST, () => {
-    console.log(`Server is running on ${HOST}:${PORT}`)
+app.listen(HOST, () => {
+    console.log(`Server is running on ${HOST}`)
 });

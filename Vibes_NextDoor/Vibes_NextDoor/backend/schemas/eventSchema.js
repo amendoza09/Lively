@@ -6,10 +6,10 @@ const eventSchema = new mongoose.Schema({
   location: { type: String, required: true },
   address: { type: String },
   date: { type: Date, required: true },
-  time: { type: String, required: true },  // Can also use Date if needed
+  time: { type: String, required: true },
   type: { type: String, required: true },
   description: { type: String},
-  image: { data: Buffer, contentType: String},
+  image: { type: String},
   feature: { type: Boolean, default: false },
   email: { type: String },
   phone: { type: String },

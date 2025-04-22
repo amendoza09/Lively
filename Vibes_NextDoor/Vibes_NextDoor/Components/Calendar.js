@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from  'react';
-import { View, FlatList, Text, TouchableOpacity, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
+import { View, FlatList, Text, TouchableOpacity, StyleSheet, Animated, Easing, Dimensions, ScrollView } from 'react-native';
 import { format, startOfMonth, startOfWeek, endOfWeek, endOfMonth, eachDayOfInterval, addMonths, subMonths, subWeeks, addWeeks, getDay } from 'date-fns';
 import { useNavigation } from '@react-navigation/native';
 
@@ -124,7 +124,7 @@ const Calendar = ({ events }) => {
     return (
       <View style={{ flex: 1 }}>
         {!isExpanded && (
-          <View style={styles.eventListContainer} >
+          <ScrollView contentContainerStyle={styles.eventListContainer} showsVerticalScrollIndicator={false}>
             {formattedEvents[selectedDate] ? (
               <FlatList
                 data={formattedEvents[selectedDate]}
@@ -159,7 +159,7 @@ const Calendar = ({ events }) => {
               <TouchableOpacity style={styles.closeButton} onPress={handleReset}>
                 <Text>Close</Text>
               </TouchableOpacity>
-          </View>
+          </ScrollView>
         )}
       </View>
     );

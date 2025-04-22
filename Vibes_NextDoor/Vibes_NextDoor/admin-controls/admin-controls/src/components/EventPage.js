@@ -187,9 +187,9 @@ const EventPage = () => {
                 <p><span className="font-bold">Email:</span> {event.email}</p>
                 <p><span className="font-bold">Phone:</span> {event.phone}</p>
                 <p><span className="font-bold">Restrictions:</span> {event.restrictions}</p>
-                {event.image?.data && (
+                {event.image && (
                   <img 
-                    src={`data:${event.image.contentType};base64,${event.image.data}`}
+                    src={event.image}
                     alt="Event"
                     className="mt-2 max-w-xs"
                   />

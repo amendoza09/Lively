@@ -15,7 +15,7 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
 
   const getImgUrl = (img) => {
     if (!img) return Image.resolveAssetSource(require('../assets/defaultImage.png')).uri;
-    return `data:image/${img.contentType};base64,${img}`;
+    return img;
   };
 
   const LazyImage = ({ uri, style }) => {
@@ -106,7 +106,7 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
                         >
                           <View style={[styles.eventCard, { backgroundColor }]}>
                             <View style={styles.imageCard}>
-                              <LazyImage uri={getImgUrl(event.image?.data)} style={styles.image} />
+                              <LazyImage uri={getImgUrl(event.image)} style={styles.image} />
                             </View>
                             <View> 
                               <View style={styles.info}> 
@@ -171,6 +171,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginTop: 10,
     borderRadius: 5,
+    width: 250,
+    overflow: 'hidden',
   },
   imageCard: {
     width: 250,

@@ -31,12 +31,11 @@ const SubmitEventScreen = ({ route, navigation  }) => {
   const [phone, setPhone] = useState('');
   const [restrictions, setRestrictions] = useState('');
   const [externalLink, setExternalLink] = useState('');
-  const [loading, setLoading] = useState(true);
   const scrollViewRef = useRef(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const eventTypes = [
-    'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Other'
+    'Art', 'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Market', 'Other'
   ];
   const availableCities = [
     'Athens, GA',
