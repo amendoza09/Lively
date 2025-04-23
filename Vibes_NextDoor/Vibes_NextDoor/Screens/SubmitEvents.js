@@ -42,6 +42,11 @@ const SubmitEventScreen = ({ route, navigation  }) => {
   ];
 
   const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if(status !== 'granted') {
+      alert('Sorry, we need camera roll permisions tto make this work!');
+      return;
+    }
     let selectImage = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
