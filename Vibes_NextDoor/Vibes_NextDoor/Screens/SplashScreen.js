@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Image } from 'react-native';
 
 export default function SplashScreen() {
-  const [fadeAnim] = useState(new Animated.Value(0));
-  const [scaleAnim] = useState(new Animated.Value(0.19));
+  const [fadeAnim] = useState(new Animated.Value(1));
+  const [scaleAnim] = useState(new Animated.Value(0.28));
 
   useEffect(() => {
     Animated.sequence([
@@ -13,23 +13,12 @@ export default function SplashScreen() {
           duration: 1000,
           easing: Easing.out(Easing.ease), 
           useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 0.19,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
+        })
       ]),
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
           duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 0.2,
-          duration: 1000,
-          easing: Easing.out(Easing.ease), 
           useNativeDriver: true,
         })
       ])
