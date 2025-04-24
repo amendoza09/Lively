@@ -20,6 +20,12 @@
           "locationAlwaysAndWhenInUsePermission": "Allow Lively to use your location.",
           "locationWhenInUsePermission": "Allow Lively to access your location while you are using the app."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "mode": "production"
+        }
       ]
     ],
     "splash": {
@@ -31,8 +37,10 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app uses your location to show nearby events.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to function properly."
-      }
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to function properly.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.toni.Lively"
     },
     "android": {
       "adaptiveIcon": {
@@ -40,12 +48,18 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "65609414-d869-46c3-b513-141d95240ddc"
+      }
     }
   }
 }
