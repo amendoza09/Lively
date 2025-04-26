@@ -29,6 +29,7 @@ const PreviewEventScreen = ({ route, navigation }) => {
         time: eventData.time,
         type: eventData.type,
         description: eventData.description,
+        isFree: eventData.isFree,
         feature: false,
         status: 'pending',
         email: eventData.email,
@@ -111,6 +112,9 @@ const PreviewEventScreen = ({ route, navigation }) => {
           </View>
           <View style={styles.infoLine}>
             <Text style={styles.infoTitle}>Type:</Text><Text>{eventData.type}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Event is Free:</Text><Text>{eventData.isFree}</Text>
           </View>
           <View style={styles.infoLine}>
             <Text style={styles.infoTitle}>Description:</Text><Text>{eventData.description}</Text>

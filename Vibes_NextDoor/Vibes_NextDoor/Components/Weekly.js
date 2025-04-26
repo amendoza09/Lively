@@ -62,7 +62,7 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
     )
   } 
 
-  else if(Object.keys(events).length === 0 && !error && !loading) {
+  else if(Object.keys(events).length === 0 && Object.keys(featured).length === 0 && !error && !loading) {
     return (
       <View style={styles.emptyContainer}>
         <Text>Nothing in {selectedLocation} yet...</Text>
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   titleFeature: {
-    margin: 5,
+    marginHorizontal: 5,
     marginBottom: 5,
     fontSize: 24,
     fontWeight: 'bold',

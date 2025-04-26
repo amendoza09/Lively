@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, Dimensions, Linking, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Image, StyleSheet, Dimensions, Linking, TouchableOpacity, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ExternalIcon from 'react-native-vector-icons/Feather';
 
@@ -8,6 +8,30 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const EventDetailScreen = ({ route }) => {
   const { event } = route.params;
 
+  const openMaps = (address, city) => {
+    const fullAddy = `${address}, ${city}`;
+    const query = encodeURIComponent(fullAddy);
+    const url = Platform.select({
+      ios: `maps:0,0?q=${query}`,
+      android: `geo:0,0?q=${query}`,
+    });
+    Linking.openURL(url).catch(err => {
+      console.error("Failed to open map:", err);
+    })
+  };
+  
+  const openLocation = (location, city) => {
+    const fullLocation = `${location}, ${city}`;
+    const query = encodeURIComponent(fullLocation);
+    const url = Platform.select({
+      ios: `maps:0,0?q=${query}`,
+      android: `geo:0,0?q=${query}`,
+    });
+    Linking.openURL(url).catch(err => {
+      console.error("Failed to open map:", err);
+    })
+  }
+
   const getImgUrl = (img) => {
       if (!img) return Image.resolveAssetSource(require('../assets/defaultImage.png')).uri;
       return img;
@@ -15,7 +39,6 @@ const EventDetailScreen = ({ route }) => {
 
   const LazyImage = ({ uri, style }) => {
       const [loaded, setLoaded] = useState(false);
-    
       return (
         <View style={style}>
           {!loaded && <ActivityIndicator size="small" style={StyleSheet.absoluteFill} />}
@@ -54,13 +77,17 @@ const EventDetailScreen = ({ route }) => {
           
           <View style={styles.locationInfo}>
             {event.location && (
-              <Text style={styles.locationText}>{event.location}</Text>
+              <TouchableOpacity onPress={() => openLocation(event.location, event.city)}>
+                <Text style={styles.locationText}>{event.location}</Text>
+              </TouchableOpacity>
             )}
             {event.location && event.address && (
               <Icon name="fiber-manual-record" size={5} style={[styles.timeText, styles.icon]}/>
             )}
             {event.address && (
-              <Text style={styles.locationAddy}>{event.address}</Text>
+              <TouchableOpacity onPress={() => openMaps(event.address, event.city)}>
+                <Text style={styles.locationAddy}>{event.address}</Text>
+              </TouchableOpacity>
             )}
           </View>
           <View style={styles.description}>

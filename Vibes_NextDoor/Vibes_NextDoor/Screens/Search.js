@@ -98,7 +98,7 @@ const SearchScreen = ({ route, navigation }) => {
                             <Text style={styles.cityText}>{item}</Text>
                         </TouchableOpacity>
                     )} 
-                    />
+                />
             ) : (
                 <Text style={styles.noResults}>
                     {searchQuery ? 'Nothing here yet' : ''}

@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   eventIndicator: {
     width: 5,
     height: 5,
-    backgroundColor: '#EB504E',
+    backgroundColor: '#EB504E', // red
     borderRadius: 3,
   },
   todayIndicator: {

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-native-community/blur": "^4.4.1",
+    "@react-native-community/checkbox": "^0.5.17",
     "@react-native-community/datetimepicker": "^8.3.0",
     "@react-native-community/geolocation": "^3.4.0",
     "@react-native-community/masked-view": "^0.1.11",
@@ -50,7 +51,8 @@
     "react-native-safe-area-context": "^5.0.0",
     "react-native-screens": "^4.4.0",
     "react-native-snap-carousel": "^3.9.1",
-    "react-native-vector-icons": "^10.2.0"
+    "react-native-vector-icons": "^10.2.0",
+    "expo-checkbox": "~4.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

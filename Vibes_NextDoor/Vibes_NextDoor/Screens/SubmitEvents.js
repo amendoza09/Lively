@@ -1,26 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Platform, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback
+  View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Platform, 
+  KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, SafeAreaView, Dimensions
   } from 'react-native';
-import { config } from './config.env';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
-import LottieView from 'lottie-react-native';
+import Checkbox from 'expo-checkbox';
 
-const SubmitEventScreen = ({ route, navigation  }) => {
-  const { onSubmit } = route.params || {};
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
+const SubmitEventScreen = ({ navigation  }) => {
   const [selectedCity, setSelectedCity] = useState('');
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState(''); 
-  const [address, setAddress] = useState(''); 
+  const [address, setAddress] = useState('');
+  const [address2, setAddress2] = useState('');
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [eventType, setEventType] = useState('');
   const [image, setImage] = useState(null);
-  const [imageBase64, setImageBase64] = useState(null);
   const [imageType, setImageType] = useState('');
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showDatePicker, setDatePicker] = useState(false);
@@ -29,10 +29,13 @@ const SubmitEventScreen = ({ route, navigation  }) => {
   const [description, setDescription] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [free, setFree] = useState(null);
   const [restrictions, setRestrictions] = useState('');
   const [externalLink, setExternalLink] = useState('');
   const scrollViewRef = useRef(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  const inputAccessoryViewID = 'doneAccessoryView';
 
   const eventTypes = [
     'Art', 'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Market', 'Other'
@@ -71,9 +74,11 @@ const SubmitEventScreen = ({ route, navigation  }) => {
     setSelectedCity('');
     setLocation('');
     setAddress('');
+    setAddress2('');
     setDate(new Date());
     setTime(new Date());
     setEventType('');
+    setFree(null);
     setDescription('');
     setImage('');
     setEmail(''),
@@ -118,34 +123,41 @@ const SubmitEventScreen = ({ route, navigation  }) => {
       title,
       location,
       address: address || '',
+      address2: address2 || '',
       date: date.toISOString().split('T')[0],
       time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       type: eventType,
+      isFree: free,
       description,
       featured: false,
-      image: image,
+      image: image || '',
       email,
       phone,
       restrictions,
       externalLink,
     };
-
     navigation.navigate("Preview Submission", { eventData: newEvent, clearForm });
-    
   };
 
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 100}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 100}
       style={{flexGrow: 1}}
     >
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.settingsHeader}>
+          <Text style={styles.headerTitle}>Submit an Event</Text>
+        </View>
+      </SafeAreaView>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    
+        
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
+          
           <Text style={styles.label}>Event Title {title === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TextInput 
             style={styles.input}
+            returnKeyType="done"
             placeholder="Enter event title"
             value={title}
             onChangeText={setTitle}
@@ -156,24 +168,31 @@ const SubmitEventScreen = ({ route, navigation  }) => {
             <Text style={styles.input}>{selectedCity || "Select city"}</Text>
           </TouchableOpacity>
           {showCityPicker && (
-            <Picker 
-              selectedValue={selectedCity}
-              onValueChange={(selectedCity) => {
-                setShowCityPicker(false);
-                if(selectedCity) setSelectedCity(selectedCity);
-              }}
-            >
-              <Picker.Item label="Select city" value=" " />
-              {availableCities.map((type) => (
-                <Picker.Item key={type} label={type} value={type} />
-              ))}
-            </Picker>
+            <View>
+              <View style={{ alignItems: 'flex-end', paddingHorizontal: 10 }}>
+                <TouchableOpacity onPress={() => setShowCityPicker(false)}>
+                  <Text style={{ color: '#5BC0EB' }}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <Picker 
+                selectedValue={selectedCity}
+                onValueChange={(selectedCity) => {
+                  if(selectedCity) setSelectedCity(selectedCity);
+                }}
+              >
+                <Picker.Item label="Select city" value=" " />
+                {availableCities.map((type) => (
+                  <Picker.Item key={type} label={type} value={type} />
+                ))}
+              </Picker>
+            </View>
           )}
 
           <Text style={styles.label}>Location {location === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TextInput 
             style={styles.input}
             placeholder="Enter location"
+            returnKeyType="done"
             value={location}
             onChangeText={setLocation}
           />
@@ -182,8 +201,18 @@ const SubmitEventScreen = ({ route, navigation  }) => {
           <TextInput 
             style={styles.input}
             placeholder="Enter address (optional)"
+            returnKeyType="done"
             value={address}
             onChangeText={setAddress}
+            onFocus = {(event) => scrollToInput(event.target)}
+          />
+          <Text style={styles.label}>Address Line 2</Text>
+          <TextInput 
+            style={styles.input}
+            placeholder="Address Line 2 (optional)"
+            returnKeyType="done"
+            value={address2}
+            onChangeText={setAddress2}
             onFocus = {(event) => scrollToInput(event.target)}
           />
           <View style={styles.timeContainer}>
@@ -222,19 +251,45 @@ const SubmitEventScreen = ({ route, navigation  }) => {
             <Text style={styles.input}>{eventType || "Select event type"}</Text>
           </TouchableOpacity>
           {showEventPicker && (
-            <Picker 
-              selectedValue={eventType}
-              onValueChange={(selectedEventType) => {
-                setShowEventPicker(false);
-                if(selectedEventType) setEventType(selectedEventType);
-              }}
-            >
+            <View>
+              <View style={{ alignItems: 'flex-end', paddingHorizontal: 10 }}>
+                <TouchableOpacity onPress={() => setShowEventPicker(false)}>
+                  <Text style={{ color: '#5BC0EB' }}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <Picker 
+                selectedValue={eventType}
+                onValueChange={(selectedEventType) => {
+                  if(selectedEventType) setEventType(selectedEventType);
+                }}
+              >
               <Picker.Item label="Select event type" value=" " />
               {eventTypes.map((type) => (
                 <Picker.Item key={type} label={type} value={type} />
               ))}
             </Picker>
+            </View>
           )}
+          
+          <Text style={styles.eventLabel}>Is this event free?</Text>
+          <View style={{ flexDirection: 'row', gap: 20}}>
+            <View style={styles.checksContainer}>
+              <Checkbox
+                value={free === true}
+                onValueChange={() => setFree(true)}
+                tintColors={{ true: '#007AFF', false: '#aaa' }}
+              />
+              <Text>Yes</Text>
+            </View>
+            <View style={styles.checksContainer}>
+              <Checkbox
+                value={free === false}
+                onValueChange={() => setFree(false)}
+                tintColors={{ true: '#007AFF', false: '#aaa' }}
+              />
+              <Text>No</Text>
+            </View>
+          </View>
 
           <Text style={styles.eventLabel}>Description</Text>
           <TextInput 
@@ -246,23 +301,24 @@ const SubmitEventScreen = ({ route, navigation  }) => {
             onFocus = {(event) => scrollToInput(event.target)}
           />
 
-          <Text style={styles.eventLabel}>Email</Text>
+          <Text style={styles.eventLabel}>Email {eventType === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TextInput 
             style={[ styles.input ]}
+            returnKeyType="done"
             placeholder="Enter email (in case we need to contact you)"
             value={email}
             onChangeText={setEmail}
-            multiline
             onFocus = {(event) => scrollToInput(event.target)}
           />
 
           <Text style={styles.eventLabel}>Phone number</Text>
           <TextInput 
-            style={[ styles.input ]}
+            style={styles.input}
+            keyboardType="phone-pad"
             placeholder="Enter phone number (optional)"
             value={phone}
             onChangeText={setPhone}
-            multiline
+            returnKeyType="done"
             onFocus = {(event) => scrollToInput(event.target)}
           />
 
@@ -272,7 +328,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
             placeholder="Age restrictions, attire, limited seating, etc."
             value={restrictions}
             onChangeText={setRestrictions}
-            multiline
+            returnKeyType="done"
             onFocus = {(event) => scrollToInput(event.target)}
           />
 
@@ -282,7 +338,7 @@ const SubmitEventScreen = ({ route, navigation  }) => {
             placeholder="Tickets, RSVP, etc.."
             value={externalLink}
             onChangeText={setExternalLink}
-            multiline
+            returnKeyType="done"
             onFocus = {(event) => scrollToInput(event.target)}
           />
 
@@ -311,6 +367,22 @@ const SubmitEventScreen = ({ route, navigation  }) => {
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    height: 108,
+  },
+  settingsHeader: {
+    textAlign: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
   container: {
     padding: 20,
     backgroundColor: '#fff',
@@ -318,10 +390,10 @@ const styles = StyleSheet.create({
     paddingBottom: 200,
   },
   label: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginBottom: 5,
-    },
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
     input: {
         borderWidth: 1,
         borderColor: '#ddd',
@@ -334,6 +406,12 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       marginBottom: 5,
       marginTop: 5,
+    },
+    checksContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 5,
+      gap: 5
     },
     imageUpload: {
         backgroundColor: '#ddd',

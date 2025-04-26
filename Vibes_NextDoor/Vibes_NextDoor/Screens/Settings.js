@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SettingScreen = ({ navigation }) => {
     const settingOptions = [
-        { id: '1', name: 'Submit an Event', action:() => navigation.navigate('Submit an Event') },
         { id: '2', name: 'Privacy', action: () => navigation.navigate('Privacy') },
         { id: '3', name: 'Help', action: () => navigation.navigate('Help') },
         { id: '4', name: 'Feedback & Suggestions', action: () => navigation.navigate('Feedback')},

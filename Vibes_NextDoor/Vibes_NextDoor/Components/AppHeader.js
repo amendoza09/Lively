@@ -66,7 +66,6 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
             easing: Easing.out(Easing.ease), 
             useNativeDriver: false,
         }).start();
-        
     };
     
 
@@ -121,28 +120,28 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
                   </Pressable>
               </View>
               {modalVisible && (
-                      <Animated.View
-                      style={[styles.modalContainer, { height: contentAnim, opacity: contentAnim}]}
-                      >
-                        <View style={{ alignItems: 'center'}}>
-                            <Text style={styles.modalTitle}>Select a City</Text>
-                                <FlatList
-                                    data={cities}
-                                    keyExtractor={(item) => item}
-                                    renderItem={({ item }) => (
-                                        <View>
-                                            <TouchableOpacity
-                                                style={styles.cityItem}
-                                                onPress={() => handleCitySelect(item)}
-                                            >
-                                                <Text style={styles.cityText}>{item}</Text>
-                                            </TouchableOpacity>
-                                            <View style={styles.selectSuspense}>
-                                                <Text style={{ color: 'black'}}>More cities available soon...</Text>
-                                            </View>
+                <Animated.View
+                  style={[styles.modalContainer, { height: contentAnim, opacity: contentAnim}]}
+                >
+                    <View style={{ alignItems: 'center'}}>
+                        <Text style={styles.modalTitle}>Select a City</Text>
+                            <FlatList
+                                data={cities}
+                                keyExtractor={(item) => item}
+                                renderItem={({ item }) => (
+                                    <View>
+                                        <TouchableOpacity
+                                            style={styles.cityItem}
+                                            onPress={() => handleCitySelect(item)}
+                                        >
+                                            <Text style={styles.cityText}>{item}</Text>
+                                        </TouchableOpacity>
+                                        <View style={styles.selectSuspense}>
+                                            <Text style={{ color: 'black'}}>More cities available soon...</Text>
                                         </View>
-                                    )}
-                                />
+                                    </View>
+                                )}
+                            />
                                 {/* search feature will come soon
                                 <Pressable style={styles.searchBar} onPress={handleSearchPress}>
                                     <Text style={styles.cityItem}>Search...</Text>
@@ -183,7 +182,7 @@ const styles = StyleSheet.create({
         color: 'Black',
     },
     cityTitle: {
-        color: '#5BC0EB',
+        color: '#5BC0EB', // blue
         fontSize: 24,
         fontWeight: 'bold',
         textAlignVertical: 'center',

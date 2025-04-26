@@ -22,6 +22,7 @@ import ThankYouHelpScreen from './Screens/ThankYouHelp';
 import ThankYouFeedbackScreen from './Screens/ThankYouFeedback';
 
 const HomeStack = createStackNavigator();
+const submitStack = createStackNavigator();
 const SettingStack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -101,6 +102,47 @@ function HomeStackScreen() {
   );
 }
 
+function SubmitScreenStack() {
+  return(
+    <submitStack.Navigator>
+      <submitStack.Screen
+        name="Submit an Event"
+        component={SubmitEventScreen}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
+      <submitStack.Screen
+        name="Preview Submission"
+        component={PreviewEventScreen}
+        options={({ navigation }) => ({
+          headerShown: true,
+          title: 'Preview Submission',
+          headerStyle: {
+            height: 108,
+          },
+          headerLeft: () => (
+            <Pressable 
+              onPress={() => navigation.goBack()} 
+              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
+            >
+              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
+            </Pressable>
+          ),
+        })}
+      />
+      <submitStack.Screen
+        name="Thank You"
+        component={ThankYouScreen}
+        options={() => ({
+          headerShown: false
+        })}
+      />
+    </submitStack.Navigator>
+  )
+}
+
 function SettingStackScreen() {
   return (
     <SettingStack.Navigator>
@@ -110,27 +152,6 @@ function SettingStackScreen() {
           headerShown: false,
         }} 
         component={SettingScreen} 
-      />
-
-      <SettingStack.Screen
-        name="Submit an Event"
-        component={SubmitEventScreen}
-        options={({ navigation }) => ({
-          headerShown: true,
-          headerStyle: {
-            height: 108,
-          },
-          title: 'Submit an Event',
-          headerLeft: () => (
-            <Pressable 
-              onPress={() => navigation.goBack()} 
-              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
-            >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
-            </Pressable>
-          ),
-        })}
       />
 
       <SettingStack.Screen
@@ -215,33 +236,7 @@ function SettingStackScreen() {
           ),
         })}
       />
-      <SettingStack.Screen
-        name="Preview Submission"
-        component={PreviewEventScreen}
-        options={({ navigation }) => ({
-          headerShown: true,
-          title: 'Preview Submission',
-          headerStyle: {
-            height: 108,
-          },
-          headerLeft: () => (
-            <Pressable 
-              onPress={() => navigation.goBack()} 
-              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
-            >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
-            </Pressable>
-          ),
-        })}
-      />
-      <SettingStack.Screen
-        name="Thank You"
-        component={ThankYouScreen}
-        options={() => ({
-          headerShown: false
-        })}
-      />
+      
       <SettingStack.Screen
         name="Thank You Help"
         component={ThankYouHelpScreen}
@@ -278,6 +273,15 @@ function RootNavigator() {
                 <Ionicons name="home-outline" size={24} color="white" style={styles.icons} />
               )
             }}  
+          />
+          <Tab.Screen
+            name="Create Event" 
+            component={SubmitScreenStack} 
+            options={{
+              tabBarIcon: () => (
+                <Ionicons name="add-circle-outline" size={24} color="white" style={styles.icons}/>
+              )
+            }}
           />
           <Tab.Screen 
             name="Settings" 

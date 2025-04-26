@@ -21,12 +21,6 @@
           "locationWhenInUsePermission": "Allow Lively to access your location while you are using the app."
         }
       ],
-      [
-        "expo-notifications",
-        {
-          "mode": "production"
-        }
-      ]
     ],
     "splash": {
       "image": "./assets/splash-icon.png",
