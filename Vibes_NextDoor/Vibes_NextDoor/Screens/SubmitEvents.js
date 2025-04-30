@@ -38,7 +38,8 @@ const SubmitEventScreen = ({ navigation  }) => {
   const inputAccessoryViewID = 'doneAccessoryView';
 
   const eventTypes = [
-    'Art', 'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 'Market', 'Other'
+    'Art', 'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 
+    'Fitness', 'Markets', 'Other'
   ];
   const availableCities = [
     'Athens, GA',

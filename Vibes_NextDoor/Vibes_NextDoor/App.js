@@ -20,6 +20,13 @@ import PreviewEventScreen from './Screens/PreviewEventScreen';
 import ThankYouScreen from './Screens/ThankYouScreen';
 import ThankYouHelpScreen from './Screens/ThankYouHelp';
 import ThankYouFeedbackScreen from './Screens/ThankYouFeedback';
+import StartEventSubmissionScreen from './Screens/AccountCheck';
+import SettingAccountScreen from './Screens/SettingsAccountCheck';
+import SignUpScreen from './Screens/Signup';
+import LoginScreen from './Screens/Login';
+import SettingsLoginScreen from './Screens/SettingsLogin';
+import SettingsSignUpScreen from './Screens/SettingsSignUpScreen';
+import AccountViewScreen from './Screens/AccountView';
 
 const HomeStack = createStackNavigator();
 const submitStack = createStackNavigator();
@@ -105,6 +112,27 @@ function HomeStackScreen() {
 function SubmitScreenStack() {
   return(
     <submitStack.Navigator>
+      <submitStack.Screen 
+        name="Account Check"
+        component={StartEventSubmissionScreen}
+        options={({ navigation}) => ({ 
+          headerShown: false,
+        })}
+      />
+      <submitStack.Screen 
+        name="Sign Up"
+        component={SignUpScreen}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
+      <submitStack.Screen 
+        name="Login"
+        component={LoginScreen}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
       <submitStack.Screen
         name="Submit an Event"
         component={SubmitEventScreen}
@@ -112,6 +140,7 @@ function SubmitScreenStack() {
           headerShown: false,
         })}
       />
+      
       <submitStack.Screen
         name="Preview Submission"
         component={PreviewEventScreen}
@@ -155,14 +184,14 @@ function SettingStackScreen() {
       />
 
       <SettingStack.Screen
-        name="Creator Account"
+        name="View Account"
         component={AccountScreen}
         options={({ navigation }) => ({
           headerShown: true,
           headerStyle: {
             height: 108,
           },
-          Title: 'Creator Account',
+          Title: 'View Account',
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 
@@ -174,7 +203,34 @@ function SettingStackScreen() {
           ),
         })}
       />
-
+      <submitStack.Screen 
+        name="Settings Account Check"
+        component={SettingAccountScreen}
+        options={({ navigation}) => ({ 
+          headerShown: true,
+        })}
+      />
+      <submitStack.Screen 
+        name="Settings Sign Up"
+        component={SettingsSignUpScreen}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
+      <submitStack.Screen 
+        name="Settings Login"
+        component={SettingsLoginScreen}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
+      <submitStack.Screen 
+        name="Account View"
+        component={AccountViewScreen}
+        options={({ navigation }) => ({
+          headerShown: false,
+        })}
+      />
       <SettingStack.Screen
         name="Privacy"
         component={PrivacyScreen}
@@ -275,7 +331,7 @@ function RootNavigator() {
             }}  
           />
           <Tab.Screen
-            name="Create Event" 
+            name="Account Check" 
             component={SubmitScreenStack} 
             options={{
               tabBarIcon: () => (

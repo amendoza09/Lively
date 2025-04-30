@@ -58,6 +58,12 @@ const Calendar = ({ events }) => {
 
     const handleDayPress = (date) => {
         const formattedDate = format(date, 'yyyy-MM-dd');
+
+        if(selectedDate === formattedDate && !isExpanded) {
+          handleReset();
+          return; 
+        } 
+
         const yPosition = dayPositions[formattedDate] || 0;
 
         setDayPosition(yPosition);
@@ -317,7 +323,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   todayIndicator: {
-    backgroundColor: '#5BC0EB',
+    backgroundColor: '#5BC0EB', // blue
     borderRadius: 40,
     width: 35,
     height: 35,

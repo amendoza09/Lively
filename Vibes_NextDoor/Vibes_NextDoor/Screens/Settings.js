@@ -7,7 +7,7 @@ const SettingScreen = ({ navigation }) => {
         { id: '2', name: 'Privacy', action: () => navigation.navigate('Privacy') },
         { id: '3', name: 'Help', action: () => navigation.navigate('Help') },
         { id: '4', name: 'Feedback & Suggestions', action: () => navigation.navigate('Feedback')},
-        { id: '5', name: 'Creator Account', action: () => navigation.navigate('Creator Account') },
+        { id: '5', name: 'My Account', action: () => navigation.navigate("Settings Account Check") },
     ];
 
     const renderOption = ({ item }) => (

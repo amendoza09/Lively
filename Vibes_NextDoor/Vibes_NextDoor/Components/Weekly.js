@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, FlatList, TouchableOpacity, Dimensions, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
@@ -41,13 +42,29 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
   });
 
   const eventTypeColors = {
-    Music: '#FFDDC1', // Light Peach
-    Fitness: '#C1FFD7', // Light Green
-    Conference: '#D1C4E9',   // Lavender
-    Art: '#FFCDD2',    // Light Pink
-    Social: '#a6f1a6', // white
-    Other: '#E0E0E0', // Light Gray (for unclassified types)
+    Music: '#FFDDC1',     // Light Peach
+    Fitness: '#C1FFD7',   // Light Green
+    Markets: '#D1C4E9',   // Lavender
+    Art: '#FFCDD2',       // Light Pink
+    Social: '#a6f1a6',    // white
+    Tech: '#B3E5FC',      // Light Blue
+    Food: '#FFF9C4',      // Soft Yellow
+    Networking: '#FFE0B2',// Light Apricot
+    Sports: '#DCEDC8',    // Pale Lime
+    Charity: '#82b584',   // Light Olive
+    Wellness: '#a1c8f0',  // Pale Blue
+    Dance: '#fc7162',     // Soft Orange
+    lgbtq: lgbtRainbowGradient, // rainbow gradient
+    Other: '#E0E0E0',     // Light Gray (for unclassified types)
   }
+  const lgbtRainbowGradient = [
+    '#FFB3BA', // Soft Red
+    '#FFDFBA', // Soft Orange
+    '#FFFFBA', // Soft Yellow
+    '#BAFFC9', // Soft Green
+    '#BAE1FF', // Soft Blue
+    '#E1BAFF', // Soft Violet
+  ];
   
   if(loading && !error) {
     return (
@@ -99,12 +116,11 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
                     showsHorizontalScrollIndicator={false}
                     keyExtractor={(event) => event._id.toString()}
                     renderItem={({ item: event }) => {
-                      const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
-                      return (
-                        <TouchableOpacity 
-                          onPress={() => navigation.navigate('Event Details', { event })}
-                        >
-                          <View style={[styles.eventCard, { backgroundColor }]}>
+                      const isLGBT = event.type === "LGBTQ+";
+                      const backgroundColor = eventTypeColors[event.type];
+                      const EventCard = () => (
+                        <>
+                          
                             <View style={styles.imageCard}>
                               <LazyImage uri={getImgUrl(event.image)} style={styles.image} />
                             </View>
@@ -119,7 +135,24 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
                                 <Text>{event.location}</Text>
                               </View>
                             </View>
-                          </View>
+                        </>
+                      );
+                      return (
+                        <TouchableOpacity onPress={() => navigation.navigate('Event Details', { event })}> 
+                          {isLGBT ? (
+                            <LinearGradient
+                              colors={lgbtRainbowGradient}
+                              start={{ x: 0, y: 0 }}
+                              end={{ x: 1, y: 0 }}
+                              style={styles.eventCard}
+                            >
+                              <EventCard />
+                            </LinearGradient>
+                          ) : (
+                            <View style={[styles.eventCard, { backgroundColor }]}>
+                              <EventCard />
+                            </View>
+                          )}
                         </TouchableOpacity>
                       )
                     }}
