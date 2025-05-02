@@ -2,6 +2,8 @@ import React, { useState, useMemo, useRef } from  'react';
 import { View, FlatList, Text, TouchableOpacity, StyleSheet, Animated, Easing, Dimensions, ScrollView } from 'react-native';
 import { format, startOfMonth, startOfWeek, endOfWeek, endOfMonth, eachDayOfInterval, addMonths, subMonths, subWeeks, addWeeks, getDay } from 'date-fns';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -13,14 +15,39 @@ const Calendar = ({ events }) => {
     const [dayPositions, setDayPositions] = useState({});
     const navigation = useNavigation();
 
-    const eventTypeColors = {
-      Music: '#FFDDC1', // Light Peach
-      Fitness: '#C1FFD7', // Light Green
-      Conference: '#D1C4E9',   // Lavender
-      Art: '#FFCDD2',    // Light Pink
-      Social: '#a6f1a6', // white
-      Other: '#E0E0E0', // Light Gray (for unclassified types)
-    };
+    
+  const eventTypeColors = {
+    Theater: '#866694',   // Pale Purple
+    Film: '#8c6049',      // Light Brown
+    Outdoor: '#66914e',   // Lightt Olive
+    Comedy: '#f5bb47',    // Golden Yellow
+    Family: '#a83b3b',    // Soft Red   
+    Education: '#81D4FA ',// Light Sky Blue
+    Drinking: '#9b59b6',  // Vibrant Purple
+    Music: '#FFDDC1',     // Light Peach
+    Fitness: '#C1FFD7',   // Mint Green
+    Markets: '#D1C4E9',   // Lavender
+    Art: '#FFCDD2',       // Light Pink
+    Social: '#a6f1a6',    // white
+    Tech: '#B3E5FC',      // Light Blue
+    Food: '#FFF9C4',      // Soft Yellow
+    Networking: '#FFE0B2',// Light Apricot
+    Sports: '#cfe3b8',    // Pale Lime
+    Charity: '#82b584',   // Light Green
+    Wellness: '#a1c8f0',  // Pale Blue
+    Dance: '#fc7162',     // Soft Orange
+    lgbtq: lgbtRainbowGradient, // rainbow gradient
+    Other: '#E0E0E0',     // Light Gray (for unclassified types)
+  }
+
+  const lgbtRainbowGradient = [
+    '#FFB3BA', // Soft Red
+    '#FFDFBA', // Soft Orange
+    '#FFFFBA', // Soft Yellow
+    '#BAFFC9', // Soft Green
+    '#BAE1FF', // Soft Blue
+    '#E1BAFF', // Soft Violet
+  ];
     
     const dayAbbreviations = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     const currentDate = format(new Date(), 'yyyy-MM-dd');
@@ -83,7 +110,7 @@ const Calendar = ({ events }) => {
             useNativeDriver: true,
           }).start(),
           Animated.timing(weeklyViewHeight, {
-            toValue: screenHeight - 365,
+            toValue: screenHeight - 350,
             duration: 300,
             easing: Easing.out(Easing.ease),
             useNativeDriver: false,
@@ -137,34 +164,46 @@ const Calendar = ({ events }) => {
                 contentContainerStyle={styles.cardsContainer}
                 keyExtractor={(event) => event._id.toString()}
                 renderItem={({ item: event }) => {
-                  const backgroundColor = eventTypeColors[event.type] || eventTypeColors.Default;
-                  return (
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate('Event Details', { event })}
-                      >
-                        <View style={[styles.eventCard, { backgroundColor }]}>
-                          <View>
-                            <View style={styles.description}>
-                              <Text style={styles.eventTitle}>{event.title}</Text>
-                              <Text>{event.location}</Text>
-                            </View>
-                            <View style={styles.info}> 
-                              <Text style={styles.infoText}>{event.time}</Text>
-                            </View>
-                          </View>
+                  const isLGBT = event.type === "LGBTQ+";
+                  const backgroundColor = eventTypeColors[event.type];
+                  const EventCard = () => (
+                    <>
+                      <View> 
+                        <View style={styles.info}> 
+                          <Text style={styles.infoText}>{event.time}</Text>
                         </View>
-                      </TouchableOpacity>
-                    );
-                  }}
-                />
-                ) : (
-                  <View style={styles.emptyPlaceHolder}>
-                    <Text styles={styles.noEventsText}>Nothing today</Text>
-                  </View>
-              )}
-              <TouchableOpacity style={styles.closeButton} onPress={handleReset}>
-                <Text>Close</Text>
-              </TouchableOpacity>
+                        <View style={styles.description}>
+                          <Text style={styles.eventTitle}>{event.title}</Text>
+                          <Text>{event.location}</Text>
+                        </View>
+                      </View>
+                    </>
+                  );
+                  return (
+                    <TouchableOpacity onPress={() => navigation.navigate('Event Details', { event })}> 
+                      {isLGBT ? (
+                        <LinearGradient
+                          colors={lgbtRainbowGradient}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={styles.eventCard}
+                        >
+                          <EventCard />
+                        </LinearGradient>
+                      ) : (
+                        <View style={[styles.eventCard, { backgroundColor }]}>
+                          <EventCard />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  )
+                }}
+              />
+            ) : (
+              <View style={styles.emptyPlaceHolder}>
+                <Text styles={styles.noEventsText}>Nothing today</Text>
+              </View>
+            )}
           </ScrollView>
         )}
       </View>
@@ -379,7 +418,6 @@ const styles = StyleSheet.create({
     flex: 1,
     display:'flex',
     alignItems: 'center',
-    
   },
   emptyPlaceHolder: {
     paddingTop: 15,

@@ -64,7 +64,7 @@ const SettingsLoginScreen = ({ navigation }) => {
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+      <TouchableOpacity onPress={() => navigation.navigate("Settings SignUp")}>
         <Text style={styles.link}>Dont have an account? Sign Up</Text>
       </TouchableOpacity>
     </ScrollView>

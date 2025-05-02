@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsAccountScreen = ({ navigation }) => {
 
-  useEffect(() => {
+  useEffect(()=> {
     const checkLoggedIn = async () => {
       const token = await AsyncStorage.getItem('userToken');
       if(token) {
@@ -12,6 +12,7 @@ const SettingsAccountScreen = ({ navigation }) => {
       }
     };
     checkLoggedIn();
+    
   }, []);
   
   const handleChoice = (mode) => {

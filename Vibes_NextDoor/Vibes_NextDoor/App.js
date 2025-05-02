@@ -2,7 +2,7 @@ import React, { useState, useContext, createContext, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Pressable, Text, StyleSheet } from 'react-native';
+import { Pressable, Text, StyleSheet, View } from 'react-native';
 import LeftArrow from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -26,6 +26,7 @@ import SignUpScreen from './Screens/Signup';
 import LoginScreen from './Screens/Login';
 import SettingsLoginScreen from './Screens/SettingsLogin';
 import SettingsSignUpScreen from './Screens/SettingsSignUpScreen';
+import EditAccountScreen from './Screens/EditAccount';
 import AccountViewScreen from './Screens/AccountView';
 
 const HomeStack = createStackNavigator();
@@ -228,7 +229,31 @@ function SettingStackScreen() {
         name="Account View"
         component={AccountViewScreen}
         options={({ navigation }) => ({
-          headerShown: false,
+          headerShown: true,
+          Title: 'Account',
+          headerStyle: {
+            height: 108,
+          },
+          headerLeft: () => (
+            <Pressable 
+              onPress={() => navigation.goBack()} 
+              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
+            >
+              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
+            </Pressable>
+          ),
+        })}
+      />
+      <submitStack.Screen 
+        name="Edit Account"
+        component={EditAccountScreen}
+        options={() => ({
+          headerShown: true,
+          Title: 'Edit Account',
+          headerStyle: {
+            height: 108,
+          },
         })}
       />
       <SettingStack.Screen
@@ -335,7 +360,22 @@ function RootNavigator() {
             component={SubmitScreenStack} 
             options={{
               tabBarIcon: () => (
-                <Ionicons name="add-circle-outline" size={24} color="white" style={styles.icons}/>
+                <View style={{
+                  width: 50,
+                  height: 50,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#5BC0EB', 
+                  borderRadius: 35,
+                  marginBottom: 15,             // elevate above the tab bar
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 8,                 // Android shadow
+                }}>
+                  <Ionicons name="add" size={36} color="#fff" />
+                </View>
               )
             }}
           />
@@ -355,7 +395,7 @@ function RootNavigator() {
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -372,17 +412,12 @@ export default function App() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    position: 'absolute', 
-    backgroundColor: '#211A1E', // Tab bar background color
-    borderColor: 'none',
-    justifyContent: 'center',
-    
+    position: 'absolute',
+    backgroundColor: '#211A1E',
+    borderTopWidth: 0,  // removes the top line if present
+    height: 70,         // slightly reduce so the floating button pops more
   },
   bottomContainer: {
-    height: 40,
-  },
-  icons: {
-    height: 50,
-    paddingTop: 20,
+    paddingTop: 15,
   }
 })

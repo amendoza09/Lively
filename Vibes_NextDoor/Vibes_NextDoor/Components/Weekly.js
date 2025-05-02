@@ -42,21 +42,29 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
   });
 
   const eventTypeColors = {
+    Theater: '#866694',   // Pale Purple
+    Film: '#8c6049',      // Light Brown
+    Outdoor: '#66914e',   // Lightt Olive
+    Comedy: '#f5bb47',    // Golden Yellow
+    Family: '#a83b3b',    // Soft Red   
+    Education: '#81D4FA ',// Light Sky Blue
+    Drinking: '#9b59b6',  // Vibrant Purple
     Music: '#FFDDC1',     // Light Peach
-    Fitness: '#C1FFD7',   // Light Green
+    Fitness: '#C1FFD7',   // Mint Green
     Markets: '#D1C4E9',   // Lavender
     Art: '#FFCDD2',       // Light Pink
     Social: '#a6f1a6',    // white
     Tech: '#B3E5FC',      // Light Blue
     Food: '#FFF9C4',      // Soft Yellow
     Networking: '#FFE0B2',// Light Apricot
-    Sports: '#DCEDC8',    // Pale Lime
-    Charity: '#82b584',   // Light Olive
+    Sports: '#cfe3b8',    // Pale Lime
+    Charity: '#82b584',   // Light Green
     Wellness: '#a1c8f0',  // Pale Blue
     Dance: '#fc7162',     // Soft Orange
     lgbtq: lgbtRainbowGradient, // rainbow gradient
     Other: '#E0E0E0',     // Light Gray (for unclassified types)
   }
+
   const lgbtRainbowGradient = [
     '#FFB3BA', // Soft Red
     '#FFDFBA', // Soft Orange
@@ -120,7 +128,6 @@ const Weekly = ({ events, error, selectedLocation, featured, loading }) => {
                       const backgroundColor = eventTypeColors[event.type];
                       const EventCard = () => (
                         <>
-                          
                             <View style={styles.imageCard}>
                               <LazyImage uri={getImgUrl(event.image)} style={styles.image} />
                             </View>
@@ -195,6 +202,7 @@ const styles = StyleSheet.create({
   },
   groupTitle: {
     paddingLeft: 10,
+    fontSize: 16,
   },
   eventCard: {
     backgroundColor: 'white',
@@ -204,12 +212,12 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginTop: 10,
     borderRadius: 5,
-    width: 250,
+    width: 225,
     overflow: 'hidden',
   },
   imageCard: {
-    width: 250,
-    height: 150,  
+    width: 225,
+    height: 125,  
     borderTopLeftRadius: 5,
     borderTopRightRadius: 5,
     alignItems: 'center',

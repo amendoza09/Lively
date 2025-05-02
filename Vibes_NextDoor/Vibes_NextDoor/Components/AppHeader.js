@@ -97,11 +97,11 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
     }, []);
 
     return (
-        
       <Animated.View style={[
         styles.modalOverlay, 
         { height: slideAnim },
       ]}>
+        <StatusBar barStyle="light-content" />
         <View style={styles.container}>
           <SafeAreaView style={styles.safeArea}>
             <View style={styles.header}>
@@ -137,7 +137,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
                                             <Text style={styles.cityText}>{item}</Text>
                                         </TouchableOpacity>
                                         <View style={styles.selectSuspense}>
-                                            <Text style={{ color: 'black'}}>More cities available soon...</Text>
+                                            <Text style={{ color: 'white'}}>More cities available soon...</Text>
                                         </View>
                                     </View>
                                 )}
@@ -159,7 +159,16 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'white',
+        backgroundColor: '#211A1E',
+        borderBottomWidth: 1,
+        
+        // Shadow properties for iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 2,
+        // Elevation for Android
+        elevation: 4,
     },
     safeArea: {
         zIndex: 10,
@@ -167,19 +176,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         width: screenWidth,
         borderColor: '#ddd',
-        borderBottomWidth: 1,
-        paddingBottom: -25
+        paddingBottom: -25,
     },
     headerRow: {
         flexDirection: 'row',
         justifyContent: 'center',
-        paddingBottom: 10,
+        paddingBottom: 5,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         textAlignVertical: 'center',
-        color: 'Black',
+        color: 'white',
     },
     cityTitle: {
         color: '#5BC0EB', // blue
@@ -189,7 +197,7 @@ const styles = StyleSheet.create({
     },
     downArrow: {
         alignSelf: 'center',
-        color: 'black'
+        color: 'white'
     },
     citySelectButton: {
         flexDirection: 'row',
@@ -203,8 +211,8 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 8,
-        color: 'black',
+        marginBottom: 5,
+        color: 'white',
     },
     cityItem: {
         padding: 10,
@@ -212,11 +220,10 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ddd',
         width: '100%',
         alignItems: 'center',
-        
     },
     cityText: {
         fontSize: 16,
-        color: 'black'
+        color: 'white'
     },
     modalOverlay: {
     },

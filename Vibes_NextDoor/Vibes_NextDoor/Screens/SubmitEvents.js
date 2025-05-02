@@ -8,10 +8,14 @@ import * as FileSystem from 'expo-file-system';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import Checkbox from 'expo-checkbox';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
-const SubmitEventScreen = ({ navigation  }) => {
+const SubmitEventScreen = ({ navigation }) => {
+  const [accountInfo, setAccountInfo] = useState(null);
+  const [hostName, setHostName] = useState('');
+  const [organizationName, setOrganizationName] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState(''); 
@@ -35,11 +39,9 @@ const SubmitEventScreen = ({ navigation  }) => {
   const scrollViewRef = useRef(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  const inputAccessoryViewID = 'doneAccessoryView';
-
   const eventTypes = [
-    'Art', 'Music', 'Sports', 'Tech', 'Food', 'Networking', 'Social', 
-    'Fitness', 'Markets', 'Other'
+    'Art', 'Charity', 'Comedy', 'Drinking', 'Education', 'Family', 'Film', 'Fitness', 'Food', 'LGBTQ+', 'Markets', 
+    'Music', 'Networking', 'Outdoor', 'Social', 'Sports', 'Tech', 'Theater', 'Wellness', 'Other'
   ];
   const availableCities = [
     'Athens, GA',
@@ -82,19 +84,48 @@ const SubmitEventScreen = ({ navigation  }) => {
     setFree(null);
     setDescription('');
     setImage('');
-    setEmail(''),
-    setPhone('')
+    setEmail('');
+    setPhone('');
     setRestrictions('');
   }
 
   useEffect(() => {
+    const fetchAccountInfo = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        return;
+      }
+      try {
+        const res = await fetch('http://192.168.1.132:10000/account-info', {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setAccountInfo(data);
+          setOrganizationName(data.organizationName || '');
+          setHostName(data.accountOwner || '');
+          setEmail(data.email || '');
+          setPhone(data.phone || '');
+          setLocation(data.location || '');
+          setSelectedCity(data.city || '');
+          setAddress(data.address1 || '');
+          setAddress2(data.address2 || '');
+        } else {
+          Alert.alert('Error', data.error || 'Failed to load account info');
+        }
+      } catch (err) {
+        Alert.alert('Network Error', err.message);
+      }
+    };
+    fetchAccountInfo();
     const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (event) => {
       setKeyboardHeight(event.endCoordinates.height);
     });
     const keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () => {
       setKeyboardHeight(0);
     })
-
+    
     return() => {
       keyboardDidHideListener.remove();
       keyboardDidShowListener.remove();
@@ -106,7 +137,7 @@ const SubmitEventScreen = ({ navigation  }) => {
       inputRef?.current?.measureLayout(
         scrollViewRef.current,
         (_, y) => {
-          scrollViewRef.current.scrollTo({ y: y - 20, animated: true });
+          scrollViewRef.current.scrollTo({ y: y - 10, animated: true });
         }
       );
     }, 100);
@@ -143,8 +174,8 @@ const SubmitEventScreen = ({ navigation  }) => {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 100}
-      style={{flexGrow: 1}}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 120}
+      style={{flexGrow: 1, backgroundColor: 'transparent'}}
     >
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.settingsHeader}>
@@ -155,6 +186,23 @@ const SubmitEventScreen = ({ navigation  }) => {
         
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
           
+          <Text style={styles.label}>Host Name {title === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
+          <TextInput 
+            style={styles.input}
+            returnKeyType="done"
+            placeholder="Your first & last name"
+            value={hostName}
+            onChangeText={setHostName}
+          />
+
+          <Text style={styles.label}>Organization Name {title === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
+          <TextInput 
+            style={styles.input}
+            returnKeyType="done"
+            placeholder="Business or organization name"
+            value={organizationName}
+            onChangeText={setOrganizationName}
+          />  
           <Text style={styles.label}>Event Title {title === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TextInput 
             style={styles.input}
@@ -162,6 +210,7 @@ const SubmitEventScreen = ({ navigation  }) => {
             placeholder="Enter event title"
             value={title}
             onChangeText={setTitle}
+            onFocus = {(event) => scrollToInput(event.target)}
           />
 
           <Text style={styles.eventLabel}>City {selectedCity === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
@@ -196,6 +245,7 @@ const SubmitEventScreen = ({ navigation  }) => {
             returnKeyType="done"
             value={location}
             onChangeText={setLocation}
+            onFocus = {(event) => scrollToInput(event.target)}
           />
 
           <Text style={styles.label}>Address</Text>
@@ -454,7 +504,7 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
     },
     submitButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: '#5BC0EB',
         padding: 15,
         borderRadius: 5,
         alignItems: 'center',

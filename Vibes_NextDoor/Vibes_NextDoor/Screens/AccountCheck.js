@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 const StartEventSubmissionScreen = ({ navigation }) => {
 
-  useEffect(() => {
     const checkLoggedIn = async () => {
       const token = await AsyncStorage.getItem('userToken');
       if(token) {
@@ -12,7 +12,6 @@ const StartEventSubmissionScreen = ({ navigation }) => {
       }
     };
     checkLoggedIn();
-  }, []);
   
   const handleChoice = (mode) => {
     if(mode === 'account') {
@@ -21,6 +20,12 @@ const StartEventSubmissionScreen = ({ navigation }) => {
       navigation.navigate('Submit an Event');
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      checkLoggedIn();
+    }, [])
+  );
 
   return (
     <View style={styles.container}>

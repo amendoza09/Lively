@@ -104,7 +104,10 @@ const HomeScreen = () => {
     }
   });
 
-  const tags = ['Free', 'Music', 'Food', 'Sports', 'Art', 'Networking', 'Social', 'Markets', 'Other'];
+  const tags = [
+    'Free', 'Art', 'Charity', 'Comedy', 'Drinking', 'Education', 'Family', 'Film', 'Fitness', 'Food', 'LGBTQ+', 
+    'Markets', 'Music', 'Networking', 'Outdoor', 'Social', 'Sports', 'Tech', 'Theater', 'Wellness', 'Other'
+  ];
 
   const fetchEvents = async () => {
     const cityName = selectedLocation.split(',')[0].toLowerCase();
@@ -153,15 +156,15 @@ const HomeScreen = () => {
     }
     setShowTagMenu(true);
     Animated.timing(slideAnim, {
-      toValue: 220, // Slide up to the top of the header
+      toValue: 290, // Slide up to the top of the header
       duration: 300,
-      easing: Easing.out(Easing.ease), 
+      easing: Easing.in(Easing.ease), 
       useNativeDriver: false,
     }).start();
     Animated.timing(contentAnim, {
-      toValue:  220,
+      toValue:  290,
       duration: 300,
-      easing: Easing.out(Easing.ease), 
+      easing: Easing.in(Easing.ease), 
       useNativeDriver: false,
     }).start();
   };
@@ -191,13 +194,13 @@ const HomeScreen = () => {
     Animated.timing(searchSlideAnim, {
       toValue: 60, // Slide up to the top of the header
       duration: 300,
-      easing: Easing.out(Easing.ease), 
+      easing: Easing.in(Easing.ease), 
       useNativeDriver: false,
     }).start();
     Animated.timing(searchContentAnim, {
       toValue:  60,
       duration: 300,
-      easing: Easing.out(Easing.ease), 
+      easing: Easing.in(Easing.ease), 
       useNativeDriver: false,
     }).start();
   };
@@ -326,7 +329,7 @@ const HomeScreen = () => {
                     <View 
                       key={filter} 
                       style={{ 
-                        width: '48%', 
+                        width: '30%', 
                         flexDirection: 'row', 
                         alignItems: 'center', 
                         marginVertical: 8,
@@ -476,18 +479,18 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "rgba(0, 0 ,0 ,0)",
   },
-    toggleContainer: {
+  toggleContainer: {
       flexDirection: "row",
       justifyContent: "space-around",
       backgroundColor: "#ddd",
       width: '80%',
       height: 35,
       borderRadius: 20,
-    },
+  },
     containerToggle:{
       flexDirection: "row",
-      marginVertical: 5,
-      paddingHorizontal: 5,
+      marginBottom: 5,
+      paddingHorizontal: 10,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: "transparent",
