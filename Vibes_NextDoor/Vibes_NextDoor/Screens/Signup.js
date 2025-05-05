@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, TextInput, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, TouchableOpacity, Text, TextInput, StyleSheet, Alert, ScrollView, StatusBar} from 'react-native';
+
+import { config } from './config.env';
 
 const SignUpScreen = ({ navigation }) => {
   const [accountOwner, setAccountOwner] = useState('');
@@ -13,7 +15,7 @@ const SignUpScreen = ({ navigation }) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     try {
-      const response = await fetch(`http://192.168.1.132:10000/accounts`, {
+      const response = await fetch(`${config.api.HOST}/accounts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({ accountOwner, organizationName, email, phone, password }),
@@ -34,6 +36,7 @@ const SignUpScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
       <Text style={styles.title}>Sign Up</Text>
       <TextInput
         placeholder="Host name"

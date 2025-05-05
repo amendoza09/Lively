@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Platform, 
-  KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, SafeAreaView,
+  KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, SafeAreaView, Dimensions,
   StatusBar
   } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,13 +9,8 @@ import * as FileSystem from 'expo-file-system';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import Checkbox from 'expo-checkbox';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CommonActions } from '@react-navigation/native';
 
-import { config } from './config.env';
-
-
-const SubmitEventScreen = ({ navigation }) => {
+const GuestSubmitEventScreen = ({ navigation }) => {
   const [accountInfo, setAccountInfo] = useState(null);
   const [hostName, setHostName] = useState('');
   const [organizationName, setOrganizationName] = useState('');
@@ -93,48 +88,6 @@ const SubmitEventScreen = ({ navigation }) => {
   }
 
   useEffect(() => {
-    const fetchAccountInfo = async () => {
-      const token = await AsyncStorage.getItem('userToken');
-      if(!token) {
-        return navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [
-              {
-                name: "Account Check",
-                state: {
-                  routes: [{ name: "Account Check" }],
-                },
-              },
-            ],
-          })
-        )
-      }
-
-      try {
-        const res = await fetch(`${config.api.HOST}/account-info`, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setAccountInfo(data);
-          setOrganizationName(data.organizationName || '');
-          setHostName(data.accountOwner || '');
-          setEmail(data.email || '');
-          setPhone(data.phone || '');
-          setLocation(data.location || '');
-          setSelectedCity(data.city || '');
-          setAddress(data.address1 || '');
-          setAddress2(data.address2 || '');
-        } else {
-          Alert.alert('Error', data.error || 'Failed to load account info');
-        }
-      } catch (err) {
-        Alert.alert('Network Error', err.message);
-      }
-    };
-    fetchAccountInfo();
     const keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", (event) => {
       setKeyboardHeight(event.endCoordinates.height);
     });
@@ -579,4 +532,4 @@ const pickerSelectStyles = {
   },
 };
 
-export default SubmitEventScreen;
+export default GuestSubmitEventScreen;

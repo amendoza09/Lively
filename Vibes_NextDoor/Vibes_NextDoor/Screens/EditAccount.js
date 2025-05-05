@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity,
-  KeyboardAvoidingView, Keyboard, Platform, TouchableWithoutFeedback
+  KeyboardAvoidingView, Keyboard, Platform, TouchableWithoutFeedback, Dimensions
  } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { config } from './config.env';
+
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const EditAccountScreen = ({ route, navigation }) => {
   const { accountInfo } = route.params;
@@ -56,7 +60,7 @@ const EditAccountScreen = ({ route, navigation }) => {
     }
 
     try {
-      const res = await fetch('http://192.168.1.132:10000/account-update', {
+      const res = await fetch(`${config.api.HOST}/account-update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -81,11 +85,11 @@ const EditAccountScreen = ({ route, navigation }) => {
   return (
     <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 100}
-          style={{flexGrow: 1, backgroundColor: 'transparent'}}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 120}
+          style={{flexGrow: 1}}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} keyboardDismissMode="on-drag">
-        <ScrollView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.label}>Organization Name</Text>
           <TextInput 
             value={organizationName} 
@@ -172,10 +176,10 @@ const EditAccountScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
-    marginBottom: 80,
-    paddingBottom: 100,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    paddingBottom: 90,
+    backgroundColor: 'white',
   },
   label: {
     fontWeight: '600',
@@ -191,7 +195,7 @@ const styles = StyleSheet.create({
   editButton: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: '#0275d8',
+    backgroundColor: '#5BC0EB',
     borderRadius: 5,
   },
   editButtonText: {

@@ -3,6 +3,7 @@ import { TouchableOpacity, View,
     Text, StyleSheet, 
     TextInput, FlatList 
 } from 'react-native';
+
 import { config } from './config.env';
 
 // search feature will come soon

@@ -16,6 +16,7 @@ import PrivacyScreen from './Screens/Privacy';
 import HelpScreen from './Screens/Help';
 import FeedbackScreen from './Screens/Feedback';
 import SubmitEventScreen from './Screens/SubmitEvents';
+import GuestSubmitEventScreen from './Screens/GuestSubmitEvents';
 import PreviewEventScreen from './Screens/PreviewEventScreen';
 import ThankYouScreen from './Screens/ThankYouScreen';
 import ThankYouHelpScreen from './Screens/ThankYouHelp';
@@ -143,6 +144,15 @@ function SubmitScreenStack() {
       />
       
       <submitStack.Screen
+        name="Submit an Event as Guest"
+        component={GuestSubmitEventScreen}
+        options={({ navigation }) => ({
+          headerShown: false,
+          title: 'Subimt an Event'
+        })}
+      />
+      
+      <submitStack.Screen
         name="Preview Submission"
         component={PreviewEventScreen}
         options={({ navigation }) => ({
@@ -190,13 +200,20 @@ function SettingStackScreen() {
         options={({ navigation }) => ({
           headerShown: true,
           headerStyle: {
-            height: 108,
+            height: 102,
+            backgroundColor:'#211A1E',
           },
-          Title: 'View Account',
+          headerTitleStyle: {
+            color:'white',
+            fontSize: 24,
+            fontWeight: 'bold',
+            paddingBottom: 20
+          },
+          title: 'View Account',
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 
-              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
+              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center'}}
             >
               <LeftArrow name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
@@ -208,7 +225,18 @@ function SettingStackScreen() {
         name="Settings Account Check"
         component={SettingAccountScreen}
         options={({ navigation}) => ({ 
+          title: 'Account',
           headerShown: true,
+          headerStyle: {
+            height: 102,
+            backgroundColor:'#211A1E',
+          },
+          headerTitleStyle: {
+            color:'white',
+            fontSize: 24,
+            fontWeight: 'bold',
+            paddingBottom: 20
+          },
         })}
       />
       <submitStack.Screen 
@@ -230,14 +258,21 @@ function SettingStackScreen() {
         component={AccountViewScreen}
         options={({ navigation }) => ({
           headerShown: true,
-          Title: 'Account',
+          title: 'Account',
           headerStyle: {
-            height: 108,
+            height: 102,
+            backgroundColor:'#211A1E',
+          },
+          headerTitleStyle: {
+            color:'white',
+            fontSize: 24,
+            fontWeight: 'bold',
+            paddingBottom: 20
           },
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 
-              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
+              style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center'}}
             >
               <LeftArrow name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
@@ -248,22 +283,37 @@ function SettingStackScreen() {
       <submitStack.Screen 
         name="Edit Account"
         component={EditAccountScreen}
-        options={() => ({
+        options={{
           headerShown: true,
-          Title: 'Edit Account',
+          headerLeft: null, 
+          title: 'Edit Account',
           headerStyle: {
-            height: 108,
+            height: 102,
+            backgroundColor:'#211A1E',
           },
-        })}
+          headerTitleStyle: {
+            color:'white',
+            fontSize: 24,
+            fontWeight: 'bold',
+            paddingBottom: 20
+          },
+        }}
       />
       <SettingStack.Screen
         name="Privacy"
         component={PrivacyScreen}
         options={({ navigation }) => ({
           headerShown: true,
-          Title: 'Privacy',
+          title: 'Privacy',
           headerStyle: {
-            height: 108,
+            height: 102,
+            backgroundColor:'#211A1E',
+          },
+          headerTitleStyle: {
+            color:'white',
+            fontSize: 24,
+            fontWeight: 'bold',
+            paddingBottom: 20
           },
           headerLeft: () => (
             <Pressable 
@@ -283,9 +333,16 @@ function SettingStackScreen() {
         options={({ navigation }) => ({
           headerShown: true,
           headerStyle: {
-            height: 108,
+            height: 102,
+            backgroundColor:'#211A1E',
           },
-          Title: 'Help',
+          headerTitleStyle: {
+            color:'white',
+            fontSize: 24,
+            fontWeight: 'bold',
+            paddingBottom: 20
+          },
+          title: 'Help',
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 
@@ -303,9 +360,16 @@ function SettingStackScreen() {
         options={({ navigation }) => ({
           headerShown: true,
           headerStyle: {
-            height: 108,
+            height: 102,
+            backgroundColor:'#211A1E',
           },
-          Title: 'Feedback',
+          headerTitleStyle: {
+            color:'white',
+            fontSize: 24,
+            fontWeight: 'bold',
+            paddingBottom: 20
+          },
+          title: 'Feedback',
           headerLeft: () => (
             <Pressable 
               onPress={() => navigation.goBack()} 
@@ -395,7 +459,7 @@ function RootNavigator() {
 }
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const timer = setTimeout(() => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SettingScreen = ({ navigation }) => {
@@ -21,7 +21,8 @@ const SettingScreen = ({ navigation }) => {
     );
 
     return (
-        <View >
+        <View>
+            <StatusBar barStyle="light-content" />
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.settingsHeader}>
                     <Text style={styles.title}>Settings</Text>
@@ -43,9 +44,9 @@ const SettingScreen = ({ navigation }) => {
 const styles =StyleSheet.create({
     safeArea: {
         alignItems: 'center',
-        backgroundColor: 'white',
-        paddingBottom: -15,
-        borderWidth: 1,
+        backgroundColor: '#211A1E',
+        paddingBottom: -20,
+        borderBottomWidth: 1,
         borderColor: '#ddd',
     },
     settingsHeader: {
@@ -53,6 +54,7 @@ const styles =StyleSheet.create({
         justifyContent: 'center',
     },
     title: {
+        color:'white',
         fontSize: 24,
         fontWeight: 'bold',
     },

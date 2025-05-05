@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     paddingBottom: 85,
+    backgroundColor: 'white'
   },
   header: {
     fontSize: 24,

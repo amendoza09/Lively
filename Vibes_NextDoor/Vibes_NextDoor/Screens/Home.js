@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, RefreshControl, TouchableOpacity,
-  Animated, TextInput, Easing, FlatList
+  Animated, TextInput, Easing, FlatList, StatusBar
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -269,6 +269,7 @@ const HomeScreen = () => {
 
   return(
     <View style={[styles.screen]}>
+      <StatusBar barStyle="dark-content" />
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation}

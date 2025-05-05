@@ -1,10 +1,12 @@
 import React, { useCallback, useState } from 'react';
 import { View, ScrollView, Text, StyleSheet, ActivityIndicator, Alert, Button, TouchableOpacity, 
-  RefreshControl, Dimensions
+  RefreshControl, Dimensions, StatusBar
  } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
+
+import { config } from './config.env';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -40,7 +42,7 @@ const AccountViewScreen = () => {
       }
 
       try {
-        const res = await fetch('http://192.168.1.132:10000/account-info', {
+        const res = await fetch(`${config.api.HOST}/account-info`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -90,21 +92,22 @@ const AccountViewScreen = () => {
   )
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
+      showsVerticalScrollIndicator={false} style={styles.container}
+    >
+      <StatusBar barStyle="light-content" />
       {refreshing && (
-            <View style={styles.refreshOverlay}>
-              <LottieView 
-                source={require('../assets/loadingAnimation.json')}
-                autoPlay
-                loop
-                style={{ width: 150, height: 150 }}
-              />
-            </View>
+        <View style={styles.refreshOverlay}>
+          <LottieView 
+            source={require('../assets/loadingAnimation.json')}
+            autoPlay
+            loop
+            style={{ width: 150, height: 150 }}
+          />
+        </View>
       )}
-      <ScrollView
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['transparent']} tintColor="transparent" />}
-              showsVerticalScrollIndicator={false}
-      >
+      
       {accountInfo && (
         <>
           <Text style={styles.item}>Organization: {accountInfo.organizationName}</Text>
@@ -125,19 +128,15 @@ const AccountViewScreen = () => {
       )}
       <Button title="Sign Out" onPress={handleSignOut} color="#d9534f" />
     </ScrollView>
-    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { 
     padding: 20, 
-    height: screenHeight
+    height: screenHeight,
+    backgroundColor: 'white'
   },
-  header: { 
-    fontSize: 22, 
-    fontWeight: 'bold', 
-    marginBottom: 20 },
   item: { 
     fontSize: 16, 
     marginBottom: 10 
@@ -145,7 +144,7 @@ const styles = StyleSheet.create({
   editButton: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: '#5BC0EB',
+    backgroundColor: '#5BC0EB', //Blue
     borderRadius: 5,
     marginBottom: 20
   },
@@ -155,7 +154,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   refreshOverlay: {
-    height: 70,
+    flex: 1,
+    height: 50,
+    paddingBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',

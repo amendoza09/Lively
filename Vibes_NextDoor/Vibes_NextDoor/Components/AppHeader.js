@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    View, Text, Pressable, StyleSheet,
-    FlatList, TouchableOpacity,
-    Animated, Dimensions, Easing,
-    StatusBar, useColorScheme
+    View, Text, Pressable, StyleSheet, FlatList, TouchableOpacity,
+    Animated, Dimensions, Easing, StatusBar, useColorScheme
 } from 'react-native';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';

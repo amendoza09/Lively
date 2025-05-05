@@ -1,15 +1,15 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 const StartEventSubmissionScreen = ({ navigation }) => {
-
     const checkLoggedIn = async () => {
       const token = await AsyncStorage.getItem('userToken');
       if(token) {
         navigation.replace("Submit an Event");
-      }
+      } 
+      return;
     };
     checkLoggedIn();
   
@@ -29,6 +29,7 @@ const StartEventSubmissionScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
       <Text style={styles.title}>Do you have an account?</Text>
       <TouchableOpacity onPress={() => handleChoice('account')} style={styles.button}>
         <Text style={styles.buttonText}>Yes, I have an account</Text>
@@ -46,9 +47,10 @@ const StartEventSubmissionScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1, 
-    justifyContent: 'center',
+    paddingTop: 150,
     alignItems: 'center', 
-    padding: 20
+    padding: 20,
+    backgroundColor: 'white'
   },
   title: {
     fontSize: 24, 

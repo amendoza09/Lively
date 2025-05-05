@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, TextInput, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, TouchableOpacity, Text, TextInput, StyleSheet, Alert, ScrollView, StatusBar } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { config } from './config.env';
 
 const SettingsLoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -13,7 +15,7 @@ const SettingsLoginScreen = ({ navigation }) => {
       return;
     }
     try {
-      const response = await fetch(`http://192.168.1.132:10000/accounts/login`, {
+      const response = await fetch(`${config.api.HOST}/accounts/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
         body: JSON.stringify({ email, password }),
@@ -39,6 +41,7 @@ const SettingsLoginScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
       <Text style={styles.title}>Login</Text>
 
       <TextInput
@@ -64,7 +67,7 @@ const SettingsLoginScreen = ({ navigation }) => {
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("Settings SignUp")}>
+      <TouchableOpacity onPress={() => navigation.navigate("Settings Sign Up")}>
         <Text style={styles.link}>Dont have an account? Sign Up</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -75,9 +78,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    paddingTop: 100,
+    paddingTop: 150,
     backgroundColor: '#fff',
-    marginBottom: 80,
+    marginBottom: 70,
   },
   title: {
     fontSize: 28,
