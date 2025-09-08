@@ -11,148 +11,149 @@ import { useNavigation } from '@react-navigation/native';
 const { width: screenWidth } = Dimensions.get('window');
 
 const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
-    const [modalVisible, setModalVisible] = useState(false);
-    const [slideAnim] = useState(new Animated.Value(110));
-    const [contentAnim] = useState(new Animated.Value(0));
-    const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [slideAnim] = useState(new Animated.Value(110));
+  const [contentAnim] = useState(new Animated.Value(0));
+  const navigation = useNavigation();
 
-    const cities = [
-        'Athens, GA',
-    ];
+  const cities = [
+      'Athens, GA',
+  ];
 
 
-    const getLocation = async () => {
-        try {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                setSelectedLocation('Permission Denied');
-                return;
-            }
-            const location = await Location.getCurrentPositionAsync({});
-            const { latitude, longitude } = location.coords;
+  const getLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setSelectedLocation('Permission Denied');
+          return;
+      }
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
 
-            const geocode = await Location.reverseGeocodeAsync({ latitude, longitude})
-            if(geocode.length > 0) {
-                setSelectedLocation(geocode[0].city + ', ' + geocode[0].region);
-            } else {
-                setSelectedLocation('Location not found');
-            }
-        } catch (error) {
-            console.error('Error fetching location: ', error);
-            setSelectedLocation('Location Error');
-        }
-    };
+      const geocode = await Location.reverseGeocodeAsync({ latitude, longitude})
+      if(geocode.length > 0) {
+        setSelectedLocation(geocode[0].city + ', ' + geocode[0].region);
+      } else {
+        setSelectedLocation('Location not found');
+      }
+    } catch (error) {
+        console.error('Error fetching location: ', error);
+        setSelectedLocation('Location Error');
+      }
+  };
 
-    const handleCitySelect = (city) => {
-        setSelectedLocation(city);
-        closeMenu();
-    };
+  const handleCitySelect = (city) => {
+      setSelectedLocation(city);
+      closeMenu();
+  };
 
-    const openMenu = () => {
-        setModalVisible(true);
-        Animated.timing(slideAnim, {
-            toValue: 220, // Slide up to the top of the header
-            duration: 300,
-            easing: Easing.out(Easing.ease), 
-            useNativeDriver: false,
-        }).start(() => {
+  const openMenu = () => {
+      setModalVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 220, // Slide up to the top of the header
+        duration: 300,
+        easing: Easing.out(Easing.ease), 
+          useNativeDriver: false,
+      }).start(() => {
             
-        });
-        Animated.timing(contentAnim, {
-            toValue:  110,
-            duration: 300,
-            easing: Easing.out(Easing.ease), 
-            useNativeDriver: false,
-        }).start();
-    };
-    
+      });
+      Animated.timing(contentAnim, {
+        toValue:  160,
+        duration: 300,
+        easing: Easing.out(Easing.ease), 
+          useNativeDriver: false,
+      }).start();
+  };
 
-    const closeMenu = () => {
-        Animated.timing(slideAnim, {
-            toValue: 110, // Slide back down below the header
-            duration: 300,
-            easing: Easing.out(Easing.ease), 
-            useNativeDriver: false,
-        }).start(() => {
-            setModalVisible(false);
-        });
-        Animated.timing(contentAnim, {
-            toValue: 0,
-            duration: 300,
-            easing: Easing.out(Easing.ease), 
-            useNativeDriver: false,
-        }).start();
-        
-    };
+  const closeMenu = () => {
+      Animated.timing(slideAnim, {
+        toValue: 110, // Slide back down below the header
+        duration: 300,
+        easing: Easing.out(Easing.ease), 
+          useNativeDriver: false,
+      }).start(() => {
+        setModalVisible(false);
+      });
+      Animated.timing(contentAnim, {
+        toValue: 0,
+        duration: 300,
+          easing: Easing.out(Easing.ease), 
+          useNativeDriver: false,
+      }).start();   
+  };
 
-    const handleSearchPress = () => {
-        navigation.navigate('Search', { setSelectedLocation });
-        closeMenu();
-    }
+  const handleSearchPress = () => {
+    navigation.navigate('Search', { setSelectedLocation });
+    closeMenu();
+  }
 
-    useEffect(() => {
-        getLocation();
-    }, []);
+  useEffect(() => {
+    getLocation();
+  }, []);
 
-    return (
-      <Animated.View style={[
+  return (
+    <Animated.View 
+      style={[
         styles.modalOverlay, 
         { height: slideAnim },
-      ]}>
-        <StatusBar barStyle="light-content" />
-        <View style={styles.container}>
-          <SafeAreaView style={styles.safeArea}>
-            <View style={styles.header}>
-              <View style={styles.headerRow}>
-                <Text style={styles.title}>Discover </Text>
-                  <Pressable 
-                    style={styles.citySelectButton}
-                    onPress={modalVisible ? closeMenu : openMenu}
-                  >
-                    <Text style={styles.cityTitle}>{selectedLocation || 'Select a City'}</Text>
-                      <ArrowIcon 
-                        name={modalVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"}
-                        size={24} 
-                        style={styles.downArrow} 
-                      />
-                  </Pressable>
-              </View>
-              {modalVisible && (
-                <Animated.View
-                  style={[styles.modalContainer, { height: contentAnim, opacity: contentAnim}]}
-                >
-                    <View style={{ alignItems: 'center'}}>
-                        <Text style={styles.modalTitle}>Select a City</Text>
-                            <FlatList
-                                data={cities}
-                                keyExtractor={(item) => item}
-                                renderItem={({ item }) => (
-                                    <View>
-                                        <TouchableOpacity
-                                            style={styles.cityItem}
-                                            onPress={() => handleCitySelect(item)}
-                                        >
-                                            <Text style={styles.cityText}>{item}</Text>
-                                        </TouchableOpacity>
-                                        <View style={styles.selectSuspense}>
-                                            <Text style={{ color: 'white'}}>More cities available soon...</Text>
-                                        </View>
-                                    </View>
-                                )}
-                            />
+      ]}
+    >
+    <StatusBar barStyle="light-content"/>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <Text style={styles.title}>Discover </Text>
+            <Pressable 
+              style={styles.citySelectButton}
+              onPress={modalVisible ? closeMenu : openMenu}
+            >
+              <Text style={styles.cityTitle}>{selectedLocation || 'Select a City'}</Text>
+              <ArrowIcon 
+                name={modalVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+                size={24} 
+                style={styles.downArrow} 
+              />
+            </Pressable>
+            </View>
+            {modalVisible && (
+              <Animated.View
+                style={[styles.modalContainer, { height: contentAnim, opacity: contentAnim}]}
+              >
+                <View style={{ alignItems: 'center'}}>
+                  <Text style={styles.modalTitle}>Select a City</Text>
+                    <FlatList
+                      data={cities}
+                      keyExtractor={(item) => item}
+                      renderItem={({ item }) => (
+                        <View>
+                          <TouchableOpacity
+                            style={styles.cityItem}
+                            onPress={() => handleCitySelect(item)}
+                          >
+                            <Text style={styles.cityText}>{selectedLocation}</Text>
+                            <Text style={styles.cityText}>{item}</Text>
+                          </TouchableOpacity>
+                          <View style={styles.selectSuspense}>
+                            <Text style={{ color: 'white'}}>More cities available soon...</Text>
+                          </View>
+                        </View>
+                      )}
+                    />
                                 {/* search feature will come soon
                                 <Pressable style={styles.searchBar} onPress={handleSearchPress}>
                                     <Text style={styles.cityItem}>Search...</Text>
                                 </Pressable>
                                 */}
-                            </View>
-                      </Animated.View>
-                    )}
-            </View>
-          </SafeAreaView>
-        </View>
-      </Animated.View>
-    );
+                </View>
+              </Animated.View>
+            )}
+          </View>
+        </SafeAreaView>
+      </View>
+    </Animated.View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -169,7 +170,6 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     safeArea: {
-        zIndex: 10,
         alignItems: 'center',
         justifyContent: 'center',
         width: screenWidth,
@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
         zIndex: 1,
         width: screenWidth,
         alignItems: 'center',
+        height: 'auto',
     },
     modalTitle: {
         fontSize: 20,
@@ -221,6 +222,7 @@ const styles = StyleSheet.create({
     },
     cityText: {
         fontSize: 16,
+        paddingBottom: 10,
         color: 'white'
     },
     modalOverlay: {
