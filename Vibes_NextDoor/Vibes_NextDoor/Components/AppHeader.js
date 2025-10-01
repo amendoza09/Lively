@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import * as Location from 'expo-location';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ArrowIcon from 'react-native-vector-icons/MaterialIcons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -110,10 +110,10 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
               onPress={modalVisible ? closeMenu : openMenu}
             >
               <Text style={styles.cityTitle}>{selectedLocation || 'Select a City'}</Text>
-              <ArrowIcon 
-                name={modalVisible ? "keyboard-arrow-up" : "keyboard-arrow-down"}
-                size={24} 
-                style={styles.downArrow} 
+              <AntDesign
+                name={modalVisible ? "caret-up" : "caret-down"}
+                size={16} 
+                style={styles.downArrow}
               />
             </Pressable>
             </View>
@@ -195,7 +195,8 @@ const styles = StyleSheet.create({
     },
     downArrow: {
         alignSelf: 'center',
-        color: 'white'
+        color: 'white',
+        paddingHorizontal: 6
     },
     citySelectButton: {
         flexDirection: 'row',

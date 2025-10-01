@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Dimensions, ScrollView, RefreshControl, Touchab
   Animated, TextInput, Easing, FlatList, StatusBar
 } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { config } from './config.env';
 import AppHeader from '../Components/AppHeader';
 import Weekly from '../Components/Weekly';
@@ -157,13 +157,13 @@ const HomeScreen = () => {
     setShowTagMenu(true);
     Animated.timing(slideAnim, {
       toValue: 290, // Slide up to the top of the header
-      duration: 300,
+      duration: 200,
       easing: Easing.in(Easing.ease), 
       useNativeDriver: false,
     }).start();
     Animated.timing(contentAnim, {
       toValue:  290,
-      duration: 300,
+      duration: 200,
       easing: Easing.in(Easing.ease), 
       useNativeDriver: false,
     }).start();
@@ -193,13 +193,13 @@ const HomeScreen = () => {
     setShowSearch(true);
     Animated.timing(searchSlideAnim, {
       toValue: 60, // Slide up to the top of the header
-      duration: 300,
+      duration: 200,
       easing: Easing.in(Easing.ease), 
       useNativeDriver: false,
     }).start();
     Animated.timing(searchContentAnim, {
       toValue:  60,
-      duration: 300,
+      duration: 200,
       easing: Easing.in(Easing.ease), 
       useNativeDriver: false,
     }).start();

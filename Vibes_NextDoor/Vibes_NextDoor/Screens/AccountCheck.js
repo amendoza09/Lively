@@ -16,6 +16,8 @@ const StartEventSubmissionScreen = ({ navigation }) => {
   const handleChoice = (mode) => {
     if(mode === 'account') {
       navigation.navigate('Login');
+    } else if (mode === 'guest') {
+      navigation.navigate('Submit an Event as Guest');
     } else {
       navigation.navigate('Submit an Event');
     }

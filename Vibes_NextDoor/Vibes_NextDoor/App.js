@@ -3,8 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Pressable, Text, StyleSheet, View } from 'react-native';
-import LeftArrow from 'react-native-vector-icons/MaterialIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 import SplashScreen from './Screens/SplashScreen';
 import HomeScreen from './Screens/Home';
@@ -83,7 +82,7 @@ function HomeStackScreen() {
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Ionicons name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
@@ -101,7 +100,7 @@ function HomeStackScreen() {
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Ionicons name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
             </Pressable>
           ),
@@ -166,7 +165,7 @@ function SubmitScreenStack() {
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Ionicons name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
             </Pressable>
           ),
@@ -215,7 +214,7 @@ function SettingStackScreen() {
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center'}}
             >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Ionicons name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
@@ -274,7 +273,7 @@ function SettingStackScreen() {
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center'}}
             >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Ionicons name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
@@ -320,7 +319,7 @@ function SettingStackScreen() {
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Ionicons name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
@@ -348,7 +347,7 @@ function SettingStackScreen() {
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Ionicons name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Back</Text>
             </Pressable>
           ),
@@ -375,7 +374,7 @@ function SettingStackScreen() {
               onPress={() => navigation.goBack()} 
               style={{ marginLeft: 10, flexDirection: 'row', alignItems: 'center', color:'' }}
             >
-              <LeftArrow name="arrow-back" size={24} color="#007AFF" />
+              <Ionicons name="arrow-back" size={24} color="#007AFF" />
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Go Back</Text>
             </Pressable>
           ),
