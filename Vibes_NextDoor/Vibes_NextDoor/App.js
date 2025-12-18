@@ -424,8 +424,8 @@ function RootNavigator() {
             options={{
               tabBarIcon: () => (
                 <View style={{
-                  width: 50,
-                  height: 50,
+                  width: 60,
+                  height: 60,
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: '#5BC0EB', 
@@ -459,7 +459,7 @@ function RootNavigator() {
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-  
+  {/*
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -470,6 +470,7 @@ export default function App() {
   if(isLoading) {
     return <SplashScreen />;
   }
+    */}
   return <RootNavigator />;
 }
 
@@ -478,9 +479,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: '#211A1E',
     borderTopWidth: 0,  // removes the top line if present
-    height: 70,         // slightly reduce so the floating button pops more
+    height: 75,         // slightly reduce so the floating button pops more
   },
   bottomContainer: {
-    paddingTop: 15,
+    paddingTop: 25,
   }
 })

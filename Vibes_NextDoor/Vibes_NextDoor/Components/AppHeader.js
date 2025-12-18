@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
+const AppHeader = ({ selectedLocation, setSelectedLocation, userLocation, setUserLocation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [slideAnim] = useState(new Animated.Value(110));
   const [contentAnim] = useState(new Animated.Value(0));
@@ -34,6 +34,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
       const geocode = await Location.reverseGeocodeAsync({ latitude, longitude})
       if(geocode.length > 0) {
         setSelectedLocation(geocode[0].city + ', ' + geocode[0].region);
+        setUserLocation(geocode[0].city +', ' + geocode[0].region);
       } else {
         setSelectedLocation('Location not found');
       }
@@ -51,7 +52,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
   const openMenu = () => {
       setModalVisible(true);
       Animated.timing(slideAnim, {
-        toValue: 220, // Slide up to the top of the header
+        toValue: 275, // Slide up to the top of the header
         duration: 300,
         easing: Easing.out(Easing.ease), 
           useNativeDriver: false,
@@ -109,7 +110,7 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
               style={styles.citySelectButton}
               onPress={modalVisible ? closeMenu : openMenu}
             >
-              <Text style={styles.cityTitle}>{selectedLocation || 'Select a City'}</Text>
+              <Text style={styles.cityTitle}>{selectedLocation|| 'Select a City'}</Text>
               <AntDesign
                 name={modalVisible ? "caret-up" : "caret-down"}
                 size={16} 
@@ -129,10 +130,15 @@ const AppHeader = ({ selectedLocation, setSelectedLocation }) => {
                       renderItem={({ item }) => (
                         <View>
                           <TouchableOpacity
+                            style={styles.userCityItem}
+                            onPress={() => handleCitySelect(userLocation)}
+                          >
+                            <Text style={styles.cityText}>{userLocation}</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
                             style={styles.cityItem}
                             onPress={() => handleCitySelect(item)}
                           >
-                            <Text style={styles.cityText}>{selectedLocation}</Text>
                             <Text style={styles.cityText}>{item}</Text>
                           </TouchableOpacity>
                           <View style={styles.selectSuspense}>
@@ -160,7 +166,6 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#211A1E',
         borderBottomWidth: 1,
-        
         // Shadow properties for iOS
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -221,6 +226,12 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
     },
+    userCityItem: {
+      paddingTop: 10,
+      paddingBottom: 0,
+      width: '100%',
+      alignItems: 'center',
+    },
     cityText: {
         fontSize: 16,
         paddingBottom: 10,
@@ -229,7 +240,7 @@ const styles = StyleSheet.create({
     modalOverlay: {
     },
     selectSuspense: {
-        paddingTop: 10,
+        paddingTop: 15,
         alignItems: 'center',
     }
 });

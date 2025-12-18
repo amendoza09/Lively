@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions, ScrollView, RefreshControl, TouchableOpacity,
   Animated, TextInput, Easing, FlatList, StatusBar
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Checkbox from 'expo-checkbox';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { config } from './config.env';
@@ -17,6 +18,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState('');
+  const [userLocation, setUserLocation] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [featuredEvents, setFeaturedEvents] = useState([]);
   const [viewMode, setViewMode] = useState("7-Days");
@@ -273,6 +275,8 @@ const HomeScreen = () => {
       <AppHeader 
         selectedLocation={selectedLocation} 
         setSelectedLocation={setSelectedLocation}
+        userLocation={userLocation}
+        setUserLocation={setUserLocation}
       />
       {refreshing && (
         <View style={styles.refreshOverlay}>
@@ -325,42 +329,53 @@ const HomeScreen = () => {
               <Animated.View
                 style={[styles.modalContainer, { height: contentAnim, opacity: contentAnim}]}
               >
-                <View style={styles.filterContent}>
-                  {tags.map((filter) => (
-                    <View 
-                      key={filter} 
-                      style={{ 
-                        width: '30%', 
-                        flexDirection: 'row', 
-                        alignItems: 'center', 
-                        marginVertical: 8,
-                      }}
-                    >
-                      <Checkbox
-                        value={!!selectedFilters[filter]}
-                        onValueChange={(newValue) =>
-                          setSelectedFilters((prev) => ({
-                            ...prev,
-                            [filter]: newValue,
-                          }))
-                        }
-                        color={selectedFilters[filter] ? '#007AFF' : undefined}
-                      />
-                      <Text style={{ marginLeft: 8 }}>{filter}</Text>
-                    </View>
-                  ))}
-                </View>
-                <View style={{ flexDirection: 'row', gap: 40, paddingVertical: 10,}}>
-                  <TouchableOpacity onPress={handleApplyFilters}>
-                    <Text style={{ color: '#5BC0EB' }}>Apply</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => {
-                      setSelectedFilters([]);
-                  }}>
+                <LinearGradient 
+                    colors={['rgba(0,0,0,0.10)', 'transparent']}
+                    style={styles.innerShadowTop}
+                    pointerEvents="none"
+                />
+                  <View style={styles.filterContent}>
+                    {tags.map((filter) => (
+                      <View 
+                        key={filter} 
+                        style={{ 
+                          width: '30%', 
+                          flexDirection: 'row', 
+                          alignItems: 'center', 
+                          marginVertical: 8,
+                        }}
+                      >
+                        <Checkbox
+                          value={!!selectedFilters[filter]}
+                          onValueChange={(newValue) =>
+                            setSelectedFilters((prev) => ({
+                              ...prev,
+                              [filter]: newValue,
+                            }))
+                          }
+                          color={selectedFilters[filter] ? '#007AFF' : undefined}
+                        />
+                        <Text style={{ marginLeft: 8 }}>{filter}</Text>
+                      </View>
+                    ))}
 
-                    <Text style={{ color: '#EB504E' }}>Reset</Text>
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: 40, paddingVertical: 10,}}>
+                    <TouchableOpacity onPress={handleApplyFilters}>
+                      <Text style={{ color: '#5BC0EB' }}>Apply</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                        setSelectedFilters([]);
+                    }}>
+
+                      <Text style={{ color: '#EB504E' }}>Reset</Text>
+                    </TouchableOpacity>
+                  </View>
+                <LinearGradient 
+                  colors={['transparent', 'rgba(0,0,0,0.10)']}
+                  style={styles.innerShadowBottom}
+                  pointerEvents="none"
+                />
               </Animated.View>
             )}
             </Animated.View>
@@ -465,7 +480,22 @@ const styles = StyleSheet.create({
     borderRadius: 8, 
     padding: 10,
     width: screenWidth - 70,
-},
+  },
+  innerShadowTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 8,
+  },
+
+  innerShadowBottom: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 8,
+  },
   container: {
     
   },
@@ -481,6 +511,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0 ,0 ,0)",
   },
   toggleContainer: {
+      marginVertical: 8,
       flexDirection: "row",
       justifyContent: "space-around",
       backgroundColor: "#ddd",
@@ -488,13 +519,18 @@ const styles = StyleSheet.create({
       height: 35,
       borderRadius: 20,
   },
-    containerToggle:{
-      flexDirection: "row",
-      marginBottom: 5,
-      paddingHorizontal: 10,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: "transparent",
+  containerToggle:{
+    flexDirection: "row",
+    marginBottom: 5,
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "transparent",
+      // Shadow properties for iOS
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3,
     },
     toggleButton: {
       alignItems: "center",
@@ -503,7 +539,7 @@ const styles = StyleSheet.create({
       backgroundColor: "transparent",
     },
     activeButtonWeekly: {
-      backgroundColor: "white",
+      backgroundColor: "#5BC0EB",
       borderTopLeftRadius: 20,
       borderBottomLeftRadius: 20,
     },
