@@ -47,17 +47,17 @@ const SubmitEventScreen = ({ navigation }) => {
     'Music', 'Networking', 'Outdoor', 'Social', 'Sports', 'Tech', 'Theater', 'Wellness', 'Other'
   ];
   const availableCities = [
-    'Athens, GA',
+    'Athens, GA', 'Charlotte, NC'
   ];
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if(status !== 'granted') {
-      alert('Sorry, we need camera roll permisions to make this work!');
+      alert('Sorry, we need camera roll permissions to make this work!');
       return;
     }
     let selectImage = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,

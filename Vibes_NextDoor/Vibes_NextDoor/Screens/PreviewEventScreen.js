@@ -25,8 +25,10 @@ const PreviewEventScreen = ({ route, navigation }) => {
         title: eventData.title,
         location: eventData.location,
         address: eventData.address,
-        date: eventData.date,
-        time: eventData.time,
+        startDate: eventData.startDate,
+        endDate: eventData.endDate,
+        startTime: eventData.startTime,
+        endTime: eventData.endTime,
         type: eventData.type,
         description: eventData.description,
         isFree: eventData.isFree,
@@ -37,7 +39,6 @@ const PreviewEventScreen = ({ route, navigation }) => {
         restrictions: eventData.restrictions,
         createdAt: new Date().toISOString(),
         link: eventData.externalLink || '',
-        image: imageUrl, // Send as string
       };
       
       const response = await fetch(`${config.api.HOST}/pending-events/${eventData.city}`, {
@@ -105,10 +106,16 @@ const PreviewEventScreen = ({ route, navigation }) => {
             <Text style={styles.infoTitle}>Address:</Text><Text>{eventData.address}</Text>
           </View>
           <View style={styles.infoLine}>
-            <Text style={styles.infoTitle}>Date:</Text><Text>{eventData.date}</Text>
+            <Text style={styles.infoTitle}>Start Date:</Text><Text>{eventData.startDate}</Text>
           </View>
           <View style={styles.infoLine}>
-            <Text style={styles.infoTitle}>Time:</Text><Text>{eventData.time}</Text>
+            <Text style={styles.infoTitle}>End Date:</Text><Text>{eventData.endDate}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>Start Time:</Text><Text>{eventData.startTime}</Text>
+          </View>
+          <View style={styles.infoLine}>
+            <Text style={styles.infoTitle}>End Time:</Text><Text>{eventData.endTime}</Text>
           </View>
           <View style={styles.infoLine}>
             <Text style={styles.infoTitle}>Type:</Text><Text>{eventData.type}</Text>

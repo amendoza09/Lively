@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Platform, 
   KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, SafeAreaView, Dimensions,
@@ -19,7 +19,9 @@ const GuestSubmitEventScreen = ({ navigation }) => {
   const [location, setLocation] = useState(''); 
   const [address, setAddress] = useState('');
   const [address2, setAddress2] = useState('');
-  const [date, setDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [startTime, setStartTime] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [eventType, setEventType] = useState('');
   const [image, setImage] = useState(null);
@@ -42,17 +44,17 @@ const GuestSubmitEventScreen = ({ navigation }) => {
     'Music', 'Networking', 'Outdoor', 'Social', 'Sports', 'Tech', 'Theater', 'Wellness', 'Other'
   ];
   const availableCities = [
-    'Athens, GA',
+    'Athens, GA', 'Charlotte, NC'
   ];
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if(status !== 'granted') {
-      alert('Sorry, we need camera roll permisions tto make this work!');
+      alert('Sorry, we need camera roll permissions tto make this work!');
       return;
     }
     let selectImage = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -76,7 +78,8 @@ const GuestSubmitEventScreen = ({ navigation }) => {
     setLocation('');
     setAddress('');
     setAddress2('');
-    setDate(new Date());
+    setStartDate(new Date());
+    setEndDate(new Date());
     setTime(new Date());
     setEventType('');
     setFree(null);
@@ -125,8 +128,10 @@ const GuestSubmitEventScreen = ({ navigation }) => {
       location,
       address: address || '',
       address2: address2 || '',
-      date: date.toISOString().split('T')[0],
-      time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      startDate: date.toISOString().split('T')[0],
+      endDate: date.toISOString().split('T')[0],
+      startTime: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      endTime: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       type: eventType,
       isFree: free,
       description,
@@ -237,24 +242,41 @@ const GuestSubmitEventScreen = ({ navigation }) => {
             onFocus = {(event) => scrollToInput(event.target)}
           />
           <View style={styles.timeContainer}>
-            <View>
-              <Text style={styles.label}>Date {date === null && <Text style={{color: 'red'}}>*</Text>}</Text>
-              <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
-                <DateTimePicker
-                  value={date}
-                  mode="date"
-                  display="default"
-                  onChange={(event, selectDate) =>{
-                    setDatePicker(false);
-                    if (selectDate) setDate(selectDate);
-                  }}
-                />
-              </TouchableOpacity>
+            <View style={styles.datePicker}>
+              <View>
+                <Text style={styles.label}>Start Date {startDate === null && <Text style={{color: 'red'}}>*</Text>}</Text>
+                <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
+                  <DateTimePicker
+                    value={startDate}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectDate) =>{
+                      setDatePicker(false);
+                      if (selectDate) setStartDate(selectDate);
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View>
+                <Text style={styles.label}>End Date {endDate === null && <Text style={{color: 'red'}}>*</Text>}</Text>
+                <TouchableOpacity onPress={() => setDatePicker(true)} style={styles.picker}>
+                  <DateTimePicker
+                    value={endDate}
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectDate) =>{
+                      setDatePicker(false);
+                      if (selectDate) setEndDate(selectDate);
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-            <View>
-              <Text style={styles.label}>Time {time === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
-              <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
-                <DateTimePicker 
+            <View style={styles.timePicker}>
+              <View>
+                <Text style={styles.label}>Start Time {time === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
+                <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
+                  <DateTimePicker 
                     value={time}
                     mode="time"
                     display="default"
@@ -263,10 +285,25 @@ const GuestSubmitEventScreen = ({ navigation }) => {
                       if (selectedTime) setTime(selectedTime);
                     }}
                   />
-              </TouchableOpacity>
+                </TouchableOpacity>
+              </View>
+              <View>
+                <Text style={styles.label}>End Time {time === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
+                <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
+                  <DateTimePicker 
+                    value={time}
+                    mode="time"
+                    display="default"
+                    onChange={(event, selectedTime) => {
+                      setShowTimePicker(false);
+                      if (selectedTime) setTime(selectedTime);
+                    }}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-
+          
           <Text style={styles.eventLabel}>Event Type {eventType === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
           <TouchableOpacity onPress={() => setShowEventPicker(true)}>
             <Text style={styles.input}>{eventType || "Select event type"}</Text>
@@ -455,9 +492,17 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     timeContainer: {
-      flexDirection: 'row',
+      flexDirection: 'col',
       gap: 25,
       marginBottom: 15,
+      display: 'flex',
+      justifyContent: 'space-between'
+    },
+    datePicker: {
+      flexDirection: 'row',
+    },
+    timePicker: {
+      flexDirection: 'row'
     },
     imageContainer: {
       alignItems: 'center',
