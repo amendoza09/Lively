@@ -22,7 +22,7 @@ const GuestSubmitEventScreen = ({ navigation }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [startTime, setStartTime] = useState(new Date());
-  const [time, setTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
   const [eventType, setEventType] = useState('');
   const [image, setImage] = useState(null);
   const [imageType, setImageType] = useState('');
@@ -50,7 +50,7 @@ const GuestSubmitEventScreen = ({ navigation }) => {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if(status !== 'granted') {
-      alert('Sorry, we need camera roll permissions tto make this work!');
+      alert('Sorry, we need camera roll permissions to make this work!');
       return;
     }
     let selectImage = await ImagePicker.launchImageLibraryAsync({
@@ -80,7 +80,8 @@ const GuestSubmitEventScreen = ({ navigation }) => {
     setAddress2('');
     setStartDate(new Date());
     setEndDate(new Date());
-    setTime(new Date());
+    setStartTime(new Date());
+    setEndTime(new Date());
     setEventType('');
     setFree(null);
     setDescription('');
@@ -120,18 +121,19 @@ const GuestSubmitEventScreen = ({ navigation }) => {
         alert('Please fill in all required fields.');
         return;
     }
-    const cityName = selectedCity.split(',')[0].toLowerCase();
-
+    
+    const cityName = selectedCity.toLowerCase().replace(/\s+/g, '');
+    
     const newEvent = {
       city: cityName,
       title,
       location,
       address: address || '',
       address2: address2 || '',
-      startDate: date.toISOString().split('T')[0],
-      endDate: date.toISOString().split('T')[0],
-      startTime: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      endTime: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      startDate: startDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0],
+      startTime: startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      endTime: endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       type: eventType,
       isFree: free,
       description,
@@ -142,6 +144,7 @@ const GuestSubmitEventScreen = ({ navigation }) => {
       restrictions,
       externalLink,
     };
+    console.log("submit was pressed");
     navigation.navigate("Preview Submission", { eventData: newEvent, clearForm });
   };
 
@@ -205,7 +208,7 @@ const GuestSubmitEventScreen = ({ navigation }) => {
                   if(selectedCity) setSelectedCity(selectedCity);
                 }}
               >
-                <Picker.Item label="Select city" value=" " />
+                <Picker.Item label="Select city" value="" />
                 {availableCities.map((type) => (
                   <Picker.Item key={type} label={type} value={type} />
                 ))}
@@ -274,29 +277,29 @@ const GuestSubmitEventScreen = ({ navigation }) => {
             </View>
             <View style={styles.timePicker}>
               <View>
-                <Text style={styles.label}>Start Time {time === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
+                <Text style={styles.label}>Start Time {startTime === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
                 <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
                   <DateTimePicker 
-                    value={time}
+                    value={ startTime}
                     mode="time"
                     display="default"
                     onChange={(event, selectedTime) => {
                       setShowTimePicker(false);
-                      if (selectedTime) setTime(selectedTime);
+                      if (selectedTime) setStartTime(selectedTime);
                     }}
                   />
                 </TouchableOpacity>
               </View>
               <View>
-                <Text style={styles.label}>End Time {time === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
+                <Text style={styles.label}>End Time {endTime === '' && <Text style={{color: 'red'}}>*</Text>}</Text>
                 <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.picker}>
                   <DateTimePicker 
-                    value={time}
+                    value={endTime}
                     mode="time"
                     display="default"
                     onChange={(event, selectedTime) => {
                       setShowTimePicker(false);
-                      if (selectedTime) setTime(selectedTime);
+                      if (selectedTime) setEndTime(selectedTime);
                     }}
                   />
                 </TouchableOpacity>

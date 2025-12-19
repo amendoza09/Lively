@@ -16,9 +16,12 @@ const PreviewEventScreen = ({ route, navigation }) => {
   const handleFinalSubmit = async () => {
     setLoading(true);
     try {
-      let imageUrl = '';
+      let imageUrl = config.DEFAULT_IMG;
 
-      imageUrl = await uploadImageToFirebase(eventData.image);
+      if(eventData.image) {
+        imageUrl = await uploadImageToFirebase(eventData.image);
+      }
+      
       
       const payload = {
         city: eventData.city,
